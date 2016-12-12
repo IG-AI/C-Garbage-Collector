@@ -1,7 +1,7 @@
 #Humrarnas projektarbete - Garbage Collector
 
 ###Medlemmar: 
-* (Teamansvarig) Adam Inersjö
+* Adam Inersjö - Teamansvarig
 * Daniel Ågstrand
 * Robert Rosborg
 * Maria Lindqvist
