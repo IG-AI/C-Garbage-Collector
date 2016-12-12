@@ -22,7 +22,7 @@
  *  @param  heap_end the end of the heap
  *  @return a possible pointer into the heap
  */
-void *stack_find_next_ptr(void **stack_top, void *stack_bottom,
+void **stack_find_next_ptr(void **stack_top, void *stack_bottom,
                           void *heap_start, void *heap_end);
 
 
