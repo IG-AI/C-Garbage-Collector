@@ -1,20 +1,54 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "gc.h"
+
+typedef void * page_t;
+
+struct heap{
+  void * memory;
+  size_t size;
+  bool unsafe_stack;
+  float gc_threshold;
+  page_t pages;
+};
+
 
 
 heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
 {
-  return NULL; 
+  assert(bytes >= 2048);
+  heap_t *heap = malloc(sizeof(heap_t) );
+  void *memory = malloc(bytes);
+  int page_size = 2048;
+  int number_of_pages = (bytes / page_size);
+  page_t pages = malloc(sizeof(page_t) * number_of_pages);
+
+  page_t ptr = pages;
+  for (int i = 0; i < number_of_pages; i++) {
+    ptr = memory + i * page_size;
+    ptr++;
+  }
+  
+  *heap = ( (heap_t) {memory, bytes, unsafe_stack, gc_threshold, pages} );
+  return heap;
+}
+
+void *
+get_pages(heap_t *h){
+  return h->pages;
+
 }
 
 void
 h_delete(heap_t *h)
 {
-  return; 
+  free(h->memory);
+  free(h->pages);
+  free(h);
 }
 
 

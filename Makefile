@@ -19,7 +19,7 @@ tester: gc_test.c gc.o
 
 
 gc.o: gc.c gc.h
-	$(CC) $(FLAGS) $^
+	$(CC) $(FLAGS) -c $^
 
 
 

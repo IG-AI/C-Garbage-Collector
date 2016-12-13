@@ -40,6 +40,9 @@ typedef struct heap heap_t;
 heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
+void *
+get_pages(heap_t *h);
+
 
 /**
  *  @brief Delete a heap.
