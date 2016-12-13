@@ -17,6 +17,7 @@
 #define __header__
 
 // TODO: define a header_type enum.
+typedef int header_type;
 
 /**
  *  @brief Creates a header and saves it on the heap
