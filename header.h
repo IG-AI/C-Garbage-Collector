@@ -63,7 +63,7 @@ header_type get_header_type(void *structure);
  *  @return number of pointers found in @p structure if its header has the type
  *          Structure_rep. Otherwise it will return -1
  */
-int get_number_of_pointers_in_structure(void *structure);
+int get_number_of_pointers_in_struct(void *structure);
 
 /**
  *  @brief Finds all pointers inside @p structure and places them in @p array.
@@ -77,14 +77,24 @@ int get_number_of_pointers_in_structure(void *structure);
  *  @param  array the array to place the pointers found in
  *  @return true if pointers were found and placed in @p array, false otherwise
  */
-bool get_pointers_in_structure(void *structure, void *array[]);
+bool get_pointers_in_struct(void *structure, void *array[]);
 
 /**
- *  @brief Calculates the size of the structure represented by @p format_string.
+ *  @brief Calculates the size needed to store the structure represented
+ *  by @p format_string, including a header.
  *
  *  @param  format_string the string representation of a structure
  *  @return the size needed for the structure
  */
-size_t get_data_size(char *format_string);
+size_t get_struct_size(char *format_string);
+
+/**
+ *  @brief Calculates the size needed to store data of size @p bytes
+ *  with a header.
+ *
+ *  @param  bytes the size of the data
+ *  @return the size needed for storing the data with a header
+ */
+size_t get_data_size(size_t bytes);
 
 #endif
