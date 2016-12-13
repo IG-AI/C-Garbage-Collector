@@ -3,25 +3,7 @@
 Den här filen innehåller designplanen för Header modulen. Kom ihåg att detta är
 ett levande dokument och kommer att ändras. 
 
-## Allokering med metadata (taget från spec.)
-För att slippa leta igenom heapen på samma sätt som stacken kommer vi
-att använda ett format för allokering som kräver att användaren ger den
-information vi behöver. Vårt skall stödja två typer av allokering:
-
-* `h_alloc_struct` – där programmeraren anger en slags formatsträng som beskriver
-minneslayouten hos objektet som skall allokeras. _(Analogt med hur en
-formatsträng till printf beskriver hur en utskriven sträng ser ut och var olika
-värden skall stoppas in. Se nedan.)_
-Formatsträngen beskriver var i ett objekt eventuella pekare finns som också skall
-traverseras för att markera objekt som levande.
-* `h_alloc_raw` – där programmeraren anger storleken på ett utrymme som skall
-reserveras _(Analogt med malloc)_. Detta utrymme får inte innehålla pekare till
-andra objekt.
-
-I alla fall ovan skall det allokerade minnet nollställas, dvs. samma beteende som
-calloc.
-
-### Formatsträng för h_alloc_struct
+## Formatsträngar
 Formatsträngen förklaras enklast genom exempel. Antag att vi har en typ
 `binary_tree_node`, deklarerad enligt följande.
 ```c
@@ -74,6 +56,7 @@ Detta innebär att `h_alloc_struct("32")` är semantiskt ekvivalent med
 ## Implementationsdetaljer
 Eftersom objekt i C inte har något metadata måste implementationen hålla reda på
 två saker:
+
 1. Hur stort varje objekt är (annars kan vi inte kopiera det), samt
 2. Var i objektet dess pekare till andra objekt finns.
 
@@ -92,6 +75,7 @@ liten som möjligt__ eftersom program som allokerar många små objekt annars bl
 för ineffektiva. En bra design är att spara headern precis före varje objekt i
 minnet. Låt oss börja med att titta på vad headern skall kunna innehålla för
 information:
+
 1. En pekare till en formatsträng (const char *)
 2. __En mer kompakt representation av objektets layout__
 3. En forwarding-adress
