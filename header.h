@@ -66,7 +66,8 @@ header_type get_header_type(void *structure);
 int get_number_of_pointers_in_struct(void *structure);
 
 /**
- *  @brief Finds all pointers inside @p structure and places them in @p array.
+ *  @brief Finds all pointers inside @p structure and places pointers to
+ *         them in @p array.
  *
  *  The function will only return valid information if a struct_header has been
  *  created and placed just before the struct in the heap.
@@ -74,14 +75,15 @@ int get_number_of_pointers_in_struct(void *structure);
  *  @p array must be of size get_numer_of_pointers_in_structure(@p structure).
  *
  *  @param  structure the structure to look for pointers is
- *  @param  array the array to place the pointers found in
+ *  @param  array the array to place pointers to the pointers found in header of
+ *          @p structure
  *  @return true if pointers were found and placed in @p array, false otherwise
  */
-bool get_pointers_in_struct(void *structure, void *array[]);
+bool get_pointers_in_struct(void *structure, void **array[]);
 
 /**
  *  @brief Calculates the size needed to store the structure represented
- *  by @p format_string, including a header.
+ *         by @p format_string, including a header.
  *
  *  @param  format_string the string representation of a structure
  *  @return the size needed for the structure
@@ -93,7 +95,10 @@ size_t get_struct_size(char *format_string);
  *  with a header.
  *
  *  @param  bytes the size of the data
- *  @return the size needed for storing the data with a header
+ *  @return the size needed for storing the data with a header. If @p bytes
+ *          combined with the size of the header extends maximum size
+ *          for size_t the function will return 0. Zero is also returned
+ *          when @p bytes is 0.
  */
 size_t get_data_size(size_t bytes);
 
