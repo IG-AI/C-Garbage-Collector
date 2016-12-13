@@ -156,7 +156,7 @@ h_used(heap_t *h);
  *  @return the byte size of the heap.
  */
 
-int 
+size_t 
 h_size(heap_t *h);
 
 #endif
