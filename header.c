@@ -15,3 +15,10 @@ get_data_size(size_t bytes)
       return bytes + HEADER_SIZE;
     }
 }
+
+
+size_t
+get_struct_size(char *format_string)
+{
+  return 0;
+}

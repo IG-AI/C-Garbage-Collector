@@ -3,6 +3,11 @@
 
 
 #define HEADER_SIZE 8
-
+#define PTR_SIZE sizeof(void *)
+#define CHAR_SIZE sizeof(char)
+#define INT_SIZE sizeof(int)
+#define LONG_SIZE sizeof(long)
+#define FLOAT_SIZE sizeof(float)
+#define DOUBLE_SIZE sizeof(double)
 
 #endif
