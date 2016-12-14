@@ -35,6 +35,23 @@ test_pages ()
 }
 
 
+void
+test_h_alloc_struct ()
+{
+  int test_size = 6144;
+  heap_t *test_h_alloc_struct_heap = h_init(test_size, true, 1);
+
+  void * ptr = h_alloc_struct(test_h_alloc_struct_heap, "i");
+  *(int * ) ptr = 6;
+  void * ptr2 = h_alloc_struct(test_h_alloc_struct_heap, "i");
+  *(int * ) ptr2 = 9;
+
+  CU_ASSERT(*(int *) ptr == 6);
+  CU_ASSERT(*(int *) ptr2 == 9);
+
+  h_delete(test_h_alloc_struct_heap);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -48,7 +65,8 @@ main (int argc, char *argv[])
   suite1 = CU_add_suite("Heap Test", NULL, NULL);
 
   if ((CU_add_test(suite1, "test_h_init()", test_h_init) == NULL) ||
-      (CU_add_test(suite1, "test_page()", test_pages) == NULL)
+      (CU_add_test(suite1, "test_page()", test_pages) == NULL) ||
+      (CU_add_test(suite1, "test_h_alloc_struct()", test_h_alloc_struct) == NULL)
       )
     {
       CU_cleanup_registry();

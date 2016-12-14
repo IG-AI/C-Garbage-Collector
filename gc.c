@@ -73,11 +73,30 @@ h_delete_dbg(heap_t *h, void *dbg_value)
   return; 
 }
 
+int
+de_code(char* layout)
+{
+  int bytes = 0;
+  while(*layout != '\0'){
+    if(*layout == 'i'){
+      bytes += sizeof(int);
+    }
+    else if(*layout == '*'){
+      bytes += sizeof(void *);
+        }
+    layout++;
+  }
+  return bytes;
+}
+
 
 void *
 h_alloc_struct(heap_t *h, char *layout)
 {
-  return NULL; 
+  int bytes = de_code(layout);
+  void *ptr = get_pages(h, 0);
+  h->pages[0] = h->pages[0] + bytes;
+  return ptr; 
 }
 
 
