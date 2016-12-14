@@ -22,6 +22,7 @@
  *  @brief The opaque data type holding all the heap data.
  */
 typedef struct heap heap_t;
+typedef struct page page_t;
 
 
 /**
@@ -41,7 +42,7 @@ heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
 void *
-get_pages(heap_t *h, int i);
+get_page_start(page_t *page);
 
 
 void *

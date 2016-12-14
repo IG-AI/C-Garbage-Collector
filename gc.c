@@ -6,14 +6,20 @@
 
 #include "gc.h"
 
-//typedef void * page_t;
+struct page{
+  void * start;
+  void * bump;
+  int size;
+};
+
+typedef struct page page_t;
 
 struct heap{
   void * memory;
   size_t size;
   bool unsafe_stack;
   float gc_threshold;
-  void * pages[];
+  page_t * pages[];
 };
 
 
@@ -32,12 +38,13 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
     c = 0.5;
   }
 
-  heap_t *heap = malloc((sizeof(void*) + sizeof(size_t) + sizeof(bool) + sizeof(float)) + (8 * (number_of_pages - c)));
+  heap_t *heap = malloc((sizeof(void*) + sizeof(size_t) + sizeof(bool) + sizeof(float)) + (sizeof(void *) * (number_of_pages - c)));
 
   void *memory = malloc(bytes);
   
   for (int i = 0; i < number_of_pages; i++) {
-    heap->pages[i] = memory + (i * page_size);
+    heap->pages[i] = malloc(sizeof(page_t) );
+    *heap->pages[i] = ( (page_t) {memory + (i * page_size), memory + (i * page_size), page_size} );
   }
   
   *heap = ( (heap_t) {memory, bytes, unsafe_stack, gc_threshold} );
@@ -46,9 +53,27 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
 
 
 void *
-get_pages(heap_t *h, int i) 
+get_page_start(page_t *page)
 {
-  return h->pages[i];
+  return page->start;
+}
+
+void *
+get_page_bump(page_t *page)
+{
+  return page->bump;
+}
+
+void
+set_page_bump(page_t *page, int bytes)
+{
+  page->bump += bytes;
+}
+
+int
+get_page_size(page_t *page)
+{
+  return page->size;
 }
 
 
@@ -94,8 +119,10 @@ void *
 h_alloc_struct(heap_t *h, char *layout)
 {
   int bytes = de_code(layout);
-  void *ptr = get_pages(h, 0);
-  h->pages[0] = h->pages[0] + bytes;
+  void *page_bump = get_page_bump(h->pages[0]);
+  void * ptr = page_bump;
+  set_page_bump(h->pages[0], bytes);
+  
   return ptr; 
 }
 

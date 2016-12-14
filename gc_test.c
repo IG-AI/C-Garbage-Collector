@@ -5,6 +5,14 @@
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
+struct heap{
+  void * memory;
+  size_t size;
+  bool unsafe_stack;
+  float gc_threshold;
+  page_t * pages[];
+};
+
 void 
 test_h_init ()
 {
@@ -23,12 +31,12 @@ test_pages ()
   int test_size = 6144;
   int page_size = 2048;
   heap_t *test_pages_heap = h_init(test_size, true, 1);
-  CU_ASSERT(get_pages(test_pages_heap, 0) >= get_memory(test_pages_heap) ); 
-  CU_ASSERT(get_pages(test_pages_heap, 1) <= (get_memory(test_pages_heap) + test_size - page_size) );
+  CU_ASSERT(get_page_start(test_pages_heap->pages[0]) >= get_memory(test_pages_heap) ); 
+  CU_ASSERT(get_page_start(test_pages_heap->pages[1]) <= (get_memory(test_pages_heap) + test_size - page_size) );
   printf("\nMem start:  %p  \n", get_memory(test_pages_heap));  
-  printf("First page: %p \n", get_pages(test_pages_heap,0));
-  printf("Second page:%p\n", get_pages(test_pages_heap,1));
-  printf("Third page: %p\n", get_pages(test_pages_heap,2));
+  printf("First page: %p \n", get_page_start(test_pages_heap->pages[0]));
+  printf("Second page:%p\n", get_page_start(test_pages_heap->pages[1]));
+  printf("Third page: %p\n", get_page_start(test_pages_heap->pages[2]));
   printf("Mem end:    %p  \n", get_memory(test_pages_heap) + test_size);
  
   h_delete(test_pages_heap);
