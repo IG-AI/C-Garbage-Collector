@@ -12,8 +12,9 @@ test_h_init ()
   heap_t *test_h_init_heap = h_init(test_size, true, 1);
   CU_ASSERT(test_h_init_heap != NULL);
   
-  //h_delete(test_h_init_heap);
+  h_delete(test_h_init_heap);
 }
+
 
 void 
 test_pages ()
@@ -27,11 +28,12 @@ test_pages ()
   printf("\nMem start:  %p  \n", get_memory(test_pages_heap));  
   printf("First page: %p \n", get_pages(test_pages_heap,0));
   printf("Second page:%p\n", get_pages(test_pages_heap,1));
-  printf("Third page:%p\n", get_pages(test_pages_heap,2));
+  printf("Third page: %p\n", get_pages(test_pages_heap,2));
   printf("Mem end:    %p  \n", get_memory(test_pages_heap) + test_size);
-  
+ 
   h_delete(test_pages_heap);
 }
+
 
 int
 main (int argc, char *argv[])

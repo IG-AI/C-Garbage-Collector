@@ -18,8 +18,8 @@ tester: gc_test.c gc.o
 	$(CC) $(FLAGS) $^ -o $@ -lcunit
 
 
-memtester: memtest.c gc.o
-	$(CC) $(FLAGS) $^ -o $@
+memtester: gc_test.c gc.o
+	$(CC) $(FLAGS) $^ -o $@ -lcunit
 
 
 memtest: memtester
@@ -33,5 +33,6 @@ clean:
 	rm -f gc
 	rm -f tester
 	rm -f memtester
+	rm -f gc.h.gch
 	rm -f *.o
 	rm -rf *.dSYM

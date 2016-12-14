@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 
 #include "gc.h"
@@ -20,11 +21,21 @@ heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
 {
   assert(bytes >= 2048);
-  heap_t *heap = malloc(sizeof(heap_t) );
-  void * memory = malloc(bytes);
+  float c;
   int page_size = 2048;
   int number_of_pages = (bytes / page_size);
+  
+  if (number_of_pages % 2 == 0) {
+    c = 1.5;
+  }
+  else {
+    c = 0.5;
+  }
 
+  heap_t *heap = malloc((sizeof(void*) + sizeof(size_t) + sizeof(bool) + sizeof(float)) + (8 * (number_of_pages - c)));
+
+  void *memory = malloc(bytes);
+  
   for (int i = 0; i < number_of_pages; i++) {
     heap->pages[i] = memory + (i * page_size);
   }
@@ -33,22 +44,25 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   return heap;
 }
 
-void *
-get_pages(heap_t *h, int i){
-  return h->pages[i];
 
+void *
+get_pages(heap_t *h, int i) 
+{
+  return h->pages[i];
 }
 
+
 void *
-get_memory(heap_t *h){
+get_memory(heap_t *h) 
+{
   return h->memory;
 }
+
 
 void
 h_delete(heap_t *h)
 {
   free(h->memory);
-  //free(h->pages);
   free(h);
 }
 
