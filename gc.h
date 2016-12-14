@@ -41,7 +41,11 @@ heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
 void *
-get_pages(heap_t *h);
+get_pages(heap_t *h, int i);
+
+
+void *
+get_memory(heap_t *h);
 
 
 /**

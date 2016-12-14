@@ -5,16 +5,15 @@
 
 #include "gc.h"
 
-typedef void * page_t;
+//typedef void * page_t;
 
 struct heap{
   void * memory;
   size_t size;
   bool unsafe_stack;
   float gc_threshold;
-  page_t pages;
+  void * pages[];
 };
-
 
 
 heap_t *
@@ -22,32 +21,34 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
 {
   assert(bytes >= 2048);
   heap_t *heap = malloc(sizeof(heap_t) );
-  void *memory = malloc(bytes);
+  void * memory = malloc(bytes);
   int page_size = 2048;
   int number_of_pages = (bytes / page_size);
-  page_t pages = malloc(sizeof(page_t) * number_of_pages);
 
-  page_t ptr = pages;
   for (int i = 0; i < number_of_pages; i++) {
-    ptr = memory + i * page_size;
-    ptr++;
+    heap->pages[i] = memory + (i * page_size);
   }
   
-  *heap = ( (heap_t) {memory, bytes, unsafe_stack, gc_threshold, pages} );
+  *heap = ( (heap_t) {memory, bytes, unsafe_stack, gc_threshold} );
   return heap;
 }
 
 void *
-get_pages(heap_t *h){
-  return h->pages;
+get_pages(heap_t *h, int i){
+  return h->pages[i];
 
+}
+
+void *
+get_memory(heap_t *h){
+  return h->memory;
 }
 
 void
 h_delete(heap_t *h)
 {
   free(h->memory);
-  free(h->pages);
+  //free(h->pages);
   free(h);
 }
 
