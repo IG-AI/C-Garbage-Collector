@@ -87,6 +87,13 @@ h_delete_dbg(heap_t *h, void *dbg_value);
  *  
  *  @note   the heap does *not* retain an alias to layout.
  */
+
+void 
+write_pointer_to_heap(void ** allocated_memory, void * ptr_to_write);
+
+void 
+write_int_to_heap(void * allocated_memory, int int_to_write);
+
 void *
 h_alloc_struct(heap_t *h, char *layout);
 

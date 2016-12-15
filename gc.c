@@ -19,6 +19,7 @@ struct heap{
   size_t size;
   bool unsafe_stack;
   float gc_threshold;
+  int number_of_pages;
   page_t * pages[];
 };
 
@@ -38,7 +39,12 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
     c = 0.5;
   }
 
-  heap_t *heap = malloc((sizeof(void*) + sizeof(size_t) + sizeof(bool) + sizeof(float)) + (sizeof(void *) * (number_of_pages - c)));
+  heap_t *heap = malloc( sizeof(void*)
+                         + sizeof(size_t)
+                         + sizeof(bool) 
+                         + sizeof(float) 
+                         + sizeof(int) 
+                         + (sizeof(void *) * (number_of_pages - c) ) );
 
   void *memory = malloc(bytes);
   
@@ -47,7 +53,7 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
     *heap->pages[i] = ( (page_t) {memory + (i * page_size), memory + (i * page_size), page_size} );
   }
   
-  *heap = ( (heap_t) {memory, bytes, unsafe_stack, gc_threshold} );
+  *heap = ( (heap_t) {memory, bytes, unsafe_stack, number_of_pages, gc_threshold} );
   return heap;
 }
 
@@ -98,14 +104,26 @@ h_delete_dbg(heap_t *h, void *dbg_value)
   return; 
 }
 
-int
+size_t
 de_code(char* layout)
 {
-  int bytes = 0;
+  size_t bytes = 0;
   while(*layout != '\0'){
     if(*layout == 'i'){
       bytes += sizeof(int);
     }
+    else if(*layout == 'l'){
+      bytes += sizeof(long);
+        }
+    else if(*layout == 'f'){
+      bytes += sizeof(float);
+        }
+    else if(*layout == 'c'){
+      bytes += sizeof(char);
+        }
+    else if(*layout == 'd'){
+      bytes += sizeof(double);
+        }
     else if(*layout == '*'){
       bytes += sizeof(void *);
         }
@@ -115,22 +133,65 @@ de_code(char* layout)
 }
 
 
-void *
-h_alloc_struct(heap_t *h, char *layout)
+int
+get_ptr_page(heap_t *h, void * ptr)
 {
-  int bytes = de_code(layout);
-  void *page_bump = get_page_bump(h->pages[0]);
+  int number_of_pages = h->number_of_pages;
+  for (int i = 0; i < number_of_pages; i++) {
+    if(ptr >= h->pages[i]->start  && ptr <= h->pages[i]->start + h->pages[i]->size){ 
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+
+
+void 
+write_pointer_to_heap(void ** allocated_memory, void * ptr_to_write)
+{
+  *allocated_memory = ptr_to_write;
+}
+
+void 
+write_int_to_heap(void * allocated_memory, int int_to_write)
+{
+  *(int *)allocated_memory = int_to_write;
+}
+
+void *
+h_alloc(heap_t * h, size_t bytes)
+{
+  int page_nr = 0;
+  int page_avil = get_page_start(h->pages[page_nr + 1]) - get_page_bump(h->pages[page_nr]);
+  printf("\nAvailable in page(%d):  %d, to write: %lu \n", page_nr, page_avil, bytes);
+  while((int)bytes > page_avil){
+      page_nr += 1;
+      page_avil = get_page_start(h->pages[page_nr + 1]) - get_page_bump(h->pages[page_nr]);
+      printf("Available in page(%d):  %d,\n", page_nr, page_avil);
+    }
+
+  void *page_bump = get_page_bump(h->pages[page_nr]);
   void * ptr = page_bump;
-  set_page_bump(h->pages[0], bytes);
-  
+  set_page_bump(h->pages[page_nr], bytes);
+  printf("Pointer is in page:  %d\n", get_ptr_page(h, ptr));  
+
   return ptr; 
+}
+
+void *
+h_alloc_struct(heap_t * h, char * layout)
+{
+  size_t bytes = de_code(layout);
+  return h_alloc(h, bytes);
 }
 
 
 void *
 h_alloc_data(heap_t *h, size_t bytes)
 {
-  return NULL; 
+  return h_alloc(h, bytes);
 }
 
 

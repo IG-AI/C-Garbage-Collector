@@ -10,7 +10,15 @@ struct heap{
   size_t size;
   bool unsafe_stack;
   float gc_threshold;
+  int number_of_pages;
   page_t * pages[];
+};
+
+
+struct test_struct{
+  int first;
+  void * second;
+  int third;
 };
 
 void 
@@ -49,13 +57,36 @@ test_h_alloc_struct ()
   int test_size = 6144;
   heap_t *test_h_alloc_struct_heap = h_init(test_size, true, 1);
 
-  void * ptr = h_alloc_struct(test_h_alloc_struct_heap, "i");
-  *(int * ) ptr = 6;
-  void * ptr2 = h_alloc_struct(test_h_alloc_struct_heap, "i");
-  *(int * ) ptr2 = 9;
+  void * ptr1 = h_alloc_struct(test_h_alloc_struct_heap, "i");
+  write_int_to_heap(ptr1, 6);
 
-  CU_ASSERT(*(int *) ptr == 6);
-  CU_ASSERT(*(int *) ptr2 == 9);
+  void * ptr2 = h_alloc_struct(test_h_alloc_struct_heap, "i");
+  write_int_to_heap(ptr2, 9);
+
+  void * ptr4 = h_alloc_data(test_h_alloc_struct_heap, 2040);
+
+  void * ptr5 = h_alloc_struct(test_h_alloc_struct_heap, "i*i");
+  struct test_struct ts = ( (struct test_struct) {1, malloc(4),3}); 
+  *(struct test_struct *)ptr5 = ts;
+  printf("\nTest struct:  %d %p %d  \n", (*(struct test_struct *)ptr5).first, 
+         (*(struct test_struct *)ptr5).second,
+         (*(struct test_struct *)ptr5).third );
+
+
+
+  void * ptr3 = h_alloc_struct(test_h_alloc_struct_heap, "*");
+  void * test_pointer = malloc(10);
+  write_pointer_to_heap(&ptr3, test_pointer);
+
+  printf("\nTest pointer:  %p  \n", test_pointer);  
+  printf("Pointer 2    : %p \n", (void *)ptr2 );
+
+
+  CU_ASSERT(*(int *) ptr1 == 6);
+  CU_ASSERT(*(int *)ptr2 == 9);
+  CU_ASSERT_PTR_EQUAL(test_pointer, ptr3);
+  CU_ASSERT(ptr4 != NULL);
+  CU_ASSERT(ptr5 != NULL);
 
   h_delete(test_h_alloc_struct_heap);
 }
