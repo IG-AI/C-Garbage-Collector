@@ -13,7 +13,7 @@ void
 test_get_data_size_zero()
 {
   size_t size = get_data_size(0);
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
 }
 
 void
@@ -41,14 +41,14 @@ void
 test_get_data_size_max()
 {
   size_t size = get_data_size(SIZE_MAX);
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
 }
 
 void
 test_get_data_size_upper_bound()
 {
   size_t size = get_data_size(SIZE_MAX - HEADER_SIZE + 1);
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
 }
 
 
@@ -61,14 +61,14 @@ void
 test_get_struct_size_null()
 {
   size_t size = get_struct_size(NULL);
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
 }
 
 void
 test_get_struct_size_empty_string()
 {
   size_t size = get_struct_size("");
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
 }
 
 void
@@ -170,14 +170,21 @@ void
 test_get_struct_size_zero()
 {
   size_t size = get_struct_size("0");
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
 }
 
 void
 test_get_struct_size_zero_ptr()
 {
   size_t size = get_struct_size("0*");
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
+}
+
+void
+test_get_struct_size_zero_before_valid_num()
+{
+  size_t size = get_struct_size("01*");
+  CU_ASSERT(size == INVALID);
 }
 
 void
@@ -194,33 +201,40 @@ test_get_struct_size_hundred_twelve_ptr()
   CU_ASSERT(size == 112 * PTR_SIZE + HEADER_SIZE);
 }
 
+void
+test_get_struct_size_hundred_ptr()
+{
+  size_t size = get_struct_size("100*");
+  CU_ASSERT(size == 100 * PTR_SIZE + HEADER_SIZE);
+}
+
 // ********************* Invalid ******************  //
 void
 test_get_struct_size_invalid()
 {
   size_t size = get_struct_size("->invalid");
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
 }
 
 void
 test_get_struct_size_begin_num_invalid()
 {
   size_t size = get_struct_size("3*invalid");
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
 }
 
 void
 test_get_struct_size_invalid_end_num()
 {
   size_t size = get_struct_size("invalid 3");
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
 }
 
 void
 test_get_struct_size_too_big()
 {
   size_t size = get_struct_size("5000000000000000000000000000000*");
-  CU_ASSERT(size == 0);
+  CU_ASSERT(size == INVALID);
 }
 
 // ********************* Numerical Combinations ******************  //
@@ -367,11 +381,17 @@ main(void)
                                , "Case 0*"
                                , test_get_struct_size_zero_ptr) )
        || (NULL == CU_add_test(suite_struct_size
+                               , "Case zero before valid num"
+                               , test_get_struct_size_zero_before_valid_num) )
+       || (NULL == CU_add_test(suite_struct_size
                                , "Case 12*"
                                , test_get_struct_size_twelve_ptr) )
        || (NULL == CU_add_test(suite_struct_size
                                , "Case 112*"
                                , test_get_struct_size_hundred_twelve_ptr) )
+       || (NULL == CU_add_test(suite_struct_size
+                               , "Case zero inside number"
+                               , test_get_struct_size_hundred_ptr) )
        || (NULL == CU_add_test(suite_struct_size
                                , "Case invalid"
                                , test_get_struct_size_invalid) )
