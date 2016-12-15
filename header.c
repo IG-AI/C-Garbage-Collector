@@ -6,19 +6,6 @@
 #include "header.h"
 #include "header_hidden.h"
 
-size_t
-get_data_size(size_t bytes)
-{
-  if (bytes == 0 || bytes > SIZE_MAX - HEADER_SIZE)
-    {
-      return 0;
-    }
-  else
-    {
-      return bytes + HEADER_SIZE;
-    }
-}
-
 
 #define PTR '*'
 #define INT 'i'
@@ -26,6 +13,11 @@ get_data_size(size_t bytes)
 #define LONG 'l'
 #define FLOAT 'f'
 #define DOUBLE 'd'
+
+
+/*============================================================================
+ *                             HELPER FUNCTIONS
+ *===========================================================================*/
 
 /**
  *  @brief Gets the type size of a char
@@ -111,6 +103,66 @@ parse_number(char *str, size_t *parsed_chars)
   return result;
 }
 
+
+/*============================================================================
+ *                             CREATION FUNCTIONS
+ *===========================================================================*/
+// The type RAW_DATA has '10'' as the last two bits
+// The rest of the bits will containt the size of the data following the header
+// The address returned is where the data will be stored
+// Example:
+//   create_data_header(4, 100)
+//   will create a header with
+//   ...000 100 10
+//          ^^^ ^^
+//           |   |
+//           | binary for RAW_DATA
+//           |
+//        binary 4
+//
+//   return ptr will be 100 + HEADER_SIZE (108 in this case)
+void *
+create_data_header(size_t bytes, void *ptr)
+{
+  if (bytes == 0 || ptr == NULL) return NULL;
+
+  assert(sizeof(unsigned long) == sizeof(void *));
+  unsigned long *ptr_to_header = (unsigned long *) ptr; // CROSS_PLATFORM
+  *ptr_to_header = (unsigned long) bytes << 2;          // CROSS_PLATFORM
+  *ptr_to_header |= 2UL;                                // CROSS_PLATFORM
+  return (char *) ptr + HEADER_SIZE;
+}
+
+
+
+/*============================================================================
+ *                             TYPE FUNCTIONS
+ *===========================================================================*/
+header_type
+get_header_type(void *structure)
+{
+  // TODO
+  return STRUCT_REP;
+}
+
+
+/*============================================================================
+ *                             SIZE FUNCTIONS
+ *===========================================================================*/
+
+size_t
+get_data_size(size_t bytes)
+{
+  if (bytes == 0 || bytes > SIZE_MAX - HEADER_SIZE)
+    {
+      return 0;
+    }
+  else
+    {
+      return bytes + HEADER_SIZE;
+    }
+}
+
 size_t
 get_struct_size(char *form_str)
 {
@@ -148,4 +200,11 @@ get_struct_size(char *form_str)
     }
   if (multiplier != 0) result += multiplier * CHAR_SIZE;
   return result + HEADER_SIZE;
+}
+
+size_t
+get_existing_size(void *ptr)
+{
+  // TODO
+  return 0;
 }

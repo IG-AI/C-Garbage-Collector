@@ -273,6 +273,91 @@ test_get_struct_size_num_after_letter()
   CU_ASSERT(size == DOUBLE_SIZE + 2 * CHAR_SIZE + HEADER_SIZE);
 }
 
+
+/*============================================================================
+ *                             TESTS FOR create_data_header
+ *===========================================================================*/
+void
+test_create_data_header_zero_bytes()
+{
+  void *ptr = calloc(1, HEADER_SIZE);
+  void *result = create_data_header(0, ptr);
+  CU_ASSERT(result == NULL);
+  free(ptr);
+}
+
+void
+test_create_data_header_one_byte()
+{
+  void *ptr = calloc(1, HEADER_SIZE + 1);
+  void *result = create_data_header(1, ptr);
+  CU_ASSERT(result != NULL);
+  CU_ASSERT((size_t) result - (size_t) ptr == HEADER_SIZE);
+  CU_ASSERT(RAW_DATA == get_header_type(result));
+  CU_ASSERT(get_existing_size(result) == 1 + HEADER_SIZE);
+  free(ptr);
+}
+
+void
+test_create_data_header_int()
+{
+  void *ptr = calloc(1, HEADER_SIZE + sizeof(int));
+  void *result = create_data_header(sizeof(int), ptr);
+  CU_ASSERT(result != NULL);
+  CU_ASSERT((size_t) result - (size_t) ptr == HEADER_SIZE);
+  CU_ASSERT(RAW_DATA == get_header_type(result));
+  CU_ASSERT(get_existing_size(result) == sizeof(int) + HEADER_SIZE);
+  free(ptr);
+}
+
+void
+test_create_data_header_null_ptr()
+{
+  void *result = create_data_header(1, NULL);
+  CU_ASSERT(result == NULL);
+}
+
+
+/*============================================================================
+ *                             TESTS FOR get_header_type
+ *===========================================================================*/
+void
+test_get_header_type_null()
+{
+  header_type t = get_header_type(NULL);
+  CU_ASSERT(t == NOTHING);
+}
+
+void
+test_get_header_type_data()
+{
+  void *ptr = calloc(1, get_data_size(sizeof(int) ) );
+  void *result = create_data_header(sizeof(int), ptr);
+  CU_ASSERT(RAW_DATA == get_header_type(result));
+  free(ptr);
+}
+
+void
+test_get_header_type_struct()
+{
+  void *ptr = calloc(1, get_struct_size("*") );
+  void *result = create_struct_header("*", ptr);
+  CU_ASSERT(STRUCT_REP == get_header_type(result));
+  free(ptr);
+}
+
+/*
+void
+test_get_header_type_forward()
+{
+  void *ptr = calloc(1, get_struct_size("*") );
+  void *result = create_struct_header("*", ptr);
+  // Someting with forwarding
+  CU_ASSERT(FORWARDING_ADDR == get_header_type(result));
+  free(ptr);
+}
+*/
+
 /*============================================================================
  *                             MAIN TESTING UNIT
  *===========================================================================*/
@@ -281,6 +366,8 @@ main(void)
 {
   CU_pSuite suite_data_size = NULL;
   CU_pSuite suite_struct_size = NULL;
+  CU_pSuite suite_create_data_header = NULL;
+  CU_pSuite suite_get_header_type = NULL;
 
   if (CU_initialize_registry() != CUE_SUCCESS)
     {
@@ -426,6 +513,59 @@ main(void)
     }
 
 
+    
+  // ********************* create_data_header SUITE ******************  //
+  suite_create_data_header = CU_add_suite("Tests function create_data_header()"
+                                 , NULL, NULL);
+  if (suite_create_data_header == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if ( (NULL == CU_add_test(suite_create_data_header
+                            , "Case bytes is 0"
+                            , test_create_data_header_zero_bytes) )
+       || (NULL == CU_add_test(suite_create_data_header
+                               , "Case bytes is 1)"
+                               , test_create_data_header_one_byte) )
+       || (NULL == CU_add_test(suite_create_data_header
+                               , "Case bytes is sizeof(int)"
+                               , test_create_data_header_int) )
+       || (NULL == CU_add_test(suite_create_data_header
+                               , "Case ptr is NULL"
+                               , test_create_data_header_null_ptr) )
+       )
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
+  // ********************* get_header_type SUITE ******************  //
+  suite_get_header_type = CU_add_suite("Tests function get_header_type()"
+                                 , NULL, NULL);
+  if (suite_get_header_type == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if ( (NULL == CU_add_test(suite_get_header_type
+                            , "Null pointer"
+                            , test_get_header_type_null) )
+       || (NULL == CU_add_test(suite_get_header_type
+                               , "Data header"
+                               , test_get_header_type_data) )
+       || (NULL == CU_add_test(suite_get_header_type
+                               , "Struct header"
+                               , test_get_header_type_struct) )
+       /*|| (NULL == CU_add_test(suite_get_header_type
+                               , "Forwarded header"
+                               , test_get_header_type_forward) )
+       */)
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+  
   // ******************** RUN TESTS ***************** //
   CU_basic_set_mode(CU_BRM_VERBOSE);
   CU_basic_run_tests();

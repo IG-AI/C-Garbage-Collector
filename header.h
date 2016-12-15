@@ -17,19 +17,23 @@
 #define __header__
 
 // TODO: define a header_type enum.
-typedef int header_type;
+enum header_type {RAW_DATA, STRUCT_REP, FORWARDING_ADDR, NOTHING};
+
+typedef enum header_type header_type;
 
 /**
  *  @brief Creates a header and saves it on the heap
  *
  *  This function is called when the header has to contain information
  *  about pointers inside of data.
+ *  The header created will be of the type STRUCT_REP
  *  
- *  @param format_string the string representation of the structure to
- *         create a header for
- *  @param heap_ptr the place on the heap where the header will be saved
+ *  @param  format_string the string representation of the structure to
+ *          create a header for
+ *  @param  heap_ptr the place on the heap where the header will be saved
+ *  @return pointer to where the data should be placed
  */
-void create_struct_header(char *format_string, void *heap_ptr);
+void *create_struct_header(char *format_string, void *heap_ptr);
 
 
 /**
@@ -37,19 +41,22 @@ void create_struct_header(char *format_string, void *heap_ptr);
  *
  *  This function is called when the header doesn't have to contain information
  *  about pointers existing inside data.
+ *  The header created will be of the type RAW_DATA
  *  
- *  @param bytes the size in bytes
- *  @param heap_ptr the place on the heap where the header will be saved
+ *  @param  bytes the size in bytes
+ *  @param  heap_ptr the place on the heap where the header will be saved
+ *  @return pointer to where the data should be placed
  */
-void create_data_header(size_t bytes, void *heap_ptr);
+void *create_data_header(size_t bytes, void *heap_ptr);
 
 /**
  *  @brief Gets the type of header belonging to the structure.
  *
- *  The available types are Forwarding_address and Structure_rep.
+ *  The available types are FORWARDING_ADDR, STRUCT_REP and RAW_DATA.
  *  
- *  @param  structure the structure to analyze
- *  @return the type of header beloning to @p structure
+ *  @Param  structure the structure to analyze
+ *  @return the type of header beloning to @p structure, NOTHING if
+ *          @p structure is NULL
  */
 header_type get_header_type(void *structure);
 
@@ -102,5 +109,15 @@ size_t get_struct_size(char *format_string);
  *          when @p bytes is 0.
  */
 size_t get_data_size(size_t bytes);
+
+/**
+ *  @brief Get the size of data having a header
+ *
+ *  The size of the header itself is included in the result
+ *
+ *  @param  ptr pointer to the data to get size of
+ *  @return size of data combined with header
+ */
+size_t get_existing_size(void *ptr);
 
 #endif
