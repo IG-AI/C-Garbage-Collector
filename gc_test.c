@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "gc.h"
+#include <time.h>
 
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
@@ -27,7 +28,6 @@ test_h_init ()
   int test_size = 2048;
   heap_t *test_h_init_heap = h_init(test_size, true, 1);
   CU_ASSERT(test_h_init_heap != NULL);
-  
   h_delete(test_h_init_heap);
 }
 
@@ -92,7 +92,28 @@ test_h_alloc_struct ()
   h_delete(test_h_alloc_struct_heap);
 }
 
-test_
+void 
+test_h_avail()
+{
+  time_t t;
+  srand( (unsigned) time(&t));
+
+  for (int i = 1; i <= 5; i++) {
+
+    int test_size = 2048 * i;
+    int rand_nr = rand() % 2000;
+    heap_t *test_h_avail_heap = h_init(test_size, true, 1);
+    printf("rand: %d\n",rand_nr);
+    void * ptr = h_alloc_data(test_h_avail_heap, rand_nr);
+    //void * ptr = h_alloc_struct(test_h_avail_heap, "ii");
+  
+    printf("pointer: %p\n",ptr);
+    CU_ASSERT(h_avail(test_h_avail_heap) == ( (size_t) (test_size) - rand_nr ) );
+    h_delete(test_h_avail_heap);  
+
+  }
+  
+}
 
 int
 main (int argc, char *argv[])
@@ -106,9 +127,11 @@ main (int argc, char *argv[])
 
   suite1 = CU_add_suite("Heap Test", NULL, NULL);
 
-  if ((CU_add_test(suite1, "test_h_init()", test_h_init) == NULL) ||
+  if (
+      (CU_add_test(suite1, "test_h_init()", test_h_init) == NULL) ||
       (CU_add_test(suite1, "test_page()", test_pages) == NULL) ||
-      (CU_add_test(suite1, "test_h_alloc_struct()", test_h_alloc_struct) == NULL)
+      (CU_add_test(suite1, "test_h_alloc_struct()", test_h_alloc_struct) == NULL) ||
+      (CU_add_test(suite1, "test_h_avail()", test_h_avail) == NULL)
       )
     {
       CU_cleanup_registry();

@@ -28,23 +28,16 @@ heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
 {
   assert(bytes >= 2048);
-  float c;
   int page_size = 2048;
   int number_of_pages = (bytes / page_size);
   
-  if (number_of_pages % 2 == 0) {
-    c = 1.5;
-  }
-  else {
-    c = 0.5;
-  }
 
   heap_t *heap = malloc( sizeof(void*)
                          + sizeof(size_t)
                          + sizeof(bool) 
                          + sizeof(float) 
                          + sizeof(int) 
-                         + (sizeof(void *) * (number_of_pages - c) ) );
+                         + (sizeof(void *) * (number_of_pages) ) );
 
   void *memory = malloc(bytes);
 
@@ -68,11 +61,13 @@ get_page_start(page_t *page)
   return page->start;
 }
 
+
 void *
 get_page_bump(page_t *page)
 {
   return page->bump;
 }
+
 
 void
 set_page_bump(page_t *page, int bytes)
@@ -80,10 +75,17 @@ set_page_bump(page_t *page, int bytes)
   page->bump += bytes;
 }
 
+
 int
 get_page_size(page_t *page)
 {
   return page->size;
+}
+
+
+size_t get_page_avail(page_t *page)
+{
+  return ( (page->start + page->size) - page->bump);
 }
 
 
@@ -107,6 +109,7 @@ h_delete_dbg(heap_t *h, void *dbg_value)
 {
   return; 
 }
+
 
 size_t
 de_code(char* layout)
@@ -156,12 +159,12 @@ return -1;
 }
 
 
-
 void 
 write_pointer_to_heap(void ** allocated_memory, void * ptr_to_write)
 {
   *allocated_memory = ptr_to_write;
 }
+
 
 void 
 write_int_to_heap(void * allocated_memory, int int_to_write)
@@ -169,15 +172,21 @@ write_int_to_heap(void * allocated_memory, int int_to_write)
   *(int *)allocated_memory = int_to_write;
 }
 
+
 void *
 h_alloc(heap_t * h, size_t bytes)
 {
+  if(h_avail(h) < h->gc_threshold){
+    //run gc
+  }
+
   int page_nr = 0;
-  int page_avil = get_page_start(h->pages[page_nr + 1]) - get_page_bump(h->pages[page_nr]);
+  int page_avil = get_page_avail(h->pages[page_nr]);
   printf("\nAvailable in page(%d):  %d, to write: %lu \n", page_nr, page_avil, bytes);
-  while((int)bytes > page_avil){
+  while( (int)bytes > page_avil){
+    //asserta att vi inte går över page gränsen
       page_nr += 1;
-      page_avil = get_page_start(h->pages[page_nr + 1]) - get_page_bump(h->pages[page_nr]);
+      page_avil = get_page_avail(h->pages[page_nr]);
       printf("Available in page(%d):  %d,\n", page_nr, page_avil);
     }
 
@@ -188,6 +197,7 @@ h_alloc(heap_t * h, size_t bytes)
 
   return ptr; 
 }
+
 
 void *
 h_alloc_struct(heap_t * h, char * layout)
@@ -224,13 +234,10 @@ size_t h_avail(heap_t *h)
   int number_of_pages = h->number_of_pages;
   printf("Number of pages: %d", number_of_pages);
   for (int i = 0; i < number_of_pages; i++) {
-    printf("\nAvil in page %d: %lu\n",i, ( (h->pages[i]->start + h->pages[i]->size) - h->pages[i]->bump) );
-    avail += ( (h->pages[i]->start + h->pages[i]->size) - h->pages[i]->bump);  
+    printf("\nAvil in page %d: %lu\n", i, get_page_avail(h->pages[i]) );
+    avail += get_page_avail(h->pages[i]);  
   }
-
 return avail;
-
-   
 }
 
 
