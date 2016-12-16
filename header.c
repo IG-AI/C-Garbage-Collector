@@ -80,6 +80,7 @@ char_to_digit(char c)
 size_t
 parse_number(char *str, size_t *parsed_chars)
 {
+  // To Optimize: use "strtol"
   if (str == NULL || parsed_chars == NULL) return INVALID;
   size_t result = 0;
   size_t i = 0;
@@ -115,6 +116,19 @@ str_duplicate(char *str)
   return strdup(str);
 }
 
+void *
+header_from_data(void *ptr)
+{
+  return (char *) ptr - HEADER_SIZE;
+}
+
+void *
+data_from_header(void *ptr)
+{
+  return (char *) ptr + HEADER_SIZE;
+}
+
+
 /*============================================================================
  *                             CREATION FUNCTIONS
  *===========================================================================*/
@@ -148,7 +162,7 @@ create_data_header(size_t bytes, void *ptr)
   unsigned long *ptr_to_header = (unsigned long *) ptr; // CROSS_PLATFORM
   *ptr_to_header = (unsigned long) bytes << 2;          // CROSS_PLATFORM
   *ptr_to_header |= 2UL;                                // CROSS_PLATFORM
-  return (char *) ptr + HEADER_SIZE;
+  return data_from_header(ptr);
 }
 
 void *
@@ -160,7 +174,7 @@ create_struct_header(char *form_str, void *ptr)
   char **ptr_to_header = (char **) ptr;
   *ptr_to_header = str_duplicate(form_str);
   assert( ( (unsigned long) (*ptr_to_header) & 3UL) == B_FORMAT_STR); // C_P
-  return (char *) ptr + HEADER_SIZE;
+  return data_from_header(ptr);
 }
 
 /*============================================================================
@@ -170,7 +184,7 @@ header_type
 get_header_type(void *data)
 {
   if (data == NULL) return NOTHING;
-  void *header_ptr = ( (char *) data - HEADER_SIZE);
+  void *header_ptr = header_from_data(data);
   unsigned long header = *(unsigned long *) header_ptr; // CROSS_PLATFORM
   unsigned long type_bits = header & 3UL; // CROSS_PLATFORM
   
@@ -200,7 +214,7 @@ get_data_size(size_t bytes)
 size_t
 get_struct_size(char *form_str)
 {
-  if (form_str == NULL || *form_str == '\0') return INVALID;
+  if(form_str == NULL || *form_str == '\0') return INVALID;
   
   size_t result = 0;
   size_t multiplier = 0;
@@ -212,7 +226,7 @@ get_struct_size(char *form_str)
         {
           size_t parsed_chars;
           multiplier = parse_number(form_str, &parsed_chars);
-          if (multiplier == INVALID) return INVALID;
+          if(multiplier == INVALID) return INVALID;
           i += parsed_chars - 1;
           form_str += parsed_chars - 1;
         }
@@ -221,7 +235,7 @@ get_struct_size(char *form_str)
           size_t current_size = size_for(current);
           if(current_size == INVALID) return INVALID;
             
-          if (multiplier == 0)
+          if(multiplier == 0)
             {
               result += current_size;
             }
@@ -232,7 +246,7 @@ get_struct_size(char *form_str)
             }
         }
     }
-  if (multiplier != 0) result += multiplier * CHAR_SIZE;
+  if(multiplier != 0) result += multiplier * CHAR_SIZE;
   return result + HEADER_SIZE;
 }
 
@@ -241,4 +255,42 @@ get_existing_size(void *ptr)
 {
   // TODO
   return 0;
+}
+
+
+/*============================================================================
+ *                             Getting pointers functions
+ *===========================================================================*/
+
+int
+number_of_pointers_in_str(char *str)
+{
+  int result = 0;
+  int multiplier = 0;
+  for(int i = 0; i < (int) strlen(str); ++i)
+    {
+      if(isdigit(str[i]))
+        {
+          size_t parsed_chars;
+          multiplier = parse_number(&str[i], &parsed_chars);
+          i += parsed_chars - 1;
+        }
+      else
+        {
+          if(str[i] == PTR && multiplier == 0) ++result;
+          else if(str[i] == PTR) result += multiplier;
+          multiplier = 0;
+        }
+    }
+  return result;
+}
+
+int
+get_number_of_pointers_in_struct(void *structure)
+{
+  if(structure == NULL || get_header_type(structure) != STRUCT_REP) return -1;
+
+  void *format_str_ptr = header_from_data(structure);
+  char *format_str = *((char **) format_str_ptr);
+  return 1 + number_of_pointers_in_str(format_str);
 }

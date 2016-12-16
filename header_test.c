@@ -419,6 +419,90 @@ test_get_header_type_forward()
 }
 */
 
+
+/*============================================================================
+ *                  TESTS FOR get_number_of_pointers_in_structure
+ *===========================================================================*/
+void
+test_get_number_pointers_null_ptr()
+{
+  int result = get_number_of_pointers_in_struct(NULL);
+  CU_ASSERT(result == -1);
+}
+
+void
+test_get_number_pointers_raw_data()
+{
+  void *ptr = calloc(1, get_data_size(sizeof(int) ) );
+  void *data = create_data_header(sizeof(int), ptr);
+  int result = get_number_of_pointers_in_struct(data);
+  CU_ASSERT(result == -1);
+  free(ptr);
+}
+
+/*
+void
+test_get_number_pointers_forwarding_data()
+{
+  void *ptr = calloc(1, get_data_size(sizeof(int) ) );
+  void *data = create_data_header(sizeof(int), ptr);
+  //Forwarding
+  int result = get_number_of_pointers_in_struct(data);
+  CU_ASSERT(result == -1);
+  free(ptr);
+  }*/
+
+void
+test_get_number_pointers_struct_no_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("i"));
+  void *data = create_struct_header("i", ptr);
+  int result = get_number_of_pointers_in_struct(data);
+  CU_ASSERT(result == 1);
+  free(ptr);
+}
+
+void
+test_get_number_pointers_struct_one_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("*"));
+  void *data = create_struct_header("*", ptr);
+  int result = get_number_of_pointers_in_struct(data);
+  CU_ASSERT(result == 2);
+  free(ptr);
+}
+
+void
+test_get_number_pointers_struct_multi_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("***"));
+  void *data = create_struct_header("***", ptr);
+  int result = get_number_of_pointers_in_struct(data);
+  CU_ASSERT(result == 4);
+  free(ptr);
+}
+
+
+void
+test_get_number_pointers_struct_multi_ptr_nr()
+{
+  void *ptr = calloc(1, get_struct_size("3*"));
+  void *data = create_struct_header("3*", ptr);
+  int result = get_number_of_pointers_in_struct(data);
+  CU_ASSERT(result == 4);
+  free(ptr);
+}
+
+void
+test_get_number_pointers_struct_mixed_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("*i3*"));
+  void *data = create_struct_header("*i3*", ptr);
+  int result = get_number_of_pointers_in_struct(data);
+  CU_ASSERT(result == 5);
+  free(ptr);
+}
+
 /*============================================================================
  *                             MAIN TESTING UNIT
  *===========================================================================*/
@@ -430,6 +514,8 @@ main(void)
   CU_pSuite suite_create_data_header = NULL;
   CU_pSuite suite_create_struct_header = NULL;
   CU_pSuite suite_get_header_type = NULL;
+  CU_pSuite suite_get_num_ptr = NULL;
+
 
   if (CU_initialize_registry() != CUE_SUCCESS)
     {
@@ -656,6 +742,48 @@ main(void)
                                , "Forwarded header"
                                , test_get_header_type_forward) )
        */)
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
+
+   
+  // ********************* get_num_ptr SUITE ******************  //
+  suite_get_num_ptr = CU_add_suite("Tests function get_number_of"
+                                   "_pointers_in_struct()"
+                                 , NULL, NULL);
+  if (suite_get_num_ptr == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if ( (NULL == CU_add_test(suite_get_num_ptr
+                            , "Null ptr"
+                            , test_get_number_pointers_null_ptr) )
+       || (NULL == CU_add_test(suite_get_num_ptr
+                               , "Raw data"
+                               , test_get_number_pointers_raw_data) )
+       /*  || (NULL == CU_add_test(suite_get_num_ptr
+                               , "Forwarding"
+                               , test_get_number_pointers_forwarding_data) )*/
+       || (NULL == CU_add_test(suite_get_num_ptr
+                               , "No ptrs"
+                               , test_get_number_pointers_struct_no_ptr) )
+       || (NULL == CU_add_test(suite_get_num_ptr
+                               , "One ptr"
+                               , test_get_number_pointers_struct_one_ptr) )
+       || (NULL == CU_add_test(suite_get_num_ptr
+                               , "Multi ptrs"
+                               , test_get_number_pointers_struct_multi_ptr) )
+       || (NULL == CU_add_test(suite_get_num_ptr
+                               , "Multi ptrs with nr"
+                               , test_get_number_pointers_struct_multi_ptr_nr) )
+       || (NULL == CU_add_test(suite_get_num_ptr
+                               , "Mixed ptrs"
+                               , test_get_number_pointers_struct_mixed_ptr) )
+       
+    )
     {
       CU_cleanup_registry();
       return CU_get_error();
