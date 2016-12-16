@@ -3,6 +3,43 @@
 Den här filen innehåller designplanen för Header modulen. Kom ihåg att detta är
 ett levande dokument och kommer att ändras. 
 
+## Introduktion
+Header modulen kommer hantera allt som har med meta-data och formatsträngar att
+göra. Följande funktionalitet kommer att finnas:
+
+* Beräkning av storlek som behövs för att få plats med data på heapen
+  , inklusive meta-data (structs använder formatsträng för detta)
+* Beräkning av storlek för existerande data, inklusive meta-data
+* Skapande av meta-data, innehållande representation av structs
+* Ändrande av meta-data, vid forwarding av data
+* Checkning av vilken typ av meta-data som data har
+* Extrahering av pekare från structar
+* Ev. kopiering av meta-data
+
+## Beräkning av storlek
+Beräkning av storlek kommer ske vid två tillfällen i programmet:
+
+* Innan data allokerats på heapen
+* När data ska kopieras till ny del av heapen (vid skräpsamling)
+
+#### Innan data allokerats
+Innan data allokerats på heapen ska `get_data_size()` eller `get_struct_size()`
+anropas för att få reda på hur mycket plats som behövs på heapen.
+
+`get_data_size` tar endast en storleksanvisning i bytes som argument och kommer
+returnera hur mycket plats som behövs för datan med den storleken tillsammans med
+headern.
+
+`get_struct_size` tar en formatsträng (se nedan) och beräknar hur mycket plats
+structen som strängen representerar behöver (inklusive header).
+
+#### När data ska kopieras
+För att kunna kopiera data från en "page" till en annan i heapen måste man veta hur
+mycket plats som behövs. Denna information kan man få ut från data som har en
+header genom att anropa `get_existing_size`. Funktionen ger en storlek som inkluderar
+meta-data.
+
+
 ## Formatsträngar
 Formatsträngen förklaras enklast genom exempel. Antag att vi har en typ
 `binary_tree_node`, deklarerad enligt följande.
@@ -52,6 +89,8 @@ inte valid__.
 __En formatsträng som bara innehåller ett heltal, t.ex. "32", tolkas som"32c"__.
 Detta innebär att `h_alloc_struct("32")` är semantiskt ekvivalent med
 `h_alloc_raw(32)`.
+
+
 
 ## Implementationsdetaljer
 Eftersom objekt i C inte har något metadata måste implementationen hålla reda på
@@ -106,7 +145,7 @@ Två bitar är tillräckligt för att koda in fyra olika tillstånd, t.ex.
 |--------:|-------------------|
 | 00      | pekare till en formatsträng (alt. 1) |
 | 01      | forwarding-adress (alt. 3)           |
-| 10      | _tillgängligt för utökning_          |
+| 10      | Storleksanvisning för 'ren data'     |
 | 11      | bitvektor med layoutinformation (alt 2. se nedan) |
 
 Notera att de två minst signikanta bitarna måste __”maskas ut”__ ur pekaren
