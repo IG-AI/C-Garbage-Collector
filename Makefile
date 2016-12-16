@@ -11,25 +11,25 @@ run: gc
 	./gc
 
 
-test: tester
-	./tester
+test_gc: tester_gc
+	./tester_gc
 
-tester: gc_test.c gc.o
+tester_gc: gc_test.c gc.o
 	$(CC) $(FLAGS) $^ -o $@ -lcunit
 
 
-memtester: gc_test.c gc.o
+memtester_gc: gc_test.c gc.o
 	$(CC) $(FLAGS) $^ -o $@ -lcunit
 
 
-memtest: memtester
+memtest_gc: memtester_gc
 	valgrind -v --leak-check=full ./memtester
 
 
 gc.o: gc.c gc.h
 	$(CC) $(FLAGS) -c $^
 
-clean:
+clean_gc:
 	rm -f gc
 	rm -f tester
 	rm -f memtester
