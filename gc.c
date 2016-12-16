@@ -49,8 +49,8 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   }
   
 
-  printf("\nCreating heap. Size:%lu Page size:%d Number of pages:%d Actual number of pages:%d  \n", 
-         bytes, page_size, number_of_pages, heap->number_of_pages);
+  //printf("\nCreating heap. Size:%lu Page size:%d Number of pages:%d Actual number of pages:%d  \n", 
+  //       bytes, page_size, number_of_pages, heap->number_of_pages);
   return heap;
 }
 
@@ -188,18 +188,18 @@ h_alloc(heap_t * h, size_t bytes)
 
   int page_nr = 0;
   int page_avil = get_page_avail(h->pages[page_nr]);
-  printf("\nAvailable in page(%d):  %d, to write: %lu \n", page_nr, page_avil, bytes);
+  //printf("\nAvailable in page(%d):  %d, to write: %lu \n", page_nr, page_avil, bytes);
   while( (int)bytes > page_avil){
     //asserta att vi inte går över page gränsen
       page_nr += 1;
       page_avil = get_page_avail(h->pages[page_nr]);
-      printf("Available in page(%d):  %d,\n", page_nr, page_avil);
+      //printf("Available in page(%d):  %d,\n", page_nr, page_avil);
     }
 
   void *page_bump = get_page_bump(h->pages[page_nr]);
   void * ptr = page_bump;
   set_page_bump(h->pages[page_nr], bytes);
-  printf("Pointer is in page:  %d\n", get_ptr_page(h, ptr));  
+  //printf("Pointer is in page:  %d\n", get_ptr_page(h, ptr));  
 
   return ptr; 
 }
@@ -238,9 +238,9 @@ size_t h_avail(heap_t *h)
 {
   size_t avail = 0;
   int number_of_pages = h->number_of_pages;
-  printf("Number of pages: %d", number_of_pages);
+  //printf("Number of pages: %d", number_of_pages);
   for (int i = 0; i < number_of_pages; i++) {
-    printf("\nAvil in page %d: %lu\n", i, get_page_avail(h->pages[i]) );
+    //printf("\nAvil in page %d: %lu\n", i, get_page_avail(h->pages[i]) );
     avail += get_page_avail(h->pages[i]);  
   }
 return avail;
@@ -251,9 +251,9 @@ size_t h_used(heap_t *h)
 {
   size_t used = 0;
   int number_of_pages = h->number_of_pages;
-  printf("Number of pages: %d", number_of_pages);
+  //printf("Number of pages: %d", number_of_pages);
   for (int i = 0; i < number_of_pages; i++) {
-    printf("\nAvil in page %d: %lu\n", i, get_page_used(h->pages[i]) );
+    //printf("\nUsed in page %d: %lu\n", i, get_page_used(h->pages[i]) );
     used += get_page_used(h->pages[i]);  
   }
 return used;

@@ -41,46 +41,46 @@ test_pages ()
   heap_t *test_pages_heap = h_init(test_size, true, 1);
   CU_ASSERT(get_page_start(test_pages_heap->pages[0]) >= get_memory(test_pages_heap) ); 
   CU_ASSERT(get_page_start(test_pages_heap->pages[1]) <= (get_memory(test_pages_heap) + test_size - page_size) );
-  printf("\nMem start:  %p  \n", get_memory(test_pages_heap));  
-  printf("First page: %p \n", get_page_start(test_pages_heap->pages[0]));
-  printf("Second page:%p\n", get_page_start(test_pages_heap->pages[1]));
-  printf("Third page: %p\n", get_page_start(test_pages_heap->pages[2]));
-  printf("Mem end:    %p  \n", get_memory(test_pages_heap) + test_size);
+  //printf("\nMem start:  %p  \n", get_memory(test_pages_heap));  
+  //printf("First page: %p \n", get_page_start(test_pages_heap->pages[0]));
+  //printf("Second page:%p\n", get_page_start(test_pages_heap->pages[1]));
+  //printf("Third page: %p\n", get_page_start(test_pages_heap->pages[2]));
+  //printf("Mem end:    %p  \n", get_memory(test_pages_heap) + test_size);
  
   h_delete(test_pages_heap);
 }
 
 
 void
-test_h_alloc_struct ()
+test_h_alloc ()
 {
   int test_size = 6144;
-  heap_t *test_h_alloc_struct_heap = h_init(test_size, true, 1);
+  heap_t *test_h_alloc_heap = h_init(test_size, true, 1);
 
-  void * ptr1 = h_alloc_struct(test_h_alloc_struct_heap, "i");
+  void * ptr1 = h_alloc_struct(test_h_alloc_heap, "i");
   write_int_to_heap(ptr1, 6);
 
-  void * ptr2 = h_alloc_struct(test_h_alloc_struct_heap, "i");
+  void * ptr2 = h_alloc_struct(test_h_alloc_heap, "i");
   write_int_to_heap(ptr2, 9);
 
-  void * ptr4 = h_alloc_data(test_h_alloc_struct_heap, 2040);
+  void * ptr4 = h_alloc_data(test_h_alloc_heap, 2040);
 
-  void * ptr5 = h_alloc_struct(test_h_alloc_struct_heap, "i*i");
+  void * ptr5 = h_alloc_struct(test_h_alloc_heap, "i*i");
   struct test_struct ts = ( (struct test_struct) {1, malloc(4),3}); 
   *(struct test_struct *)ptr5 = ts;
-  printf("\nTest struct:  %d %p %d  \n", (*(struct test_struct *)ptr5).first, 
-         (*(struct test_struct *)ptr5).second,
-         (*(struct test_struct *)ptr5).third );
+  //printf("\nTest struct:  %d %p %d  \n", (*(struct test_struct *)ptr5).first, 
+  //       (*(struct test_struct *)ptr5).second,
+  //       (*(struct test_struct *)ptr5).third );
 
 
 
-  void * ptr3 = h_alloc_struct(test_h_alloc_struct_heap, "*");
+  void * ptr3 = h_alloc_struct(test_h_alloc_heap, "*");
   void * test_pointer = malloc(10);
   write_pointer_to_heap(&ptr3, test_pointer);
 
-  printf("\nTest pointer:  %p  \n", test_pointer);  
-  printf("Pointer 2    : %p \n", (void *)ptr2 );
-  printf("\nAvail: %lu \n", h_avail(test_h_alloc_struct_heap));
+  //printf("\nTest pointer:  %p  \n", test_pointer);  
+  //printf("Pointer 2    : %p \n", (void *)ptr2 );
+  //printf("\nAvail: %lu \n", h_avail(test_h_alloc_heap));
 
 
   CU_ASSERT(*(int *) ptr1 == 6);
@@ -89,11 +89,12 @@ test_h_alloc_struct ()
   CU_ASSERT(ptr4 != NULL);
   CU_ASSERT(ptr5 != NULL);
 
-  h_delete(test_h_alloc_struct_heap);
+  h_delete(test_h_alloc_heap);
 }
 
+
 void 
-test_h_avail()
+test_h_size()
 {
   time_t t;
   srand( (unsigned) time(&t));
@@ -102,18 +103,22 @@ test_h_avail()
 
     int test_size = 2048 * i;
     int rand_nr = rand() % 2000;
-    heap_t *test_h_avail_heap = h_init(test_size, true, 1);
-    printf("rand: %d\n",rand_nr);
-    void * ptr = h_alloc_data(test_h_avail_heap, rand_nr);
-    //void * ptr = h_alloc_struct(test_h_avail_heap, "ii");
-  
-    printf("pointer: %p\n",ptr);
-    CU_ASSERT(h_avail(test_h_avail_heap) == ( (size_t) (test_size) - rand_nr ) );
-    h_delete(test_h_avail_heap);  
+    heap_t *test_h_size_heap = h_init(test_size, true, 1);
+    //printf("rand: %d\n",rand_nr);
+    h_alloc_data(test_h_size_heap, rand_nr);
+    
+    CU_ASSERT(h_avail(test_h_size_heap) == ( (size_t) (test_size) - rand_nr) );
+    CU_ASSERT(h_used(test_h_size_heap) == ( (size_t) rand_nr) );
+    CU_ASSERT(h_size(test_h_size_heap) == ( (size_t) 2048 * i) );
+    h_delete(test_h_size_heap);  
 
   }
   
 }
+
+
+
+
 
 int
 main (int argc, char *argv[])
@@ -130,8 +135,8 @@ main (int argc, char *argv[])
   if (
       (CU_add_test(suite1, "test_h_init()", test_h_init) == NULL) ||
       (CU_add_test(suite1, "test_page()", test_pages) == NULL) ||
-      (CU_add_test(suite1, "test_h_alloc_struct()", test_h_alloc_struct) == NULL) ||
-      (CU_add_test(suite1, "test_h_avail()", test_h_avail) == NULL)
+      (CU_add_test(suite1, "test_h_alloc_struct/data()", test_h_alloc) == NULL) ||
+      (CU_add_test(suite1, "test_h_size/avail/used()", test_h_size) == NULL)
       )
     {
       CU_cleanup_registry();
