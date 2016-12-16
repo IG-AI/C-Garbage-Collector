@@ -89,6 +89,12 @@ size_t get_page_avail(page_t *page)
 }
 
 
+size_t get_page_used(page_t *page)
+{
+  return  page->bump - page->start;
+}
+
+
 void *
 get_memory(heap_t *h) 
 {
@@ -243,11 +249,18 @@ return avail;
 
 size_t h_used(heap_t *h)
 {
-  return 0; 
+  size_t used = 0;
+  int number_of_pages = h->number_of_pages;
+  printf("Number of pages: %d", number_of_pages);
+  for (int i = 0; i < number_of_pages; i++) {
+    printf("\nAvil in page %d: %lu\n", i, get_page_used(h->pages[i]) );
+    used += get_page_used(h->pages[i]);  
+  }
+return used;
 }
 
 
 size_t h_size(heap_t *h)
 {
-  return 0; 
+  return h->size; 
 }
