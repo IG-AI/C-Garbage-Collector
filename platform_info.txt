@@ -1,0 +1,35 @@
+
+Linux X86
+int:       4 
+bool:      1
+char:      1
+double:    8
+long:      8
+float:     4
+void *:    8
+endian:    little
+Stack growth direction: down
+
+Solaris X86
+int:       4
+char:      1
+bool:      1
+double:    8
+long:      8
+float:     4
+void *:    8
+endian:    little
+Stack growth direction: down ???
+
+
+SPARC
+int:       4
+char:      1
+bool:      1
+double:    8
+long:      8
+float:     4
+void *:    8
+endian:    big
+Stack growth direction:
+

@@ -1,6 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "CUnit/Basic.h"
+#include "stack_search.h"
 
 extern char **environ;
 
@@ -8,113 +10,136 @@ extern char **environ;
 void do_nothing(){
 }
 
-void test_2(){
-  void *top = __builtin_frame_address(1);
-  printf("Top3:     %p\n", top);
 
+void * get_end_of_stack(){
+  return __builtin_frame_address(0);
 }
 
-///////TESTS FOR LIST FUNCTIONS///////
-void test_list_new(){
+void test_stack_find_ptr()
+{
+  int *target = calloc(sizeof(int), 1);
+  void *stack_end = get_end_of_stack();
+  void **stack_start = (void **)environ;
+  *target = 111;
+  void *heap_end = target + 40;
+  void *heap_start = target - 40;
+  bool finished = false;
+  bool found_addr = false;
+  int expected_value = 0;
+  int count = -1;
+  printf("target:     %p\n", &target);
+  while(!finished)
+    {
+      void *pointer = stack_find_next_ptr(stack_start, stack_end, heap_start, heap_end);
+            
+      ++count;
+      
+      if(pointer == NULL)
+        {
+          finished = true;
+        }
+      else if(*(unsigned long *)pointer == (unsigned long)target)
+        {
+          expected_value = *(int*)*(void **)pointer;           
+          found_addr = true;        
+        }      
+    }
+  CU_ASSERT_TRUE(found_addr);
+  CU_ASSERT_EQUAL(expected_value, *target);
+  free(target);
+  printf("-----------------------------------------------------\n");
+}
 
 
- 
 
-  int *i = malloc(sizeof(int));
+void test_stack()
+{
+  int times = 12;
+  int *mem_start = calloc(times, sizeof(int));
+  int *mem_lower_inside = mem_start+1;
+  int *mem_middle = mem_start+5;
+  int *mem_upper_inside = mem_start + 9;
+  int *mem_after = mem_start + 10;
+  *mem_start = 0;
+  *mem_lower_inside = 1;
+  *mem_middle = 5;
+  *mem_upper_inside = 9;
+  *mem_after = 10;
 
-  int b = 12;
-  int c = 23;
-  int d = 45;
-  int e = 45;
-  int f = 45;
-  int g = 45;
-  int h = 45;
-  int j = 45;
- 
-  int *k = alloca(sizeof(int));
-  int *l = alloca(sizeof(int));
-  int *m = alloca(sizeof(int));
-  int *n = alloca(sizeof(int));
-  int *o = alloca(sizeof(int));
-  int *p = alloca(sizeof(int));
-  int *q = alloca(sizeof(int));
-  int *r = alloca(sizeof(int));
-  int *s = alloca(sizeof(int));
+  void *stack_end = get_end_of_stack();
+  void **stack_start = (void **)environ;
+  bool finished = false;
+  bool found_lower_inside = false;
+  bool found_middle = false;
+  bool found_upper_inside = false;
+  int count = -1;
+  // printf("stack_top:     %p\n", stack_top);
+  printf("mem_start:     %p\n", &mem_start);
+  printf("mem_lower_in:  %p\n", &mem_lower_inside);
+  printf("mem_middle:    %p\n", &mem_middle);
+  printf("mem_upper_int: %p\n", &mem_upper_inside);
+  printf("mem_after:     %p\n", &mem_after);
+  while(!finished)
+    {
+      void *pointer = stack_find_next_ptr(stack_start, stack_end, mem_lower_inside-40, mem_upper_inside+40);
+            
+      ++count;
+      
+      if(pointer == NULL)
+        {
+          finished = true;
+        }
+      else if(*(unsigned long *)pointer == (unsigned long) mem_lower_inside)
+        {
+          printf("li %d\n", *(int*)*(void **)pointer);
+          found_lower_inside = true;  
+        }
+      else if (*(unsigned long *)pointer == (unsigned long) mem_middle) 
+        {
+          printf("m %d\n", *(int*)*(void **)pointer);
+          found_middle = true;  
+        }
+      else if (*(unsigned long *)pointer == (unsigned long) mem_upper_inside)
+        {
+          printf("ui %d\n", *(int*)*(void **)pointer);
+          found_upper_inside = true;        
+        }
+      else
+        {
+          puts("nothing");
+        }
+    }
 
-  void *top = __builtin_frame_address(0);
-  
- 
-  void *bottom = environ;
-   
+  printf("st:    %p\n", mem_start);
+  printf("st:    %p\n", mem_lower_inside);
+  printf("st:    %p\n", mem_middle);
+  printf("st:    %p\n", mem_upper_inside);
+  printf("st:    %p\n", mem_after);
+  printf("st:    %d\n", *mem_start);
+  printf("st:    %d\n", *mem_lower_inside);
+  printf("st:    %d\n", *mem_middle);
+  printf("st:    %d\n", *mem_upper_inside);
+  printf("st:    %d\n", *mem_after);
 
-  int **heap_start = &i - 1;
-  int **heap_end = &i + 1;
-  //  unsigned long q = (unsigned long)&i;
-  void *top2 = __builtin_frame_address(0);
-  printf("Bottom:   %p\n", bottom);
-  printf("Top:      %p\n", top);
-  printf("Malloced: %p\n", &i);
-  printf("Int b:    %p\n", &b);
-  printf("Int c:    %p\n", &c);
-  printf("Int d:    %p\n", &d);
-  printf("Int e:    %p\n", &e);
-  printf("Int f:    %p\n", &f);
-  printf("Int g:    %p\n", &g);
-  printf("Int h:    %p\n", &h);
-  printf("Int j:    %p\n", &j);
+  CU_ASSERT_TRUE(found_lower_inside);
+  CU_ASSERT_TRUE(found_middle);
+  CU_ASSERT_TRUE(found_upper_inside);
 
-  puts("");
-  printf("Int pk:   %p\n", &k);
-  printf("Int vk:   %p\n", k);
-  puts("");
-  printf("Int pl:   %p\n", &l);
-  printf("Int vl:   %p\n", l);
-  puts("");
-  printf("Int pm:   %p\n", &m);
-  printf("Int vm:   %p\n", m);
-  puts("");
-  printf("Int pn:   %p\n", &n);
-  printf("Int vn:   %p\n", n);
-  puts("");
-  printf("Int po:   %p\n", &o);
-  printf("Int vo:   %p\n", o);
-  puts("");
-  printf("Int pp:   %p\n", &p);
-  printf("Int vp:   %p\n", p);
-  puts("");
-  printf("Int pq:   %p\n", &q);
-  printf("Int vq:   %p\n", q);
-  puts("");
-  printf("Int pr:   %p\n", &r);
-  printf("Int vr:   %p\n", r);
-  puts("");
-  printf("Int ps:   %p\n", &s);
-  printf("Int vs:   %p\n", s);
+  printf("count: %d", count);
 
-  // printf("Int q:    %lu\n", q);
-  printf("M + 4:    %p\n", heap_start);
-  printf("M - 4:    %p\n", heap_end);
-  printf("Top2:     %p\n", top2);
-  test_2();
-  /* CU_ASSERT_PTR_NULL(list_first(list)); */
-  /* CU_ASSERT_PTR_NULL(list_last(list)); */
-  
-  /* list_free(list, (delete_list_item)do_nothing); */
-
-   free(i);
 }
 
 
 
 int main(int argc, char *argv[]){
+
   if(argc && argv){}
   CU_initialize_registry();
 
-  //Set up suites and tests for list functions
-  CU_pSuite list_new = CU_add_suite("Test creation of list", NULL, NULL);
-  CU_add_test(list_new, "Test list_new", test_list_new);
-
- 
+  //Set up suites and tests for stack functions
+  CU_pSuite stack_test = CU_add_suite("Test stack search", NULL, NULL);
+  CU_add_test(stack_test, "Test_stack_find_ptr", test_stack_find_ptr);
+  CU_add_test(stack_test, "Test_stack_large", test_stack);
 
   //Actually run tests
   CU_basic_run_tests();
