@@ -6,6 +6,8 @@
 #include "header.h"
 #include "header_hidden.h"
 
+#define _XOPEN_SOURCE 500
+extern char *strdup(const char *s);
 
 #define PTR '*'
 #define INT 'i'
@@ -103,10 +105,26 @@ parse_number(char *str, size_t *parsed_chars)
   return result;
 }
 
+char *
+str_duplicate(char *str)
+{
+  /*
+    Should allocate on our heap, waiting on completed h_alloc_data.
+    How to get the heap here...?
+  */
+  return strdup(str);
+}
 
 /*============================================================================
  *                             CREATION FUNCTIONS
  *===========================================================================*/
+
+#define B_FORMAT_STR 0UL
+#define B_FORWARDING_ADDR 1UL
+#define B_RAW_DATA 2UL
+#define B_BIT_VECTOR 3UL
+
+
 // The type RAW_DATA has '10'' as the last two bits
 // The rest of the bits will containt the size of the data following the header
 // The address returned is where the data will be stored
@@ -133,16 +151,32 @@ create_data_header(size_t bytes, void *ptr)
   return (char *) ptr + HEADER_SIZE;
 }
 
+void *
+create_struct_header(char *form_str, void *ptr)
+{
+  if (form_str == NULL || ptr == NULL) return NULL;
+  if (get_struct_size(form_str) == INVALID) return NULL;
 
+  char **ptr_to_header = (char **) ptr;
+  *ptr_to_header = str_duplicate(form_str);
+  assert( ( (unsigned long) (*ptr_to_header) & 3UL) == B_FORMAT_STR); // C_P
+  return (char *) ptr + HEADER_SIZE;
+}
 
 /*============================================================================
  *                             TYPE FUNCTIONS
  *===========================================================================*/
 header_type
-get_header_type(void *structure)
+get_header_type(void *data)
 {
-  // TODO
-  return STRUCT_REP;
+  if (data == NULL) return NOTHING;
+  void *header_ptr = ( (char *) data - HEADER_SIZE);
+  unsigned long header = *(unsigned long *) header_ptr; // CROSS_PLATFORM
+  unsigned long type_bits = header & 3UL; // CROSS_PLATFORM
+  
+  if(type_bits == B_FORMAT_STR || type_bits == B_BIT_VECTOR) return STRUCT_REP;
+  else if(type_bits == B_RAW_DATA) return RAW_DATA;
+  else return FORWARDING_ADDR;
 }
 
 

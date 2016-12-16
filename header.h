@@ -12,12 +12,21 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-         
+
 #ifndef __header__
 #define __header__
 
-// TODO: define a header_type enum.
-enum header_type {RAW_DATA, STRUCT_REP, FORWARDING_ADDR, NOTHING};
+/**
+ *  @brief The enumeration of different types a header can have.
+ *
+ *  
+ */
+enum header_type {
+  RAW_DATA          /**< The header is followed by raw data */
+  , STRUCT_REP      /**< The header is followed by data containing pointers */
+  , FORWARDING_ADDR /**< The header contains information about forwarded data */
+  , NOTHING         /**< There is no header */
+};
 
 typedef enum header_type header_type;
 
@@ -27,6 +36,8 @@ typedef enum header_type header_type;
  *  This function is called when the header has to contain information
  *  about pointers inside of data.
  *  The header created will be of the type STRUCT_REP
+ *  The @p format_string will be copied and doesn't need to be placed
+ *  on the heap before hand.
  *  
  *  @param  format_string the string representation of the structure to
  *          create a header for
@@ -34,7 +45,6 @@ typedef enum header_type header_type;
  *  @return pointer to where the data should be placed
  */
 void *create_struct_header(char *format_string, void *heap_ptr);
-
 
 /**
  *  @brief Creates a header and saves it on the heap
@@ -46,19 +56,20 @@ void *create_struct_header(char *format_string, void *heap_ptr);
  *  @param  bytes the size in bytes
  *  @param  heap_ptr the place on the heap where the header will be saved
  *  @return pointer to where the data should be placed
+ *          NULL if @p bytes is zero or @p heap_ptr is NULL
  */
 void *create_data_header(size_t bytes, void *heap_ptr);
 
 /**
- *  @brief Gets the type of header belonging to the structure.
+ *  @brief Gets the type of header belonging to the data.
  *
  *  The available types are FORWARDING_ADDR, STRUCT_REP and RAW_DATA.
  *  
- *  @Param  structure the structure to analyze
- *  @return the type of header beloning to @p structure, NOTHING if
- *          @p structure is NULL
+ *  @param  data the data to analyze
+ *  @return the type of header beloning to @p data, NOTHING if
+ *          @p data is NULL
  */
-header_type get_header_type(void *structure);
+header_type get_header_type(void *);
 
 /**
  *  @brief Get the number of pointers inside @p structure.

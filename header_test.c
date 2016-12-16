@@ -319,6 +319,67 @@ test_create_data_header_null_ptr()
 
 
 /*============================================================================
+ *                             TESTS FOR create_struct_header
+ *===========================================================================*/
+void
+test_create_struct_header_null_str()
+{
+  void *ptr = calloc(1, HEADER_SIZE);
+  void *result = create_struct_header(NULL, ptr);
+  CU_ASSERT(result == NULL);
+  free(ptr);
+}
+
+void
+test_create_struct_header_empty_str()
+{
+  void *ptr = calloc(1, HEADER_SIZE);
+  void *result = create_struct_header("", ptr);
+  CU_ASSERT(result == NULL);
+  free(ptr);
+}
+
+void
+test_create_struct_header_null_ptr()
+{
+  void *result = create_struct_header("*", NULL);
+  CU_ASSERT(result == NULL);
+}
+
+void
+test_create_struct_header_single_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("*"));
+  void *result = create_struct_header("*", ptr);
+  CU_ASSERT(result != NULL);
+  CU_ASSERT((size_t) result - (size_t) ptr == HEADER_SIZE);
+  CU_ASSERT(STRUCT_REP == get_header_type(result));
+  CU_ASSERT(get_existing_size(result) == get_struct_size("*"));
+  free(ptr);
+}
+
+void
+test_create_struct_header_complex()
+{
+  void *ptr = calloc(1, get_struct_size("3*2i3l"));
+  void *result = create_struct_header("3*2i3l", ptr);
+  CU_ASSERT(result != NULL);
+  CU_ASSERT((size_t) result - (size_t) ptr == HEADER_SIZE);
+  CU_ASSERT(STRUCT_REP == get_header_type(result));
+  CU_ASSERT(get_existing_size(result) == get_struct_size("3*2i3l"));
+  free(ptr);
+}
+
+void
+test_create_struct_header_too_big_size()
+{
+  void *ptr = calloc(1, HEADER_SIZE);
+  void *result = create_struct_header("500000000000001*", ptr);
+  CU_ASSERT(result == NULL);
+  free(ptr);
+}
+
+/*============================================================================
  *                             TESTS FOR get_header_type
  *===========================================================================*/
 void
@@ -367,6 +428,7 @@ main(void)
   CU_pSuite suite_data_size = NULL;
   CU_pSuite suite_struct_size = NULL;
   CU_pSuite suite_create_data_header = NULL;
+  CU_pSuite suite_create_struct_header = NULL;
   CU_pSuite suite_get_header_type = NULL;
 
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -540,6 +602,39 @@ main(void)
       return CU_get_error();
     }
 
+  // ********************* create_struct_header SUITE ******************  //
+  suite_create_struct_header = CU_add_suite("Tests function create_struct_header()"
+                                 , NULL, NULL);
+  if (suite_create_struct_header == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if ( (NULL == CU_add_test(suite_create_struct_header
+                            , "NULL format string"
+                            , test_create_struct_header_null_str) )
+       || (NULL == CU_add_test(suite_create_struct_header
+                               , "NULL heap pointer"
+                               , test_create_struct_header_null_ptr) )
+       || (NULL == CU_add_test(suite_create_struct_header
+                               , "Empty format string"
+                               , test_create_struct_header_empty_str) )
+       || (NULL == CU_add_test(suite_create_struct_header
+                               , "Single \"*\""
+                               , test_create_struct_header_single_ptr) )
+       
+       || (NULL == CU_add_test(suite_create_struct_header
+                               , "Complex format string"
+                               , test_create_struct_header_complex) )
+       || (NULL == CU_add_test(suite_create_struct_header
+                               , "Format string rep. too big size"
+                               , test_create_struct_header_too_big_size) )
+       )
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+  
   // ********************* get_header_type SUITE ******************  //
   suite_get_header_type = CU_add_suite("Tests function get_header_type()"
                                  , NULL, NULL);
