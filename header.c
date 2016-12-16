@@ -9,11 +9,11 @@
 #define _XOPEN_SOURCE 500
 extern char *strdup(const char *s);
 
-#define PTR '*'
-#define INT 'i'
-#define CHAR 'c'
-#define LONG 'l'
-#define FLOAT 'f'
+#define PTR    '*'
+#define INT    'i'
+#define CHAR   'c'
+#define LONG   'l'
+#define FLOAT  'f'
 #define DOUBLE 'd'
 
 
@@ -293,4 +293,70 @@ get_number_of_pointers_in_struct(void *structure)
   void *format_str_ptr = header_from_data(structure);
   char *format_str = *((char **) format_str_ptr);
   return 1 + number_of_pointers_in_str(format_str);
+}
+
+void *
+move_ptr_forward(void *ptr, size_t ammount)
+{
+  unsigned long new_data = (unsigned long) ptr + ammount;
+  return (void *) new_data;
+
+}
+
+void
+get_pointers_from_num(char *header
+                      , int *i
+                      , void **array[]
+                      , size_t *array_index
+                      , void **current_data)
+{
+  size_t parsed_chars;
+  int num = parse_number(&header[*i], &parsed_chars);
+  *i += parsed_chars;
+  if(header[*i] == PTR)
+    {
+      for(int j = 0; j < num; ++j)
+        {
+          array[*array_index] = *current_data;
+          ++*array_index;
+          *current_data = move_ptr_forward(*current_data, PTR_SIZE);
+        }
+    }
+  else
+    {
+      assert(size_for(header[*i]) != INVALID);
+      size_t ammount = size_for(header[*i]) * num;
+      *current_data = move_ptr_forward(*current_data, ammount);
+    }
+
+}
+
+bool
+get_pointers_in_struct(void *structure, void **array[])
+{
+  if(structure == NULL || array == NULL) return false;
+  if(get_header_type(structure) != STRUCT_REP) return false;
+  assert(get_number_of_pointers_in_struct(structure) > 0);
+  
+  array[0] = header_from_data(structure);
+  char *header = *array[0];
+  size_t array_index = 1;
+  void *current_data = structure;
+  for(int i = 0; i < (int) strlen(header); ++i)
+    {
+      if(isdigit(header[i]))
+        {
+          get_pointers_from_num(header, &i, array, &array_index, &current_data);
+        }
+      else if(header[i] == PTR)
+        {
+          array[array_index] = current_data;
+          ++array_index;
+        }
+      assert(size_for(header[i]) != INVALID);
+      current_data = move_ptr_forward(current_data, size_for(header[i]));
+    }
+
+  
+  return true;
 }

@@ -503,6 +503,137 @@ test_get_number_pointers_struct_mixed_ptr()
   free(ptr);
 }
 
+
+/*============================================================================
+ *                             TESTS FOR get_pointers_in_structure
+ *===========================================================================*/
+void
+test_get_pointers_null_ptr()
+{
+  void **array[1];
+  bool result = get_pointers_in_struct(NULL, array);
+  CU_ASSERT_FALSE(result);
+}
+
+void
+test_get_pointers_null_array()
+{
+  void *ptr = calloc(1, get_struct_size("*"));
+  void *data = create_struct_header("*", ptr);
+  bool result = get_pointers_in_struct(data, NULL);
+  CU_ASSERT_FALSE(result);
+  free(ptr);
+}
+
+void
+test_get_pointers_raw_data()
+{
+  void **array[1];
+  void *ptr = calloc(1, get_data_size(sizeof(int) ) );
+  void *data = create_data_header(sizeof(int), ptr);
+  bool result = get_pointers_in_struct(data, array);
+  CU_ASSERT_FALSE(result);
+  free(ptr);
+}
+
+/*
+void
+test_get_pointers_forwarding_data()
+{
+  void **array[1];
+  void *ptr = calloc(1, get_data_size(sizeof(int) ) );
+  void *data = create_data_header(sizeof(int), ptr);
+  //Forwarding
+  bool result = get_pointers_in_struct(data, array);
+  CU_ASSERT_FALSE(result);
+  free(ptr);
+  }*/
+
+void
+test_get_pointers_struct_no_ptr()
+{
+  void **array[1];
+  void *ptr = calloc(1, get_struct_size("i"));
+  void *data = create_struct_header("i", ptr);
+  bool result = get_pointers_in_struct(data, array);
+  CU_ASSERT_TRUE(result);
+  CU_ASSERT(array[0] != NULL);
+  free(ptr);
+}
+
+void
+test_get_pointers_struct_one_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("*"));
+  void *data = create_struct_header("*", ptr);
+  int size = get_number_of_pointers_in_struct(data);
+  void **array[size];
+  for(int i = 0; i < size; ++i) array[i] = NULL;
+  
+  bool result = get_pointers_in_struct(data, array);
+  CU_ASSERT_TRUE(result);
+  for(int i = 0; i < size; ++i)
+    {
+      CU_ASSERT(array[i] != NULL);
+    }
+  free(ptr);
+}
+
+void
+test_get_pointers_struct_multi_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("***"));
+  void *data = create_struct_header("***", ptr);
+  int size = get_number_of_pointers_in_struct(data);
+  void **array[size];
+  for(int i = 0; i < size; ++i) array[i] = NULL;
+  
+  bool result = get_pointers_in_struct(data, array);
+  CU_ASSERT_TRUE(result);
+  for(int i = 0; i < size; ++i)
+    {
+      CU_ASSERT(array[i] != NULL);
+    }
+  free(ptr);
+}
+
+
+void
+test_get_pointers_struct_multi_ptr_nr()
+{
+  void *ptr = calloc(1, get_struct_size("3*"));
+  void *data = create_struct_header("3*", ptr);
+  int size = get_number_of_pointers_in_struct(data);
+  void **array[size];
+  for(int i = 0; i < size; ++i) array[i] = NULL;
+  
+  bool result = get_pointers_in_struct(data, array);
+  CU_ASSERT_TRUE(result);
+  for(int i = 0; i < size; ++i)
+    {
+      CU_ASSERT(array[i] != NULL);
+    }
+  free(ptr);
+}
+
+void
+test_get_pointers_struct_mixed_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("*i3*"));
+  void *data = create_struct_header("*i3*", ptr);
+  int size = get_number_of_pointers_in_struct(data);
+  void **array[size];
+  for(int i = 0; i < size; ++i) array[i] = NULL;
+  
+  bool result = get_pointers_in_struct(data, array);
+  CU_ASSERT_TRUE(result);
+  for(int i = 0; i < size; ++i)
+    {
+      CU_ASSERT(array[i] != NULL);
+    }
+  free(ptr);
+}
+
 /*============================================================================
  *                             MAIN TESTING UNIT
  *===========================================================================*/
@@ -515,6 +646,7 @@ main(void)
   CU_pSuite suite_create_struct_header = NULL;
   CU_pSuite suite_get_header_type = NULL;
   CU_pSuite suite_get_num_ptr = NULL;
+  CU_pSuite suite_get_ptrs = NULL;
 
 
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -788,7 +920,49 @@ main(void)
       CU_cleanup_registry();
       return CU_get_error();
     }
-  
+
+
+  // ********************* get_ptrs SUITE ******************  //
+  suite_get_ptrs = CU_add_suite("Tests function get_pointers_in_struct()"
+                                   , NULL, NULL);
+  if (suite_get_ptrs == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if ( (NULL == CU_add_test(suite_get_ptrs
+                            , "Null ptr"
+                            , test_get_pointers_null_ptr) )
+       || (NULL == CU_add_test(suite_get_ptrs
+                               , "Null array"
+                               , test_get_pointers_null_array) )
+       || (NULL == CU_add_test(suite_get_ptrs
+                               , "Raw data"
+                               , test_get_pointers_raw_data) )
+       /*  || (NULL == CU_add_test(suite_get_ptrs
+           , "Forwarding"
+           , test_get_pointers_forwarding_data) )*/
+       || (NULL == CU_add_test(suite_get_ptrs
+                               , "No ptrs"
+                               , test_get_pointers_struct_no_ptr) )
+       || (NULL == CU_add_test(suite_get_ptrs
+                               , "One ptr"
+                               , test_get_pointers_struct_one_ptr) )
+       || (NULL == CU_add_test(suite_get_ptrs
+                               , "Multi ptrs"
+                               , test_get_pointers_struct_multi_ptr) )
+       || (NULL == CU_add_test(suite_get_ptrs
+                               , "Multi ptrs with nr"
+                               , test_get_pointers_struct_multi_ptr_nr) )
+       || (NULL == CU_add_test(suite_get_ptrs
+                               , "Mixed ptrs"
+                               , test_get_pointers_struct_mixed_ptr) )
+       
+       )
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
   // ******************** RUN TESTS ***************** //
   CU_basic_set_mode(CU_BRM_VERBOSE);
   CU_basic_run_tests();
