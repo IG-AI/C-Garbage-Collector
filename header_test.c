@@ -634,6 +634,228 @@ test_get_pointers_struct_mixed_ptr()
   free(ptr);
 }
 
+
+/*============================================================================
+ *                             TESTS FOR get_existing_size
+ *===========================================================================*/
+
+void
+test_get_existing_size_null_ptr()
+{
+  size_t result = get_existing_size(NULL);
+  CU_ASSERT(result == INVALID);
+}
+
+/*
+void
+test_get_existing_size_forwarding()
+{
+  void *ptr = calloc(1, get_struct_size("*"));
+  void *data = create_struct_header("*", ptr);
+  //Forwarding
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == INVALID);
+  free(ptr);
+}
+*/
+
+
+void
+test_get_existing_size_raw_data_eigth()
+{
+  void *ptr = calloc(1, get_data_size(8));
+  void *data = create_data_header(8, ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_data_size(8));
+  free(ptr);
+}
+
+void
+test_get_existing_size_raw_data_one()
+{
+  void *ptr = calloc(1, get_data_size(1));
+  void *data = create_data_header(1, ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_data_size(1));
+  free(ptr);
+}
+
+
+void
+test_get_existing_size_struct_rep_one_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("*"));
+  void *data = create_struct_header("*", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("*"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_struct_rep_char()
+{
+  void *ptr = calloc(1, get_struct_size("c"));
+  void *data = create_struct_header("c", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("c"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_struct_rep_int()
+{
+  void *ptr = calloc(1, get_struct_size("i"));
+  void *data = create_struct_header("i", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("i"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_struct_rep_long()
+{
+  void *ptr = calloc(1, get_struct_size("l"));
+  void *data = create_struct_header("l", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("l"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_struct_rep_float()
+{
+  void *ptr = calloc(1, get_struct_size("f"));
+  void *data = create_struct_header("f", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("f"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_struct_rep_double()
+{
+  void *ptr = calloc(1, get_struct_size("d"));
+  void *data = create_struct_header("d", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("d"));
+  free(ptr);
+}
+
+// ********************* Combinations ******************  //
+void
+test_get_existing_size_ptr_int()
+{
+  void *ptr = calloc(1, get_struct_size("*i"));
+  void *data = create_struct_header("*i", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("*i"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_ptr_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("**"));
+  void *data = create_struct_header("**", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("**"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_ptr_char_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("*c*"));
+  void *data = create_struct_header("*c*", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("*c*"));
+  free(ptr);
+}
+
+
+// ********************* Basic Numerical ******************  //
+void
+test_get_existing_size_one_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("1*"));
+  void *data = create_struct_header("1*", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("1*"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_one()
+{
+  void *ptr = calloc(1, get_struct_size("1"));
+  void *data = create_struct_header("1", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("1"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_twelve_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("12*"));
+  void *data = create_struct_header("12*", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("12*"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_hundred_twelve_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("112*"));
+  void *data = create_struct_header("112*", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("112*"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_hundred_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("100*"));
+  void *data = create_struct_header("100*", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("100*"));
+  free(ptr);
+}
+
+// ********************* Numerical Combinations ******************  //
+
+void
+test_get_existing_size_two_ptr_three_int()
+{
+  void *ptr = calloc(1, get_struct_size("2*3i"));
+  void *data = create_struct_header("2*3i", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("2*3i"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_two_ptr_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("2**"));
+  void *data = create_struct_header("2**", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("2**"));
+  free(ptr);
+}
+
+void
+test_get_existing_size_num_after_letter()
+{
+  void *ptr = calloc(1, get_struct_size("d2"));
+  void *data = create_struct_header("d2", ptr);
+  size_t result = get_existing_size(data);
+  CU_ASSERT(result == get_struct_size("d2"));
+  free(ptr);
+}
+
 /*============================================================================
  *                             MAIN TESTING UNIT
  *===========================================================================*/
@@ -647,6 +869,7 @@ main(void)
   CU_pSuite suite_get_header_type = NULL;
   CU_pSuite suite_get_num_ptr = NULL;
   CU_pSuite suite_get_ptrs = NULL;
+  CU_pSuite suite_existing_size = NULL;
 
 
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -963,6 +1186,84 @@ main(void)
       CU_cleanup_registry();
       return CU_get_error();
     }
+
+  // ********************* get_existing_size SUITE ******************  //
+  suite_existing_size = CU_add_suite("Tests function get_existing_size()"
+                                   , NULL, NULL);
+  if (suite_existing_size == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if ( (NULL == CU_add_test(suite_existing_size
+                            , "Null ptr"
+                            , test_get_existing_size_null_ptr) )
+       /*       || (NULL == CU_add_test(suite_existing_size
+                               , "forwarding"
+                               , test_get_existing_size_forwarding) )*/
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Raw data 8"
+                               , test_get_existing_size_raw_data_eigth) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Raw data 1"
+                               , test_get_existing_size_raw_data_one) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case *"
+                               , test_get_existing_size_struct_rep_one_ptr) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case char"
+                               , test_get_existing_size_struct_rep_char) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case int"
+                               , test_get_existing_size_struct_rep_int) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case long"
+                               , test_get_existing_size_struct_rep_long) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case float"
+                               , test_get_existing_size_struct_rep_float) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case double"
+                               , test_get_existing_size_struct_rep_double) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case *i"
+                               , test_get_existing_size_ptr_int) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case **"
+                               , test_get_existing_size_ptr_ptr) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case *c*"
+                               , test_get_existing_size_ptr_char_ptr) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case 1*"
+                               , test_get_existing_size_one_ptr) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case 1"
+                               , test_get_existing_size_one) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case 12*"
+                               , test_get_existing_size_twelve_ptr) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case 112*"
+                               , test_get_existing_size_hundred_twelve_ptr) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case zero inside number"
+                               , test_get_existing_size_hundred_ptr) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case 2*3i"
+                               , test_get_existing_size_two_ptr_three_int) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case 2**"
+                               , test_get_existing_size_two_ptr_ptr) )
+       || (NULL == CU_add_test(suite_existing_size
+                               , "Case d2"
+                               , test_get_existing_size_num_after_letter) )
+    )
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
   // ******************** RUN TESTS ***************** //
   CU_basic_set_mode(CU_BRM_VERBOSE);
   CU_basic_run_tests();

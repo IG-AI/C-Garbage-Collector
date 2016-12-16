@@ -126,9 +126,9 @@ size_t get_data_size(size_t bytes);
  *
  *  The size of the header itself is included in the result
  *
- *  @param  ptr pointer to the data to get size of
+ *  @param  data pointer to the data to get size of
  *  @return size of data combined with header
  */
-size_t get_existing_size(void *ptr);
+size_t get_existing_size(void *data);
 
 #endif
