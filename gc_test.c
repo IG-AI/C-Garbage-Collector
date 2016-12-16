@@ -16,6 +16,13 @@ struct heap{
 };
 
 
+struct page{
+  void * start;
+  void * bump;
+  int size;
+};
+
+
 struct test_struct{
   int first;
   void * second;
@@ -35,19 +42,29 @@ test_h_init ()
 void 
 test_pages ()
 {
-  
-  int test_size = 6144;
-  int page_size = 2048;
-  heap_t *test_pages_heap = h_init(test_size, true, 1);
-  CU_ASSERT(get_page_start(test_pages_heap->pages[0]) >= get_memory(test_pages_heap) ); 
-  CU_ASSERT(get_page_start(test_pages_heap->pages[1]) <= (get_memory(test_pages_heap) + test_size - page_size) );
-  //printf("\nMem start:  %p  \n", get_memory(test_pages_heap));  
-  //printf("First page: %p \n", get_page_start(test_pages_heap->pages[0]));
-  //printf("Second page:%p\n", get_page_start(test_pages_heap->pages[1]));
-  //printf("Third page: %p\n", get_page_start(test_pages_heap->pages[2]));
-  //printf("Mem end:    %p  \n", get_memory(test_pages_heap) + test_size);
+  time_t t;
+  srand( (unsigned) time(&t));
+
+  for (int i = 1; i <= 5; i++) { 
+    int test_size = 2048 * i;
+    heap_t *test_pages_heap = h_init(test_size, true, 1);
+    void * memory_end = test_pages_heap->memory + test_size;
+    void * pages_end = (test_pages_heap->memory + test_size + (sizeof(page_t) * test_pages_heap->number_of_pages) );
+    for(int j = 0; j < i; j++){
+      void * ptr = (void *)test_pages_heap->pages[j];
+      CU_ASSERT( ptr >= memory_end && ptr < pages_end);
+      //printf("\nMemory end:%lu\nPointer:   %lu\nPages end: %lu\n",
+      //       (long unsigned)memory_end, (long unsigned)ptr, (long unsigned)pages_end);
+    }
+
+    //printf("\nMem start:  %p  \n", get_memory(test_pages_heap));  
+    //printf("First page: %p \n", get_page_start(test_pages_heap->pages[0]));
+    //printf("Second page:%p\n", get_page_start(test_pages_heap->pages[1]));
+    //printf("Third page: %p\n", get_page_start(test_pages_heap->pages[2]));
+    //printf("Mem end:    %p  \n", get_memory(test_pages_heap) + test_size);
  
-  h_delete(test_pages_heap);
+    h_delete(test_pages_heap);
+  }
 }
 
 

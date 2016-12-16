@@ -28,6 +28,7 @@ heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
 {
   assert(bytes >= 2048);
+  assert(bytes % 2048 == 0);
   int page_size = 2048;
   int number_of_pages = (bytes / page_size);
   
