@@ -47,13 +47,17 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
                          + (sizeof(void *) * (number_of_pages - c) ) );
 
   void *memory = malloc(bytes);
+
+  *heap = ( (heap_t) {memory, bytes, unsafe_stack, gc_threshold, number_of_pages} );
   
-  for (int i = 0; i < number_of_pages; i++) {
+  for (int i = 0; i < number_of_pages; ++i) {
     heap->pages[i] = malloc(sizeof(page_t) );
     *heap->pages[i] = ( (page_t) {memory + (i * page_size), memory + (i * page_size), page_size} );
   }
   
-  *heap = ( (heap_t) {memory, bytes, unsafe_stack, number_of_pages, gc_threshold} );
+
+  printf("\nCreating heap. Size:%lu Page size:%d Number of pages:%d Actual number of pages:%d  \n", 
+         bytes, page_size, number_of_pages, heap->number_of_pages);
   return heap;
 }
 
@@ -138,12 +142,17 @@ get_ptr_page(heap_t *h, void * ptr)
 {
   int number_of_pages = h->number_of_pages;
   for (int i = 0; i < number_of_pages; i++) {
-    if(ptr >= h->pages[i]->start  && ptr <= h->pages[i]->start + h->pages[i]->size){ 
-      return i;
+
+    //printf("Varv %d\n", i);
+    //printf("%p\n%p\n%p\n", h->pages[i]->start, (h->pages[i]->start + h->pages[i]->size),ptr ); 
+
+    if(ptr >= h->pages[i]->start  && ptr < h->pages[i]->start + h->pages[i]->size){ 
+    return i;
     }
+
   }
 
-  return -1;
+return -1;
 }
 
 
@@ -211,7 +220,17 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
 
 size_t h_avail(heap_t *h)
 {
-  return 0; 
+  size_t avail = 0;
+  int number_of_pages = h->number_of_pages;
+  printf("Number of pages: %d", number_of_pages);
+  for (int i = 0; i < number_of_pages; i++) {
+    printf("\nAvil in page %d: %lu\n",i, ( (h->pages[i]->start + h->pages[i]->size) - h->pages[i]->bump) );
+    avail += ( (h->pages[i]->start + h->pages[i]->size) - h->pages[i]->bump);  
+  }
+
+return avail;
+
+   
 }
 
 

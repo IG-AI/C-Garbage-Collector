@@ -80,6 +80,7 @@ test_h_alloc_struct ()
 
   printf("\nTest pointer:  %p  \n", test_pointer);  
   printf("Pointer 2    : %p \n", (void *)ptr2 );
+  printf("\nAvail: %lu \n", h_avail(test_h_alloc_struct_heap));
 
 
   CU_ASSERT(*(int *) ptr1 == 6);
@@ -90,6 +91,8 @@ test_h_alloc_struct ()
 
   h_delete(test_h_alloc_struct_heap);
 }
+
+test_
 
 int
 main (int argc, char *argv[])
