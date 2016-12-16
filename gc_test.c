@@ -105,11 +105,15 @@ test_h_size()
     int rand_nr = rand() % 2000;
     heap_t *test_h_size_heap = h_init(test_size, true, 1);
     //printf("rand: %d\n",rand_nr);
+    //printf("\nUsed: %lu\n", h_used(test_h_size_heap));
+    //printf("\nAvail: %lu\n", h_avail(test_h_size_heap));
     h_alloc_data(test_h_size_heap, rand_nr);
+    //printf("\nUsed after: %lu\n", h_used(test_h_size_heap));
+    //printf("\nAvail after: %lu\n", h_avail(test_h_size_heap));
     
     CU_ASSERT(h_avail(test_h_size_heap) == ( (size_t) (test_size) - rand_nr) );
     CU_ASSERT(h_used(test_h_size_heap) == ( (size_t) rand_nr) );
-    CU_ASSERT(h_size(test_h_size_heap) == ( (size_t) 2048 * i) );
+    CU_ASSERT(h_size(test_h_size_heap) == ( (size_t) test_size) );
     h_delete(test_h_size_heap);  
 
   }

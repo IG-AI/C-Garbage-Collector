@@ -39,13 +39,16 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
                          + sizeof(int) 
                          + (sizeof(void *) * (number_of_pages) ) );
 
-  void *memory = malloc(bytes);
+  void *memory = malloc(bytes + (sizeof(page_t) * number_of_pages) );
 
   *heap = ( (heap_t) {memory, bytes, unsafe_stack, gc_threshold, number_of_pages} );
   
+  void *ptr = memory + bytes;
   for (int i = 0; i < number_of_pages; ++i) {
-    heap->pages[i] = malloc(sizeof(page_t) );
-    *heap->pages[i] = ( (page_t) {memory + (i * page_size), memory + (i * page_size), page_size} );
+    //heap->pages[i] = malloc(sizeof(page_t) );
+    *(page_t *)ptr = ( (page_t) {memory + (i * page_size), memory + (i * page_size), page_size} );
+    heap->pages[i] = ptr;
+    ptr += sizeof(page_t);
   }
   
 
