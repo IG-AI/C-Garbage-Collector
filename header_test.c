@@ -233,7 +233,7 @@ test_get_struct_size_invalid_end_num()
 void
 test_get_struct_size_too_big()
 {
-  size_t size = get_struct_size("5000000000000000000000000000000*");
+  size_t size = get_struct_size("5000000000000000000000000000001*");
   CU_ASSERT(size == INVALID);
 }
 
@@ -374,7 +374,7 @@ void
 test_create_struct_header_too_big_size()
 {
   void *ptr = calloc(1, HEADER_SIZE);
-  void *result = create_struct_header("500000000000001*", ptr);
+  void *result = create_struct_header("5000000000000000000000000000001*", ptr);
   CU_ASSERT(result == NULL);
   free(ptr);
 }
