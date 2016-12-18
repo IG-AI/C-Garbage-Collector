@@ -210,10 +210,36 @@ get_struct_size(char *form_str)
 }
 
 size_t
+get_raw_data_size(void *data)
+{
+  if(get_internal_ht(data) != I_HT_RAW_DATA) return INVALID;
+
+  unsigned long *header = header_from_data(data);
+  unsigned long size = (unsigned long) *header >> 2UL;
+  return get_data_size(size);
+}
+
+size_t
+get_format_str_size(void *structure)
+{
+  if(get_internal_ht(structure) != I_HT_FORMAT_STR) return INVALID;
+
+  char **header = header_from_data(structure);
+  return get_struct_size(*header);
+}
+
+size_t
 get_existing_size(void *ptr)
 {
   // TODO
-  return 0;
+  if(ptr == NULL) return INVALID;
+
+  internal_ht type = get_internal_ht(ptr);
+  if(type == I_HT_FORWARDING_ADDR) return INVALID;
+  else if(type == I_HT_RAW_DATA) return get_raw_data_size(ptr);
+  else if(type == I_HT_FORMAT_STR) return get_format_str_size(ptr);
+  assert(false && "Bit vector not yet implemented");
+  return INVALID;
 }
 
 
