@@ -16,6 +16,17 @@ extern char *strdup(const char *s);
 #define FLOAT  'f'
 #define DOUBLE 'd'
 
+enum internal_ht
+  {
+    I_HT_NOTHING
+    , I_HT_RAW_DATA
+    , I_HT_FORWARDING_ADDR
+    , I_HT_FORMAT_STR
+    , I_HT_BIT_VECTOR
+  };
+
+typedef enum internal_ht internal_ht;
+
 
 /*============================================================================
  *                             HELPER FUNCTIONS
@@ -115,17 +126,28 @@ create_struct_header(char *form_str, void *ptr)
 /*============================================================================
  *                             TYPE FUNCTIONS
  *===========================================================================*/
-header_type
-get_header_type(void *data)
+internal_ht
+get_internal_ht(void *data)
 {
-  if (data == NULL) return NOTHING;
+  if (data == NULL) return I_HT_NOTHING;
   void *header_ptr = header_from_data(data);
   unsigned long header = *(unsigned long *) header_ptr; // CROSS_PLATFORM
   unsigned long type_bits = header & 3UL; // CROSS_PLATFORM
   
-  if(type_bits == B_FORMAT_STR || type_bits == B_BIT_VECTOR) return STRUCT_REP;
-  else if(type_bits == B_RAW_DATA) return RAW_DATA;
-  else return FORWARDING_ADDR;
+  if(type_bits == B_FORMAT_STR) return I_HT_FORMAT_STR;
+  else if(type_bits == B_BIT_VECTOR) return I_HT_BIT_VECTOR;
+  else if(type_bits == B_RAW_DATA) return I_HT_RAW_DATA;
+  else return I_HT_FORWARDING_ADDR;
+}
+
+header_type
+get_header_type(void *data)
+{
+  internal_ht i_type = get_internal_ht(data);
+  if(i_type == I_HT_FORMAT_STR || i_type == I_HT_BIT_VECTOR) return STRUCT_REP;
+  else if(i_type == I_HT_RAW_DATA) return RAW_DATA;
+  else if(i_type == I_HT_FORWARDING_ADDR) return FORWARDING_ADDR;
+  else return NOTHING;
 }
 
 
