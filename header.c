@@ -41,71 +41,6 @@ size_for(char c)
   else                  return INVALID;
 }
 
-#define ASCII_ZERO 48
-#define ASCII_NINE 57
-#define ASCII_OFFSET 48
-#define INVALID_NUM -1
-
-/**
- *  @brief Turn a numerical char into an int
- *
- *  
- *
- *  @param  c the char to convert
- *  @return the int corresponding to @p c, INVALID_NUM if c isn't a digit
- */
-int
-char_to_digit(char c)
-{
-  if(c < ASCII_ZERO || c > ASCII_NINE)
-    {
-      return INVALID_NUM;
-    }
-  else
-    {
-      return c - ASCII_OFFSET;
-    }
-}
-
-/**
- *  @brief Parses a positive number from a string.
- *
- *  
- *
- *  @param  str the string to parse a positive number from
- *  @param  parsed_chars pointer to where to stor number of chars parsed
- *  @return a number parsed from @p str.
- *          INVALID if no positive number was able to be parsed from @p str,
- */
-size_t
-parse_number(char *str, size_t *parsed_chars)
-{
-  // To Optimize: use "strtol"
-  if (str == NULL || parsed_chars == NULL) return INVALID;
-  size_t result = 0;
-  size_t i = 0;
-  char current = str[i];
-
-  while (current != '\0' && isdigit(current))
-    {
-      int number = char_to_digit(current);
-      assert(current > 0);
-      if (result == 0 && number == 0)
-        {
-          return INVALID;
-        }
-      else 
-        {
-          result = result * 10;
-          result += number;
-          ++i;
-          current = str[i];
-        }
-    }
-  *parsed_chars = i;
-  return result;
-}
-
 char *
 str_duplicate(char *str)
 {
@@ -211,6 +146,8 @@ get_data_size(size_t bytes)
     }
 }
 
+#define BASE10 10
+
 size_t
 get_struct_size(char *form_str)
 {
@@ -218,17 +155,16 @@ get_struct_size(char *form_str)
   
   size_t result = 0;
   size_t multiplier = 0;
-  int str_len = strlen(form_str);
-  for (int i = 0; i < str_len; ++i, form_str += 1)
+  char *current_ptr = form_str;
+  while(*current_ptr != '\0')
     {
-      char current = *form_str;
-      if(isdigit(current))
+      char current = *current_ptr;
+      if(isdigit(current) && current != '0')
         {
-          size_t parsed_chars;
-          multiplier = parse_number(form_str, &parsed_chars);
-          if(multiplier == INVALID) return INVALID;
-          i += parsed_chars - 1;
-          form_str += parsed_chars - 1;
+          char *after_number;
+          multiplier = strtol(current_ptr, &after_number, BASE10);
+          if(multiplier < 1) return INVALID;
+          current_ptr = after_number;
         }
       else
         {
@@ -244,6 +180,7 @@ get_struct_size(char *form_str)
               result += multiplier * current_size;
               multiplier = 0;
             }
+          ++current_ptr;
         }
     }
   if(multiplier != 0) result += multiplier * CHAR_SIZE;
@@ -267,19 +204,22 @@ number_of_pointers_in_str(char *str)
 {
   int result = 0;
   int multiplier = 0;
-  for(int i = 0; i < (int) strlen(str); ++i)
+  char *current_ptr = str;
+  while(*current_ptr != '\0')
     {
-      if(isdigit(str[i]))
+      char current = *current_ptr;
+      if(isdigit(current))
         {
-          size_t parsed_chars;
-          multiplier = parse_number(&str[i], &parsed_chars);
-          i += parsed_chars - 1;
+          char *after_num;
+          multiplier = strtol(current_ptr, &after_num, BASE10);
+          current_ptr = after_num;
         }
       else
         {
-          if(str[i] == PTR && multiplier == 0) ++result;
-          else if(str[i] == PTR) result += multiplier;
+          if(current == PTR && multiplier == 0) ++result;
+          else if(current == PTR) result += multiplier;
           multiplier = 0;
+          ++current_ptr;
         }
     }
   return result;
@@ -304,16 +244,17 @@ move_ptr_forward(void *ptr, size_t ammount)
 }
 
 void
-get_pointers_from_num(char *header
-                      , int *i
+get_pointers_from_num(char **ptr_to_str
                       , void **array[]
                       , size_t *array_index
                       , void **current_data)
 {
-  size_t parsed_chars;
-  int num = parse_number(&header[*i], &parsed_chars);
-  *i += parsed_chars;
-  if(header[*i] == PTR)
+  char *current_ptr = *ptr_to_str;
+  char *after_num;
+  int num = strtol(current_ptr, &after_num, BASE10);
+  current_ptr = after_num;
+  char current = *current_ptr;
+  if(current == PTR)
     {
       for(int j = 0; j < num; ++j)
         {
@@ -324,10 +265,11 @@ get_pointers_from_num(char *header
     }
   else
     {
-      assert(size_for(header[*i]) != INVALID);
-      size_t ammount = size_for(header[*i]) * num;
+      assert(size_for(current) != INVALID);
+      size_t ammount = size_for(current) * num;
       *current_data = move_ptr_forward(*current_data, ammount);
     }
+  *ptr_to_str = current_ptr;
 
 }
 
@@ -339,23 +281,28 @@ get_pointers_in_struct(void *structure, void **array[])
   assert(get_number_of_pointers_in_struct(structure) > 0);
   
   array[0] = header_from_data(structure);
-  char *header = *array[0];
+  char *current_ptr = *array[0];
   size_t array_index = 1;
   void *current_data = structure;
-  for(int i = 0; i < (int) strlen(header); ++i)
+  while(*current_ptr != '\0')
     {
-      if(isdigit(header[i]))
+      char current = *current_ptr;
+      if(isdigit(current))
         {
-          get_pointers_from_num(header, &i, array, &array_index, &current_data);
+          get_pointers_from_num(&current_ptr, array, &array_index, &current_data);
         }
-      else if(header[i] == PTR)
+      else
         {
-          array[array_index] = current_data;
-          ++array_index;
+          if(current == PTR)
+            {
+              array[array_index] = current_data;
+              ++array_index;
+            }
+          ++current_ptr;
+          assert(size_for(current) != INVALID);
+          current_data = move_ptr_forward(current_data, size_for(current));
         }
-      assert(size_for(header[i]) != INVALID);
-      current_data = move_ptr_forward(current_data, size_for(header[i]));
-    }
+     }
 
   
   return true;
