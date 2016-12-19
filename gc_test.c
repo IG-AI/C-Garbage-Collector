@@ -32,10 +32,19 @@ struct test_struct{
 void 
 test_h_init ()
 {
-  int test_size = 2048;
-  heap_t *test_h_init_heap = h_init(test_size, true, 1);
-  CU_ASSERT(test_h_init_heap != NULL);
-  h_delete(test_h_init_heap);
+  time_t t;
+  srand( (unsigned) time(&t));
+
+  for (int i = 1; i <= 42; i++) { 
+    int int_rand = (rand() % 20) + 1;
+    int test_size = 2048 * int_rand;
+    printf("\nTest size: %d\n", test_size);
+
+    heap_t *test_h_init_heap = h_init(test_size, true, 1);
+    CU_ASSERT(test_h_init_heap != NULL);
+    CU_ASSERT(test_h_init_heap->size == (size_t)test_size);
+    h_delete(test_h_init_heap);
+  }
 }
 
 
@@ -45,12 +54,13 @@ test_pages ()
   time_t t;
   srand( (unsigned) time(&t));
 
-  for (int i = 1; i <= 5; i++) { 
-    int test_size = 2048 * i;
+  for (int i = 1; i <= 420; i++) {
+    int rand_int = (rand() %20) + 1;
+    int test_size = 2048 * rand_int;
     heap_t *test_pages_heap = h_init(test_size, true, 1);
     void * memory_end = test_pages_heap->memory + test_size;
     void * pages_end = (test_pages_heap->memory + test_size + (sizeof(page_t) * test_pages_heap->number_of_pages) );
-    for(int j = 0; j < i; j++){
+    for(int j = 0; j < rand_int; j++){
       void * ptr = (void *)test_pages_heap->pages[j];
       CU_ASSERT( ptr >= memory_end && ptr < pages_end);
       //printf("\nMemory end:%lu\nPointer:   %lu\nPages end: %lu\n",
@@ -107,6 +117,7 @@ test_h_alloc ()
   CU_ASSERT(ptr5 != NULL);
 
   h_delete(test_h_alloc_heap);
+  free(test_pointer);
 }
 
 
@@ -116,9 +127,9 @@ test_h_size()
   time_t t;
   srand( (unsigned) time(&t));
 
-  for (int i = 1; i <= 5; i++) {
+  for (int i = 1; i <= 42; i++) {
 
-    int test_size = 2048 * i;
+    int test_size = 2048;
     int rand_nr = rand() % 2000;
     heap_t *test_h_size_heap = h_init(test_size, true, 1);
     //printf("rand: %d\n",rand_nr);
