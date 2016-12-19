@@ -3,51 +3,34 @@
 #include <stdbool.h>
 
 
-#include <setjmp.h>
-
-#define Dump_registers() \
-  jmp_buf env; \
-  if (setjmp(env)) abort(); \
-
-
-
-void *stack_find_next_ptr(void **stack_top, void *stack_bottom, void *heap_start, void *heap_end)
+void *stack_find_next_ptr(void **stack_bottom, void *stack_top, void *heap_start, void *heap_end)
 {
-  Dump_registers();
   /*
-  unsigned long diff = ((unsigned long) *stack_top) - ((unsigned long) stack_bottom); 
-  printf("top:  %lu\n", (unsigned long) *stack_top);
-  printf("bot:  %lu\n", (unsigned long) stack_bottom);
-  printf("dif:  %lu\n", diff);*/
-  if(*stack_top < stack_bottom)
+   * Bitshifts the bottom value to align it to 8-byte addresses
+   * Required for Sparc platforms which have addresses aligned
+   * to 8-byte addresses. From our understanding this is also
+   * true for the other platforms too.
+   */
+  *stack_bottom = (void *)((unsigned long)*stack_bottom >> 3UL);
+  *stack_bottom = (void *)((unsigned long)*stack_bottom << 3UL);
+  while(*stack_bottom > stack_top)
     {
-      puts("smaller");
-      while(*stack_top != stack_bottom)
+      void *result = *stack_bottom;
+      if( *(unsigned long *)result <= (unsigned long)heap_end 
+          && *(unsigned long *)result >= (unsigned long)heap_start)
         {
-          void *result = *stack_top;
-          if( *(unsigned long *)result <= (unsigned long)heap_end-sizeof(void *) 
-            && *(unsigned long *)result >= (unsigned long)heap_start)
-            {
-              ++*stack_top;
-              return result;
-            }
-          ++*stack_top;
+          /*
+           * Moves the pointer, sizeof(void*) will move it 8 bytes.
+           * If future tests would show non-alignment in some platforms
+           * move it instead sizeof(char).
+           */
+          *stack_bottom = (void *)(((unsigned long)*stack_bottom) - sizeof(void *));
+          return result;
         }
-    }
-  else
-    {    
-      puts("larger");
-      while(*stack_top != stack_bottom)
-        {
-          void *result = *stack_top;
-          if( *(unsigned long *)result <= (unsigned long)heap_end-sizeof(void *) 
-            && *(unsigned long *)result >= (unsigned long)heap_start)
-            {
-              --*stack_top;
-              return result;
-            }
-          --*stack_top;
-        }
+      /*
+       * See above.
+       */
+      *stack_bottom = (void *)(((unsigned long)*stack_bottom) - sizeof(void *));
     }
   return NULL;
 }
