@@ -16,6 +16,37 @@ göra. Följande funktionalitet kommer att finnas:
 * Extrahering av pekare från structar
 * Ev. kopiering av meta-data
 
+## Exempel på användning
+__Creation of Data Header__
+```c
+// Get the size needed for header + data
+size_t size = get_data_size( sizeof(int) );
+// Get space for both header and data
+void *start_ptr = calloc(1, size);
+// Create the header
+void *data_ptr = create_data_header( sizeof(int), start_ptr);
+```
+__Creation of Struct Header__
+```c
+// Get the size needed for header + struct
+size_t size = get_struct_size("*i2l");
+// Get space for both header and struct
+void *start_ptr = calloc(1, size);
+// Create the header
+void *struct_ptr = create_struct_header( "*i2l", start_ptr);
+```
+__Extract pointers from Struct__
+```c
+// Get the ammount of pointers inside of the struct
+int num_ptrs = get_number_of_pointers_in_struct(sturct_ptr); // From above
+assert(num_ptrs != -1);
+
+// Create array to put pointers to heap pointers in
+void **ptr_array[num_ptrs];
+bool success = get_pointers_in_struct(struct_ptr, ptr_array);
+// Continue working with the pointers...
+```
+
 ## Beräkning av storlek
 Beräkning av storlek kommer ske vid två tillfällen i programmet:
 
