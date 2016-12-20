@@ -558,6 +558,7 @@ test_get_pointers_struct_no_ptr()
   bool result = get_pointers_in_struct(data, array);
   CU_ASSERT_TRUE(result);
   CU_ASSERT(array[0] != NULL);
+  CU_ASSERT(strcmp((char *) array[0], "i")); // Change with Bitvector
   free(ptr);
 }
 
@@ -566,6 +567,7 @@ test_get_pointers_struct_one_ptr()
 {
   void *ptr = calloc(1, get_struct_size("*"));
   void *data = create_struct_header("*", ptr);
+  *(void **)data = (void *) 1UL;
   int size = get_number_of_pointers_in_struct(data);
   void **array[size];
   for(int i = 0; i < size; ++i) array[i] = NULL;
@@ -576,6 +578,7 @@ test_get_pointers_struct_one_ptr()
     {
       CU_ASSERT(array[i] != NULL);
     }
+  CU_ASSERT(*(unsigned long*)array[1] == 1UL);
   free(ptr);
 }
 
@@ -584,15 +587,20 @@ test_get_pointers_struct_multi_ptr()
 {
   void *ptr = calloc(1, get_struct_size("***"));
   void *data = create_struct_header("***", ptr);
+  for(unsigned long i = 0; i < 3; ++i)
+    {
+      ((unsigned long *)data)[i] = i+1;
+    }
   int size = get_number_of_pointers_in_struct(data);
   void **array[size];
   for(int i = 0; i < size; ++i) array[i] = NULL;
   
   bool result = get_pointers_in_struct(data, array);
   CU_ASSERT_TRUE(result);
-  for(int i = 0; i < size; ++i)
+  CU_ASSERT(array[0] != NULL);
+  for(unsigned long i = 1; i < 4; ++i)
     {
-      CU_ASSERT(array[i] != NULL);
+      CU_ASSERT(*(unsigned long *)array[i] == i);
     }
   free(ptr);
 }
@@ -603,15 +611,20 @@ test_get_pointers_struct_multi_ptr_nr()
 {
   void *ptr = calloc(1, get_struct_size("3*"));
   void *data = create_struct_header("3*", ptr);
+  for(unsigned long i = 0; i < 3; ++i)
+    {
+      ((unsigned long *)data)[i] = i+1;
+    }
   int size = get_number_of_pointers_in_struct(data);
   void **array[size];
   for(int i = 0; i < size; ++i) array[i] = NULL;
   
   bool result = get_pointers_in_struct(data, array);
   CU_ASSERT_TRUE(result);
-  for(int i = 0; i < size; ++i)
+  CU_ASSERT(array[0] != NULL);
+  for(unsigned long i = 1; i < 4; ++i)
     {
-      CU_ASSERT(array[i] != NULL);
+      CU_ASSERT(*(unsigned long *)array[i] == i);
     }
   free(ptr);
 }
