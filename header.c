@@ -28,6 +28,11 @@ enum internal_ht
 typedef enum internal_ht internal_ht;
 
 
+#define B_FORMAT_STR 0UL
+#define B_FORWARDING_ADDR 1UL
+#define B_RAW_DATA 2UL
+#define B_BIT_VECTOR 3UL
+
 /*============================================================================
  *                             HELPER FUNCTIONS
  *===========================================================================*/
@@ -74,15 +79,32 @@ data_from_header(void *ptr)
   return (char *) ptr + HEADER_SIZE;
 }
 
+void *
+clear_type_bits(void *header)
+{
+  unsigned long header_u = (unsigned long ) header;
+  return (void *) ((header_u >> 2UL) << 2UL); // CROSS_PLATFORM
+}
+
+void
+set_type_bits(void *header_ptr, internal_ht type)
+{
+  if(type == I_HT_NOTHING) return;
+
+  unsigned long type_bits;
+  if(type == I_HT_RAW_DATA)             type_bits = B_RAW_DATA;
+  else if(type == I_HT_FORMAT_STR)      type_bits = B_FORMAT_STR;
+  else if(type == I_HT_FORWARDING_ADDR) type_bits = B_FORWARDING_ADDR;
+  else                                  type_bits = B_BIT_VECTOR;
+  
+  unsigned long header_u = (unsigned long) clear_type_bits(*(void **)header_ptr);
+  *(void **)header_ptr = (void *) (header_u | type_bits);
+}
+
 
 /*============================================================================
  *                             CREATION FUNCTIONS
  *===========================================================================*/
-
-#define B_FORMAT_STR 0UL
-#define B_FORWARDING_ADDR 1UL
-#define B_RAW_DATA 2UL
-#define B_BIT_VECTOR 3UL
 
 
 // The type RAW_DATA has '10'' as the last two bits
@@ -106,8 +128,8 @@ create_data_header(size_t bytes, void *ptr)
 
   assert(sizeof(unsigned long) == sizeof(void *));
   unsigned long *ptr_to_header = (unsigned long *) ptr; // CROSS_PLATFORM
-  *ptr_to_header = (unsigned long) bytes << 2;          // CROSS_PLATFORM
-  *ptr_to_header |= 2UL;                                // CROSS_PLATFORM
+  *ptr_to_header = bytes << 2UL; // CROSS_PLATFORM
+  set_type_bits(ptr_to_header, I_HT_RAW_DATA);
   return data_from_header(ptr);
 }
 
@@ -119,7 +141,7 @@ create_struct_header(char *form_str, void *ptr)
 
   char **ptr_to_header = (char **) ptr;
   *ptr_to_header = str_duplicate(form_str);
-  assert( ( (unsigned long) (*ptr_to_header) & 3UL) == B_FORMAT_STR); // C_P
+  set_type_bits(ptr_to_header, I_HT_FORMAT_STR);
   return data_from_header(ptr);
 }
 
@@ -369,4 +391,29 @@ copy_header(void *data , void *heap_ptr)
   *(void **)heap_ptr = *(void **)header_from_data(data);
 
   return data_from_header(heap_ptr);
+}
+
+
+bool
+forward_header(void *data, void *new_data)
+{
+  if (data == NULL) return false;
+  if (new_data == NULL) return false;
+  if (data == new_data) return false;
+
+  void **header_ptr = header_from_data(data);
+  *header_ptr = new_data;
+  set_type_bits(header_ptr, I_HT_FORWARDING_ADDR);
+  
+  return true;
+}
+
+void *
+get_forwarding_address(void *data)
+{
+  if (data == NULL) return NULL;
+  if (get_header_type(data) != FORWARDING_ADDR) return NULL;
+
+  void **header_ptr = header_from_data(data);
+  return clear_type_bits(*header_ptr);
 }

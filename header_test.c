@@ -407,17 +407,18 @@ test_get_header_type_struct()
   free(ptr);
 }
 
-/*
 void
 test_get_header_type_forward()
 {
   void *ptr = calloc(1, get_struct_size("*") );
   void *result = create_struct_header("*", ptr);
-  // Someting with forwarding
+  void *new_ptr = calloc(1, get_struct_size("*") );
+
+  forward_header(result, new_ptr);
   CU_ASSERT(FORWARDING_ADDR == get_header_type(result));
   free(ptr);
+  free(new_ptr);
 }
-*/
 
 
 /*============================================================================
@@ -440,17 +441,18 @@ test_get_number_pointers_raw_data()
   free(ptr);
 }
 
-/*
 void
 test_get_number_pointers_forwarding_data()
 {
   void *ptr = calloc(1, get_data_size(sizeof(int) ) );
   void *data = create_data_header(sizeof(int), ptr);
-  //Forwarding
+  void *new_ptr = calloc(1, get_data_size(sizeof(int) ) );
+  forward_header(data, new_ptr);
   int result = get_number_of_pointers_in_struct(data);
   CU_ASSERT(result == -1);
   free(ptr);
-  }*/
+  free(new_ptr);
+}
 
 void
 test_get_number_pointers_struct_no_ptr()
@@ -536,18 +538,20 @@ test_get_pointers_raw_data()
   free(ptr);
 }
 
-/*
 void
 test_get_pointers_forwarding_data()
 {
   void **array[1];
   void *ptr = calloc(1, get_data_size(sizeof(int) ) );
   void *data = create_data_header(sizeof(int), ptr);
-  //Forwarding
+  void *new_ptr = calloc(1, get_data_size(sizeof(int) ) );
+  forward_header(data, new_ptr);
+
   bool result = get_pointers_in_struct(data, array);
   CU_ASSERT_FALSE(result);
   free(ptr);
-  }*/
+  free(new_ptr);
+}
 
 void
 test_get_pointers_struct_no_ptr()
@@ -659,19 +663,19 @@ test_get_existing_size_null_ptr()
   CU_ASSERT(result == INVALID);
 }
 
-/*
 void
 test_get_existing_size_forwarding()
 {
   void *ptr = calloc(1, get_struct_size("*"));
   void *data = create_struct_header("*", ptr);
-  //Forwarding
+  void *new_ptr = calloc(1, get_struct_size("*") );
+  forward_header(data, new_ptr);
+
   size_t result = get_existing_size(data);
   CU_ASSERT(result == INVALID);
   free(ptr);
+  free(new_ptr);
 }
-*/
-
 
 void
 test_get_existing_size_raw_data_eigth()
@@ -931,13 +935,14 @@ test_copy_header_forward()
 {
   void *old_ptr = calloc(1, get_data_size(8));
   void *data = create_data_header(8, old_ptr);
-  // FORWARDING
+  void *forward_ptr = calloc(1, get_data_size(sizeof(int) ) );
+  forward_header(data, forward_ptr);
+
   void *new_ptr = calloc(1, get_data_size(8));
   void *new_data = copy_header(data, new_ptr);
+  
   CU_ASSERT(get_header_type(new_data) == get_header_type(data));
   CU_ASSERT(get_existing_size(new_data) == get_existing_size(data));
-  CU_ASSERT(get_number_of_pointers_in_struct(new_data)
-            == get_number_of_pointers_in_struct(data));
   free(old_ptr);
   free(new_ptr);
 }
@@ -945,7 +950,146 @@ test_copy_header_forward()
 
 
 
+/*============================================================================
+ *                             FORWARDING SUITE
+ *===========================================================================*/
+void
+test_forward_header_data_null()
+{
+  void *data = NULL;
+  void *new_ptr = calloc(1, get_data_size(8));
+  void *new_data = (void *)((unsigned long) new_ptr + 1);
 
+  bool result = forward_header(data, new_data);
+  CU_ASSERT_FALSE(result);
+  free(new_ptr);
+}
+
+void
+test_forward_header_new_data_null()
+{
+  void *ptr = calloc(1, get_data_size(8));
+  void *data = (void *)((unsigned long) ptr + 1);
+  void *new_data = NULL;
+
+  bool result = forward_header(data, new_data);
+  CU_ASSERT_FALSE(result);
+  free(ptr);
+}
+
+void
+test_forward_header_same_pointer()
+{
+  void *ptr = calloc(1, get_data_size(8));
+  void *data = (void *)((unsigned long) ptr + 1);
+  bool result = forward_header(data, data);
+  CU_ASSERT_FALSE(result);
+  free(ptr);
+}
+
+void
+test_forward_header_struct()
+{
+  void *old_ptr = calloc(1, get_struct_size("d2"));
+  void *data = create_struct_header("d2", old_ptr);
+  void *new_ptr = calloc(1, get_struct_size("d2"));
+  void *new_data = (void *)((unsigned long) new_ptr + 1);
+
+  bool result = forward_header(data, new_data);
+  CU_ASSERT_TRUE(result);
+  CU_ASSERT(get_header_type(data) == FORWARDING_ADDR);
+  free(old_ptr);
+  free(new_ptr);
+}
+
+void
+test_forward_header_raw_data()
+{
+  void *old_ptr = calloc(1, get_data_size(8));
+  void *data = create_data_header(8, old_ptr);
+  void *new_ptr = calloc(1, get_data_size(8));
+  void *new_data = (void *)((unsigned long) new_ptr + 1);
+
+  bool result = forward_header(data, new_data);
+  CU_ASSERT_TRUE(result);
+  CU_ASSERT(get_header_type(data) == FORWARDING_ADDR);
+  free(old_ptr);
+  free(new_ptr);
+}
+
+void
+test_forward_header_forward()
+{
+  void *old_ptr = calloc(1, get_data_size(8));
+  void *data = create_data_header(8, old_ptr);
+  void *new_ptr = calloc(1, get_data_size(8));
+  void *new_data = create_data_header(8, old_ptr);
+
+  bool result = forward_header(data, new_ptr);
+  CU_ASSERT_TRUE(result);
+  CU_ASSERT(get_header_type(data) == FORWARDING_ADDR);
+  
+  result = forward_header(new_data, old_ptr);
+  CU_ASSERT_TRUE(result);
+  CU_ASSERT(get_header_type(new_data) == FORWARDING_ADDR);
+  CU_ASSERT(get_header_type(data) == FORWARDING_ADDR);
+  free(old_ptr);
+  free(new_ptr);
+}
+
+
+
+/*============================================================================
+ *                        TESTS FOR get_forwarding_address
+ *===========================================================================*/
+void
+test_get_forwarding_address_data_null()
+{
+  void *data = NULL;
+
+  bool result = get_forwarding_address(data);
+  CU_ASSERT_FALSE(result);
+}
+
+void
+test_get_forwarding_address_struct()
+{
+  void *old_ptr = calloc(1, get_struct_size("*"));
+  void *data = create_struct_header("*", old_ptr);
+
+  bool result = get_forwarding_address(data);
+  CU_ASSERT_FALSE(result);
+  free(old_ptr);
+}
+
+void
+test_get_forwarding_address_raw_data()
+{
+  void *old_ptr = calloc(1, get_data_size(8));
+  void *data = create_data_header(8, old_ptr);
+
+  bool result = get_forwarding_address(data);
+  CU_ASSERT_FALSE(result);
+  free(old_ptr);
+}
+
+void
+test_get_forwarding_address_forward()
+{
+  void *old_ptr = calloc(1, get_data_size(8));
+  void *data = create_data_header(8, old_ptr);
+  void *new_ptr = calloc(1, get_data_size(8));
+
+  void *new_data = copy_header(data, new_ptr);
+  forward_header(data, new_data);
+
+  CU_ASSERT(get_header_type(data) == FORWARDING_ADDR);
+  void *result = get_forwarding_address(data);
+  CU_ASSERT(result == new_data);
+  
+  free(old_ptr);
+  free(new_ptr);
+}
 
 
 
@@ -964,6 +1108,8 @@ main(void)
   CU_pSuite suite_get_ptrs = NULL;
   CU_pSuite suite_existing_size = NULL;
   CU_pSuite suite_copy_header = NULL;
+  CU_pSuite suite_forward_header = NULL;
+  CU_pSuite suite_get_forwarding_address = NULL;
 
 
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -1187,10 +1333,10 @@ main(void)
        || (NULL == CU_add_test(suite_get_header_type
                                , "Struct header"
                                , test_get_header_type_struct) )
-       /*|| (NULL == CU_add_test(suite_get_header_type
+       || (NULL == CU_add_test(suite_get_header_type
                                , "Forwarded header"
                                , test_get_header_type_forward) )
-       */)
+       )
     {
       CU_cleanup_registry();
       return CU_get_error();
@@ -1213,9 +1359,9 @@ main(void)
        || (NULL == CU_add_test(suite_get_num_ptr
                                , "Raw data"
                                , test_get_number_pointers_raw_data) )
-       /*  || (NULL == CU_add_test(suite_get_num_ptr
+       || (NULL == CU_add_test(suite_get_num_ptr
                                , "Forwarding"
-                               , test_get_number_pointers_forwarding_data) )*/
+                               , test_get_number_pointers_forwarding_data) )
        || (NULL == CU_add_test(suite_get_num_ptr
                                , "No ptrs"
                                , test_get_number_pointers_struct_no_ptr) )
@@ -1256,9 +1402,9 @@ main(void)
        || (NULL == CU_add_test(suite_get_ptrs
                                , "Raw data"
                                , test_get_pointers_raw_data) )
-       /*  || (NULL == CU_add_test(suite_get_ptrs
+       || (NULL == CU_add_test(suite_get_ptrs
            , "Forwarding"
-           , test_get_pointers_forwarding_data) )*/
+           , test_get_pointers_forwarding_data) )
        || (NULL == CU_add_test(suite_get_ptrs
                                , "No ptrs"
                                , test_get_pointers_struct_no_ptr) )
@@ -1292,9 +1438,9 @@ main(void)
   if ( (NULL == CU_add_test(suite_existing_size
                             , "Null ptr"
                             , test_get_existing_size_null_ptr) )
-       /*       || (NULL == CU_add_test(suite_existing_size
+       || (NULL == CU_add_test(suite_existing_size
                                , "forwarding"
-                               , test_get_existing_size_forwarding) )*/
+                               , test_get_existing_size_forwarding) )
        || (NULL == CU_add_test(suite_existing_size
                                , "Raw data 8"
                                , test_get_existing_size_raw_data_eigth) )
@@ -1372,9 +1518,9 @@ main(void)
        || (NULL == CU_add_test(suite_copy_header
                                , "Null heap ptr"
                                , test_copy_header_heap_ptr_null) )
-       /*       || (NULL == CU_add_test(suite_copy_header
+       || (NULL == CU_add_test(suite_copy_header
                                , "Forwarded data"
-                               , test_copy_header_forward) )*/
+                               , test_copy_header_forward) )
        || (NULL == CU_add_test(suite_copy_header
                                , "Raw data"
                                , test_copy_header_raw_data) )
@@ -1387,6 +1533,66 @@ main(void)
       return CU_get_error();
     }
 
+  
+  // ********************* forward_header SUITE ******************  //
+  suite_forward_header = CU_add_suite("Tests function forward_header()"
+                                   , NULL, NULL);
+  if (suite_forward_header == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if ( (NULL == CU_add_test(suite_forward_header
+                            , "Null data ptr"
+                            , test_forward_header_data_null) )
+       || (NULL == CU_add_test(suite_forward_header
+                               , "Null new data ptr"
+                               , test_forward_header_new_data_null) )
+       || (NULL == CU_add_test(suite_forward_header
+                               , "Points to same"
+                               , test_forward_header_same_pointer) )
+       || (NULL == CU_add_test(suite_forward_header
+                               , "Forwarded data"
+                               , test_forward_header_forward) )
+       || (NULL == CU_add_test(suite_forward_header
+                               , "Raw data"
+                               , test_forward_header_raw_data) )
+       || (NULL == CU_add_test(suite_forward_header
+                               , "Struct"
+                               , test_forward_header_struct) )
+    )
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
+  // ********************* get_forwarding_address SUITE ******************  //
+  suite_get_forwarding_address = CU_add_suite("Tests function"
+                                              " get_forwarding_address()"
+                                              , NULL, NULL);
+  if (suite_get_forwarding_address == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if ( (NULL == CU_add_test(suite_get_forwarding_address
+                            , "Null data ptr"
+                            , test_get_forwarding_address_data_null) )
+       || (NULL == CU_add_test(suite_get_forwarding_address
+                               , "Forwarded data"
+                               , test_get_forwarding_address_forward) )
+       || (NULL == CU_add_test(suite_get_forwarding_address
+                               , "Raw data"
+                               , test_get_forwarding_address_raw_data) )
+       || (NULL == CU_add_test(suite_get_forwarding_address
+                               , "Struct"
+                               , test_get_forwarding_address_struct) )
+    )
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+  
   // ******************** RUN TESTS ***************** //
   CU_basic_set_mode(CU_BRM_VERBOSE);
   CU_basic_run_tests();

@@ -136,12 +136,31 @@ size_t get_existing_size(void *data);
  *  @brief Creates a copy of a header and saves the copy on the heap
  *
  *  
- *  @param  data the address to data containing the header to be copied 
+ *  @param  data the data containing the header to be copied 
  *  @param  heap_ptr the place on the heap where the header will be saved
  *  @return pointer to where the data should be placed
  *          NULL if @p data is NULL or @p heap_ptr is NULL
  */
 void *copy_header(void *data , void *heap_ptr);
+
+/**
+ *  @brief forwards a header 
+ *
+ *  
+ *  @param  data the data containing the header to be forwarded 
+ *  @param  new_data the data the header will be forwarded to
+ *  @return true if the forwarding was successfull, false otherwise
+ */
+bool forward_header(void *data, void *new_data);
+
+/**
+ *  @brief Gets the address that data has been forwarded to 
+ *
+ *  @param  data the data containing the header to get forwarding address from
+ *  @return the address where @p data has been forwarded to
+ *          NULL if @p data isn't of type FORWARDING_ADDR
+ */
+void *get_forwarding_address(void *data);
 
 
 #endif
