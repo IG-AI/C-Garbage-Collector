@@ -36,7 +36,7 @@ typedef struct page page_t;
  *          considered unsafe pointers
  *  @param  gc_threshold the memory pressure at which gc should be triggered
  *          (1.0 = full memory)
- *  @return the new heap
+ *  @return the new heap or NULL if memory cannot be allocated
  */
 heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold);

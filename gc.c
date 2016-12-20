@@ -16,7 +16,7 @@ extern char **environ;
 struct page{
   void * start;
   void * bump;
-  int size;
+  size_t size;
 };
 
 typedef struct page page_t;
@@ -26,7 +26,7 @@ struct heap{
   size_t size;
   bool unsafe_stack;
   float gc_threshold;
-  int number_of_pages;
+  size_t number_of_pages;
   page_t * pages[];
 };
 
@@ -42,13 +42,13 @@ struct heap{
  *  @param  h pointer to the heap struct 
  */
 void 
-create_pages(void *memory, void *start_of_pages, int number_of_pages, size_t page_size, heap_t *h)
+create_pages(void *memory, page_t *start_of_pages, int number_of_pages, size_t page_size, heap_t *h)
 {
   for (int i = 0; i < number_of_pages; ++i) {
     unsigned long page_start =  (unsigned long) memory + (i * page_size);
-    *(page_t *)start_of_pages = ( (page_t) {(void *) page_start, (void *)page_start, page_size} );
+    *start_of_pages = ( (page_t) {(void *) page_start, (void *)page_start, page_size} );
     h->pages[i] = start_of_pages;
-    start_of_pages += sizeof(page_t);
+    start_of_pages ++;
   }
 } 
 
@@ -58,7 +58,7 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   assert(bytes >= PAGE_SIZE);
   assert(bytes % PAGE_SIZE == 0);
   size_t page_size = PAGE_SIZE;
-  int number_of_pages = (bytes / page_size);
+  size_t number_of_pages = (bytes / page_size);
   
 
   heap_t *heap = malloc( sizeof(void*)
@@ -68,8 +68,17 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
                          + sizeof(int) 
                          + (sizeof(void *) * (number_of_pages) ) );
 
+  if(heap == NULL){
+    return NULL;
+  }
+  
   void *memory = malloc(bytes + (sizeof(page_t) * number_of_pages) );
 
+  if(memory == NULL){
+    free(heap);
+    return NULL;
+  }
+  
   *heap = ( (heap_t) {memory, bytes, unsafe_stack, gc_threshold, number_of_pages} );
   
   void *start_of_pages = memory + bytes;
@@ -77,6 +86,7 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   
   //printf("\nCreating heap. Size:%lu Page size:%d Number of pages:%d Actual number of pages:%d  \n", 
   //       bytes, page_size, number_of_pages, heap->number_of_pages);
+
   return heap;
 }
 
@@ -212,19 +222,22 @@ h_alloc(heap_t * h, size_t bytes)
     //run gc
   }
 
-  if(bytes < 16){
-    bytes = 16;
+  if(bytes < SMALLEST_ALLOC_SIZE){
+    bytes = SMALLEST_ALLOC_SIZE; //plus header??
   }
 
   int page_nr = 0;
+  int number_of_pages = h->number_of_pages;
   int page_avail = get_page_avail(h->pages[page_nr]);
   //printf("\nAvailable in page(%d):  %d, to write: %lu \n", page_nr, page_avil, bytes);
   while( (int)bytes > page_avail){
-    //asserta att vi inte går över page gränsen   //TODO
-      page_nr += 1;
-      page_avail = get_page_avail(h->pages[page_nr]);
-      //printf("Available in page(%d):  %d,\n", page_nr, page_avil);
+    if(page_nr == number_of_pages - 1){
+      return NULL;
     }
+    page_nr += 1;
+    page_avail = get_page_avail(h->pages[page_nr]);
+    //printf("Available in page(%d):  %d,\n", page_nr, page_avil);
+  }
 
   void *page_bump = get_page_bump(h->pages[page_nr]);
   void * ptr_to_write_to = page_bump;
@@ -238,17 +251,21 @@ h_alloc(heap_t * h, size_t bytes)
 void *
 h_alloc_struct(heap_t * h, char * layout)
 {
-  size_t bytes = de_code(layout);
-  return h_alloc(h, bytes);
+  size_t size = get_struct_size(layout);
+  //size_t bytes = de_code(layout);
+  void * ptr = h_alloc(h, size);
+  return create_struct_header(layout, ptr);
 }
 
 
 void *
 h_alloc_data(heap_t *h, size_t bytes)
 {
-  return h_alloc(h, bytes);
+  size_t size = get_data_size(bytes);
+  void * ptr = h_alloc(h, size);
+  return create_data_header(bytes, ptr);
 }
-
+/*
 //Puts all the pointer found on stack into an array
 void pointers_to_array(heap_t *h, void *array[])
 {
@@ -291,7 +308,7 @@ h_gc(heap_t *h)
     }
   return 0;
 }
-
+*/
 
 //??
 size_t 
@@ -329,7 +346,8 @@ return used;
 }
 
 
-size_t h_size(heap_t *h)
+size_t
+h_size(heap_t *h)
 {
   return h->size; 
 }

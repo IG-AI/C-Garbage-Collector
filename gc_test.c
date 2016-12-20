@@ -58,11 +58,11 @@ test_pages ()
     int rand_int = (rand() %20) + 1;
     int test_size = 2048 * rand_int;
     heap_t *test_pages_heap = h_init(test_size, true, 1);
-    void * memory_end = test_pages_heap->memory + test_size;
+    void * pages_start = test_pages_heap->memory + test_size;
     void * pages_end = (test_pages_heap->memory + test_size + (sizeof(page_t) * test_pages_heap->number_of_pages) );
     for(int j = 0; j < rand_int; j++){
       void * ptr = (void *)test_pages_heap->pages[j];
-      CU_ASSERT( ptr >= memory_end && ptr < pages_end);
+      CU_ASSERT( ptr >= pages_start && ptr < pages_end);
       //printf("\nMemory end:%lu\nPointer:   %lu\nPages end: %lu\n",
       //       (long unsigned)memory_end, (long unsigned)ptr, (long unsigned)pages_end);
     }
