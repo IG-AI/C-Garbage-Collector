@@ -38,7 +38,7 @@ test_h_init ()
   for (int i = 1; i <= 42; i++) { 
     int int_rand = (rand() % 20) + 1;
     int test_size = 2048 * int_rand;
-    printf("\nTest size: %d\n", test_size);
+    //printf("\nTest size: %d\n", test_size);
 
     heap_t *test_h_init_heap = h_init(test_size, true, 1);
     CU_ASSERT(test_h_init_heap != NULL);
