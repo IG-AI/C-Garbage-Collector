@@ -5,11 +5,11 @@ CC =gcc
 STD =-std=c11
 LINKFLAGS =$(STD) -g -o
 COMPFLAGS =$(STD) -Wall -g -c -m64
-TESTFLAGS =$(COMPFLAGS) -lcunit #-fprofile-arcs -ftest-coverage -coverage
+TESTFLAGS =$(STD) -Wall -g -m64 -lcunit #-fprofile-arcs -ftest-coverage -coverage
 
 all: gc
 
-gc: gc.o
+gc: gc.o stack_search.o
 	$(CC) $(LINKFLAGS) $@ $^
 
 gc.o: gc.c gc.h
@@ -32,7 +32,7 @@ test_gc: gc_test
 	./gc_test
 
 gc_test: gc_test.c gc.o
-	$(CC) $(TESTFLAGS) $@
+	@$(CC)  $^ -o $@ $(TESTFLAGS)
 
 memtest_gc: gc_test
 	valgrind -v --leak-check=full ./gc_test
@@ -42,7 +42,7 @@ test_header: header_test
 	@./header_test
 
 header_test: header.o header_test.c
-	@$(CC) $(TESTFLAGS) $@
+	@$(CC)  $^ -o $@ $(TESTFLAGS)
 
 
 # Stack search
@@ -50,7 +50,7 @@ test_stack_search: stack_search_test
 	@./stack_search_test
 
 stack_search_test: stack_search.o stack_search_test.c 
-	@$(CC) $(TESTFLAGS) $@
+	@$(CC)  $^ -o $@ $(TESTFLAGS)
 
 
 
