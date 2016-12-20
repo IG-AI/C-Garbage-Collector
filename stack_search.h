@@ -25,6 +25,12 @@
  *  @return a possible pointer into the heap, or NULL if search is finished
  *
  *  When calling the function use;
+ *  
+ *  Before calling stack search registers need to be dumped to the stack.
+ *  #include <setjmp.h>
+ *  #define Dump_registers() \
+ *  jmp_buf env; \
+ *  if (setjmp(env)) abort(); \
  *
  *  __builtin_frame_address(n);
  *  To get a pointer to the start of a scopes
@@ -35,9 +41,10 @@
  *  similar to:
  *  void *stack_bottom = (void *)*environ;
  *  void *pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
+ *
  *  
  */
-void *stack_find_next_ptr(void **stack_bottom, void *stack_top,
+void **stack_find_next_ptr(void **stack_bottom, void *stack_top,
                           void *heap_start, void *heap_end);
 
 

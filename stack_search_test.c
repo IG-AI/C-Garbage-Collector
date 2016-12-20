@@ -40,22 +40,21 @@ void test_stack_find_ptr()
   void *heap_end = target + 40;
   void *heap_start = target - 40;
 
-
+  printf("target    %p\n", &target);
   bool finished = false;
   bool found_addr = false;
 
   while(!finished)
     {
-      void *pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
-      
-      if(pointer == NULL)
+      void **pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
+       if(pointer == NULL)
         {
           finished = true;
         }
-      else if(*(unsigned long *)pointer == (unsigned long)target)
+      else if(**(unsigned long **)pointer == (unsigned long)target)
         {
           found_addr = true;        
-        }      
+         }
     }
   CU_ASSERT_TRUE(found_addr);
   free(target);
@@ -92,8 +91,9 @@ void test_stack_edges()
   int *mem_one_below_end = (int *)((unsigned long)mem_upper_end-1);
   int *mem_after = (int *)((unsigned long)mem_upper_end+1);
 
-  //put some values to some of the pointers, nor really needed..
-  *mem_start = 0;
+  //put some values to some of the pointers, nor really needed.. 
+  //..and sparc will cry
+  /**mem_start = 0;
   *mem_before = 0;
   *mem_lower_inside = 1;
   *mem_one_above_inside = 0;
@@ -101,7 +101,7 @@ void test_stack_edges()
   *mem_one_below_end = 2;
   *mem_upper_end = 9;
   *mem_after = 10;
-
+  */
   /*
   printf("mem_start:     %p\n", mem_start);
   printf("mem_before:    %p\n", mem_before);
@@ -110,8 +110,8 @@ void test_stack_edges()
   printf("mem_middle:    %p\n", mem_middle);
   printf("mem_one_be_end:%p\n", mem_one_below_end);
   printf("mem_upper_end: %p\n", mem_upper_end);
-  printf("mem_after:     %p\n", mem_after);
-  */
+  printf("mem_after:     %p\n", mem_after);*/
+  
 
   //Get the top of the stack using __builtin_frame_address(0);
   void *stack_top = get_stack_top();
@@ -145,41 +145,41 @@ void test_stack_edges()
 
   while(!finished)
     {
-      void *pointer = stack_find_next_ptr(&stack_bottom, stack_top, mem_lower_inside, mem_upper_end);
-           
+      void **pointer = stack_find_next_ptr(&stack_bottom, stack_top, mem_lower_inside, mem_upper_end);        
+
       if(pointer == NULL)
         {
           finished = true;
         }
-      else if(*(unsigned long *)pointer == (unsigned long) mem_start)
+      else if(**(unsigned long **)pointer == (unsigned long) mem_start)
         {          
           found_start = true;  
         }
-      else if(*(unsigned long *)pointer == (unsigned long) mem_before)
+      else if(**(unsigned long **)pointer == (unsigned long) mem_before)
         {          
           found_before = true;  
         }
-      else if(*(unsigned long *)pointer == (unsigned long) mem_lower_inside)
+      else if(**(unsigned long **)pointer == (unsigned long) mem_lower_inside)
         {          
           found_lower_inside = true;  
         }
-      else if(*(unsigned long *)pointer == (unsigned long) mem_one_above_inside)
+      else if(**(unsigned long **)pointer == (unsigned long) mem_one_above_inside)
         {          
           found_one_above_inside = true;
         }
-      else if (*(unsigned long *)pointer == (unsigned long) mem_middle) 
+      else if (**(unsigned long **)pointer == (unsigned long) mem_middle) 
         {      
           found_middle = true;  
         }
-      else if(*(unsigned long *)pointer == (unsigned long) mem_one_below_end)
+      else if(**(unsigned long **)pointer == (unsigned long) mem_one_below_end)
         {          
           found_one_below_end = true;
         }
-      else if (*(unsigned long *)pointer == (unsigned long) mem_upper_end)
+      else if (**(unsigned long **)pointer == (unsigned long) mem_upper_end)
         {          
           found_upper_end = true;        
         }
-      else if(*(unsigned long *)pointer == (unsigned long) mem_after)
+      else if(**(unsigned long **)pointer == (unsigned long) mem_after)
         {          
           found_after = true;
         }
