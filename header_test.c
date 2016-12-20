@@ -869,6 +869,86 @@ test_get_existing_size_num_after_letter()
   free(ptr);
 }
 
+
+
+
+/*============================================================================
+ *                             COPY HEADER SUITE
+ *===========================================================================*/
+void
+test_copy_header_data_null()
+{
+  void *ptr = calloc(1, get_struct_size("d2"));
+  void *data = NULL;
+  void *result = copy_header(data, ptr);
+  CU_ASSERT(result == NULL);
+  free(ptr);
+}
+
+void
+test_copy_header_heap_ptr_null()
+{
+  void *old_ptr = calloc(1, get_struct_size("d2"));
+  void *data = create_struct_header("d2", old_ptr);
+  void *new_ptr = NULL;
+  void *result = copy_header(data, new_ptr);
+  CU_ASSERT(result == NULL);
+  free(old_ptr);
+}
+
+void
+test_copy_header_struct()
+{
+  void *old_ptr = calloc(1, get_struct_size("d2"));
+  void *data = create_struct_header("d2", old_ptr);
+  void *new_ptr = calloc(1, get_struct_size("d2"));
+  void *new_data = copy_header(data, new_ptr);
+  CU_ASSERT(get_header_type(new_data) == get_header_type(data));
+  CU_ASSERT(get_existing_size(new_data) == get_existing_size(data));
+  CU_ASSERT(get_number_of_pointers_in_struct(new_data)
+            == get_number_of_pointers_in_struct(data));
+  free(old_ptr);
+  free(new_ptr);
+}
+
+void
+test_copy_header_raw_data()
+{
+  void *old_ptr = calloc(1, get_data_size(8));
+  void *data = create_data_header(8, old_ptr);
+  void *new_ptr = calloc(1, get_data_size(8));
+  void *new_data = copy_header(data, new_ptr);
+  CU_ASSERT(get_header_type(new_data) == get_header_type(data));
+  CU_ASSERT(get_existing_size(new_data) == get_existing_size(data));
+  CU_ASSERT(get_number_of_pointers_in_struct(new_data)
+            == get_number_of_pointers_in_struct(data));
+  free(old_ptr);
+  free(new_ptr);
+}
+
+void
+test_copy_header_forward()
+{
+  void *old_ptr = calloc(1, get_data_size(8));
+  void *data = create_data_header(8, old_ptr);
+  // FORWARDING
+  void *new_ptr = calloc(1, get_data_size(8));
+  void *new_data = copy_header(data, new_ptr);
+  CU_ASSERT(get_header_type(new_data) == get_header_type(data));
+  CU_ASSERT(get_existing_size(new_data) == get_existing_size(data));
+  CU_ASSERT(get_number_of_pointers_in_struct(new_data)
+            == get_number_of_pointers_in_struct(data));
+  free(old_ptr);
+  free(new_ptr);
+}
+
+
+
+
+
+
+
+
 /*============================================================================
  *                             MAIN TESTING UNIT
  *===========================================================================*/
@@ -883,6 +963,7 @@ main(void)
   CU_pSuite suite_get_num_ptr = NULL;
   CU_pSuite suite_get_ptrs = NULL;
   CU_pSuite suite_existing_size = NULL;
+  CU_pSuite suite_copy_header = NULL;
 
 
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -1271,6 +1352,35 @@ main(void)
        || (NULL == CU_add_test(suite_existing_size
                                , "Case d2"
                                , test_get_existing_size_num_after_letter) )
+    )
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
+  // ********************* copy_header SUITE ******************  //
+  suite_copy_header = CU_add_suite("Tests function copy_header()"
+                                   , NULL, NULL);
+  if (suite_copy_header == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if ( (NULL == CU_add_test(suite_copy_header
+                            , "Null data ptr"
+                            , test_copy_header_data_null) )
+       || (NULL == CU_add_test(suite_copy_header
+                               , "Null heap ptr"
+                               , test_copy_header_heap_ptr_null) )
+       /*       || (NULL == CU_add_test(suite_copy_header
+                               , "Forwarded data"
+                               , test_copy_header_forward) )*/
+       || (NULL == CU_add_test(suite_copy_header
+                               , "Raw data"
+                               , test_copy_header_raw_data) )
+       || (NULL == CU_add_test(suite_copy_header
+                               , "Struct"
+                               , test_copy_header_struct) )
     )
     {
       CU_cleanup_registry();

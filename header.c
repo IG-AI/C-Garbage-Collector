@@ -160,7 +160,7 @@ get_data_size(size_t bytes)
 {
   if (bytes == 0 || bytes > SIZE_MAX - HEADER_SIZE)
     {
-      return 0;
+      return INVALID;
     }
   else
     {
@@ -231,7 +231,6 @@ get_format_str_size(void *structure)
 size_t
 get_existing_size(void *ptr)
 {
-  // TODO
   if(ptr == NULL) return INVALID;
 
   internal_ht type = get_internal_ht(ptr);
@@ -328,7 +327,7 @@ get_pointers_in_struct(void *structure, void **array[])
   if(get_header_type(structure) != STRUCT_REP) return false;
   assert(get_number_of_pointers_in_struct(structure) > 0);
   
-  array[0] = header_from_data(structure);
+  array[0] = header_from_data(structure); // Implement for bit-vector
   char *current_ptr = *array[0];
   size_t array_index = 1;
   void *current_data = structure;
@@ -354,4 +353,20 @@ get_pointers_in_struct(void *structure, void **array[])
 
   
   return true;
+}
+
+
+/*============================================================================
+ *                             Forwarding and copying
+ *===========================================================================*/
+
+void *
+copy_header(void *data , void *heap_ptr)
+{
+  if (data == NULL) return NULL;
+  if (heap_ptr == NULL) return NULL;
+
+  *(void **)heap_ptr = *(void **)header_from_data(data);
+
+  return data_from_header(heap_ptr);
 }

@@ -80,7 +80,7 @@ header_type get_header_type(void *);
  *
  *  @param  structure the structure to look for pointers in
  *  @return number of pointers found in @p structure if its header has the type
- *          Structure_rep. Otherwise it will return -1
+ *          STRUCT_REP. Otherwise it will return -1
  */
 int get_number_of_pointers_in_struct(void *structure);
 
@@ -90,6 +90,7 @@ int get_number_of_pointers_in_struct(void *structure);
  *
  *  The function will only return valid information if a struct_header has been
  *  created and placed just before the struct in the heap.
+ *  
  *  @p structure has to have the header type Structure_rep.
  *  @p array must be of size get_numer_of_pointers_in_structure(@p structure).
  *
@@ -130,5 +131,17 @@ size_t get_data_size(size_t bytes);
  *  @return size of data combined with header
  */
 size_t get_existing_size(void *data);
+
+/**
+ *  @brief Creates a copy of a header and saves the copy on the heap
+ *
+ *  
+ *  @param  data the address to data containing the header to be copied 
+ *  @param  heap_ptr the place on the heap where the header will be saved
+ *  @return pointer to where the data should be placed
+ *          NULL if @p data is NULL or @p heap_ptr is NULL
+ */
+void *copy_header(void *data , void *heap_ptr);
+
 
 #endif
