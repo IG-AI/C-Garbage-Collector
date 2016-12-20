@@ -3,25 +3,75 @@
 Den här filen innehåller designplanen för Header modulen. Kom ihåg att detta är
 ett levande dokument och kommer att ändras. 
 
-## Allokering med metadata (taget från spec.)
-För att slippa leta igenom heapen på samma sätt som stacken kommer vi
-att använda ett format för allokering som kräver att användaren ger den
-information vi behöver. Vårt skall stödja två typer av allokering:
+## Introduktion
+Header modulen kommer hantera allt som har med meta-data och formatsträngar att
+göra. Följande funktionalitet kommer att finnas:
 
-* `h_alloc_struct` – där programmeraren anger en slags formatsträng som beskriver
-minneslayouten hos objektet som skall allokeras. _(Analogt med hur en
-formatsträng till printf beskriver hur en utskriven sträng ser ut och var olika
-värden skall stoppas in. Se nedan.)_
-Formatsträngen beskriver var i ett objekt eventuella pekare finns som också skall
-traverseras för att markera objekt som levande.
-* `h_alloc_raw` – där programmeraren anger storleken på ett utrymme som skall
-reserveras _(Analogt med malloc)_. Detta utrymme får inte innehålla pekare till
-andra objekt.
+* Beräkning av storlek som behövs för att få plats med data på heapen
+  , inklusive meta-data (structs använder formatsträng för detta)
+* Beräkning av storlek för existerande data, inklusive meta-data
+* Skapande av meta-data, innehållande representation av structs
+* Ändrande av meta-data, vid forwarding av data
+* Checkning av vilken typ av meta-data som data har
+* Extrahering av pekare från structar
+* Ev. kopiering av meta-data
 
-I alla fall ovan skall det allokerade minnet nollställas, dvs. samma beteende som
-calloc.
+## Exempel på användning
+__Creation of Data Header__
+```c
+// Get the size needed for header + data
+size_t size = get_data_size( sizeof(int) );
+// Get space for both header and data
+void *start_ptr = calloc(1, size);
+// Create the header
+void *data_ptr = create_data_header( sizeof(int), start_ptr);
+```
+__Creation of Struct Header__
+```c
+// Get the size needed for header + struct
+size_t size = get_struct_size("*i2l");
+// Get space for both header and struct
+void *start_ptr = calloc(1, size);
+// Create the header
+void *struct_ptr = create_struct_header( "*i2l", start_ptr);
+```
+__Extract pointers from Struct__
+```c
+// Get the ammount of pointers inside of the struct
+int num_ptrs = get_number_of_pointers_in_struct(sturct_ptr); // From above
+assert(num_ptrs != -1);
 
-### Formatsträng för h_alloc_struct
+// Create array to put pointers to heap pointers in
+void **ptr_array[num_ptrs];
+bool success = get_pointers_in_struct(struct_ptr, ptr_array);
+// Continue working with the pointers...
+```
+
+## Beräkning av storlek
+Beräkning av storlek kommer ske vid två tillfällen i programmet:
+
+* Innan data allokerats på heapen
+* När data ska kopieras till ny del av heapen (vid skräpsamling)
+
+#### Innan data allokerats
+Innan data allokerats på heapen ska `get_data_size()` eller `get_struct_size()`
+anropas för att få reda på hur mycket plats som behövs på heapen.
+
+`get_data_size` tar endast en storleksanvisning i bytes som argument och kommer
+returnera hur mycket plats som behövs för datan med den storleken tillsammans med
+headern.
+
+`get_struct_size` tar en formatsträng (se nedan) och beräknar hur mycket plats
+structen som strängen representerar behöver (inklusive header).
+
+#### När data ska kopieras
+För att kunna kopiera data från en "page" till en annan i heapen måste man veta hur
+mycket plats som behövs. Denna information kan man få ut från data som har en
+header genom att anropa `get_existing_size`. Funktionen ger en storlek som inkluderar
+meta-data.
+
+
+## Formatsträngar
 Formatsträngen förklaras enklast genom exempel. Antag att vi har en typ
 `binary_tree_node`, deklarerad enligt följande.
 ```c
@@ -71,9 +121,12 @@ __En formatsträng som bara innehåller ett heltal, t.ex. "32", tolkas som"32c"_
 Detta innebär att `h_alloc_struct("32")` är semantiskt ekvivalent med
 `h_alloc_raw(32)`.
 
+
+
 ## Implementationsdetaljer
 Eftersom objekt i C inte har något metadata måste implementationen hålla reda på
 två saker:
+
 1. Hur stort varje objekt är (annars kan vi inte kopiera det), samt
 2. Var i objektet dess pekare till andra objekt finns.
 
@@ -92,6 +145,7 @@ liten som möjligt__ eftersom program som allokerar många små objekt annars bl
 för ineffektiva. En bra design är att spara headern precis före varje objekt i
 minnet. Låt oss börja med att titta på vad headern skall kunna innehålla för
 information:
+
 1. En pekare till en formatsträng (const char *)
 2. __En mer kompakt representation av objektets layout__
 3. En forwarding-adress
@@ -122,7 +176,7 @@ Två bitar är tillräckligt för att koda in fyra olika tillstånd, t.ex.
 |--------:|-------------------|
 | 00      | pekare till en formatsträng (alt. 1) |
 | 01      | forwarding-adress (alt. 3)           |
-| 10      | _tillgängligt för utökning_          |
+| 10      | Storleksanvisning för 'ren data'     |
 | 11      | bitvektor med layoutinformation (alt 2. se nedan) |
 
 Notera att de två minst signikanta bitarna måste __”maskas ut”__ ur pekaren

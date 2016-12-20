@@ -19,14 +19,16 @@
 
 # Sprint 3
 ### 19/12-16 till 23/12-16
+### Heap
+* Integrera med den simpla headern
+* Integrera med stack-search
+
 ### Alloc-Map
 * Implementera allac_map till fullo, beroende av resultatet som Stack-search teamet kommit fram till.
 
 ### Header
 * Support för bitvektor, cross-platform 
 
-### Stack-search
-* Interagera med den simpla headern med Stack-search
 
 # Sprint 4
 ### 02/01-17 till 06/01-17

@@ -22,6 +22,7 @@
  *  @brief The opaque data type holding all the heap data.
  */
 typedef struct heap heap_t;
+typedef struct page page_t;
 
 
 /**
@@ -37,7 +38,15 @@ typedef struct heap heap_t;
  *          (1.0 = full memory)
  *  @return the new heap
  */
-heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
+heap_t *
+h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
+
+void *
+get_page_start(page_t *page);
+
+
+void *
+get_memory(heap_t *h);
 
 
 /**
@@ -45,7 +54,8 @@ heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
  *
  *  @param h the heap
  */
-void h_delete(heap_t *h);
+void 
+h_delete(heap_t *h);
 
 
 /**
@@ -55,7 +65,8 @@ void h_delete(heap_t *h);
  *  @param dbg_value a value to be written into every pointer into @p h
  *         on the stack
  */
-void h_delete_dbg(heap_t *h, void *dbg_value);
+void 
+h_delete_dbg(heap_t *h, void *dbg_value);
 
 
 /**
@@ -76,7 +87,15 @@ void h_delete_dbg(heap_t *h, void *dbg_value);
  *  
  *  @note   the heap does *not* retain an alias to layout.
  */
-void *h_alloc_struct(heap_t *h, char *layout);
+
+void 
+write_pointer_to_heap(void ** allocated_memory, void * ptr_to_write);
+
+void 
+write_int_to_heap(void * allocated_memory, int int_to_write);
+
+void *
+h_alloc_struct(heap_t *h, char *layout);
 
 
 /**
@@ -89,7 +108,8 @@ void *h_alloc_struct(heap_t *h, char *layout);
  *  @param  bytes the size in bytes
  *  @return the newly allocated object
  */
-void *h_alloc_data(heap_t *h, size_t bytes);
+void *
+h_alloc_data(heap_t *h, size_t bytes);
 
 
 /**
@@ -101,7 +121,8 @@ void *h_alloc_data(heap_t *h, size_t bytes);
  *  @param  h the heap
  *  @return the number of bytes collected
  */
-size_t h_gc(heap_t *h);
+size_t 
+h_gc(heap_t *h);
 
 
 /**
@@ -116,7 +137,8 @@ size_t h_gc(heap_t *h);
  *          considered unsafe pointers
  *  @return the number of bytes collected
  */
-size_t h_gc_dbg(heap_t *h, bool unsafe_stack);
+size_t 
+h_gc_dbg(heap_t *h, bool unsafe_stack);
 
 
 /**
@@ -125,7 +147,8 @@ size_t h_gc_dbg(heap_t *h, bool unsafe_stack);
  *  @param  h the heap
  *  @return the available free memory.
  */
-size_t h_avail(heap_t *h);
+size_t 
+h_avail(heap_t *h);
 
 
 /**
@@ -138,6 +161,17 @@ size_t h_avail(heap_t *h);
  *  @param  h the heap
  *  @return the bytes currently in use by user structures.
  */
-size_t h_used(heap_t *h);
+size_t 
+h_used(heap_t *h);
+
+/**
+ *  @brief Return the byte  size of the heap as an int.
+ *  
+ *  @param h the heap
+ *  @return the byte size of the heap.
+ */
+
+size_t 
+h_size(heap_t *h);
 
 #endif
