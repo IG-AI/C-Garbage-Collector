@@ -9,6 +9,8 @@
 #define _XOPEN_SOURCE 500
 extern char *strdup(const char *s);
 
+#define BASE10 10
+
 #define PTR    '*'
 #define INT    'i'
 #define CHAR   'c'
@@ -137,6 +139,96 @@ set_type_bits(void *header_ptr, internal_ht type)
 
 
 /*============================================================================
+ *                             BIT VECTOR FUNCTIONS
+ *===========================================================================*/
+#define BV_STOP   0UL
+#define BV_CHAR   1UL
+#define BV_INT    2UL
+#define BV_PTR    3UL
+#define BV_DOUBLE 10UL
+
+#define BV_MAX_BITS 60
+
+#define BV_SMALL 2
+#define BV_LARGE 4
+
+size_t
+get_size_of_bit_type(unsigned long bits)
+{
+  if(bits == BV_CHAR) return CHAR_SIZE;
+  else if(bits == BV_INT) return INT_SIZE;
+  else if(bits == BV_PTR) return PTR_SIZE;
+  else if(bits == BV_STOP) return 0;
+  else return -1;
+}
+
+size_t
+get_bits_needed(char c)
+{
+  if(c == LONG || c == DOUBLE) return BV_LARGE;
+  else return BV_SMALL;
+}
+
+unsigned long
+get_bit_mask(char c)
+{
+  if      (c == PTR)                  return BV_PTR;
+  else if (c == INT || c == FLOAT)    return BV_INT;
+  else if (c == CHAR)                 return BV_CHAR;
+  else if (c == LONG || c == DOUBLE)  return BV_DOUBLE;
+  else                                return BV_STOP;
+}
+
+
+void *
+bit_vector_create(char *format_str)
+{
+  if(format_str == NULL) return NULL;
+
+  size_t available_bits = BV_MAX_BITS;
+  unsigned long bit_vector = 0UL;
+  unsigned long bit_mask = 0UL;
+  char *current_ptr = format_str;
+
+  
+  while(*current_ptr != '\0')
+    {      
+      int num = 1;
+      if(isdigit(*current_ptr))
+        {
+            char *after_num;
+            num = strtol(current_ptr, &after_num, BASE10);
+            current_ptr = after_num;
+        }
+      
+      char current = *current_ptr;
+      if(current == '\0')
+        {
+          current = 'c';
+          --current_ptr;
+        }
+
+      
+      bit_mask = get_bit_mask(current);
+      size_t bits_needed = get_bits_needed(current);
+      
+      for(int i = 0; i < num; ++i)
+        {          
+          available_bits -= bits_needed;
+          if(available_bits <= 0) return NULL;
+          bit_vector = bit_vector << bits_needed;
+          bit_vector |= bit_mask;
+        }
+
+      ++current_ptr;
+      
+    }
+
+  bit_vector = bit_vector << (2 + available_bits);
+  return (void *) (bit_vector << 2);
+}
+
+/*============================================================================
  *                             CREATION FUNCTIONS
  *===========================================================================*/
 
@@ -173,9 +265,19 @@ create_struct_header(char *form_str, void *ptr)
   if (form_str == NULL || ptr == NULL) return NULL;
   if (get_struct_size(form_str) == INVALID) return NULL;
 
+  void *bit_vector = bit_vector_create(form_str);
   char **ptr_to_header = (char **) ptr;
-  *ptr_to_header = str_duplicate(form_str);
-  set_type_bits(ptr_to_header, I_HT_FORMAT_STR);
+
+  if(bit_vector != NULL)
+    {
+      *ptr_to_header = bit_vector;
+      set_type_bits(ptr_to_header, I_HT_BIT_VECTOR);
+    }
+  else
+    {
+      *ptr_to_header = str_duplicate(form_str);
+      set_type_bits(ptr_to_header, I_HT_FORMAT_STR);
+    }
   return data_from_header(ptr);
 }
 
@@ -233,8 +335,6 @@ get_data_size(size_t bytes)
       return bytes + HEADER_SIZE;
     }
 }
-
-#define BASE10 10
 
 size_t
 get_struct_size(char *form_str)
@@ -297,6 +397,23 @@ get_format_str_size(void *structure)
 }
 
 size_t
+get_bit_vector_size(void *structure)
+{
+  unsigned long bit_vector = *(unsigned long *) header_from_data(structure);
+  unsigned long current_type;
+  size_t size = 0;
+  
+  do
+    {
+      current_type = bit_vector >> 62;
+      size += get_size_of_bit_type(current_type);
+      bit_vector = bit_vector << 2;
+    }
+  while(current_type != BV_STOP);
+
+  return size + HEADER_SIZE;
+}
+size_t
 get_existing_size(void *ptr)
 {
   if(ptr == NULL) return INVALID;
@@ -305,7 +422,7 @@ get_existing_size(void *ptr)
   if(type == I_HT_FORWARDING_ADDR) return INVALID;
   else if(type == I_HT_RAW_DATA) return get_raw_data_size(ptr);
   else if(type == I_HT_FORMAT_STR) return get_format_str_size(ptr);
-  assert(false && "Bit vector not yet implemented");
+  else if(type == I_HT_BIT_VECTOR) return get_bit_vector_size(ptr);
   return INVALID;
 }
 
@@ -315,7 +432,7 @@ get_existing_size(void *ptr)
  *===========================================================================*/
 
 int
-number_of_pointers_in_format_str(char *str)
+get_number_of_pointers_in_format_str(char *str)
 {
   int result = 0;
   int multiplier = 0;
@@ -341,13 +458,39 @@ number_of_pointers_in_format_str(char *str)
 }
 
 int
+get_number_of_pointers_in_bit_vector(void *header)
+{
+  unsigned long bit_vector = (unsigned long) header;
+  int count = 0;
+  unsigned long current_type;
+  
+  do
+    {
+      current_type = bit_vector >> 62;
+      if (current_type == BV_PTR) ++count;
+      bit_vector = bit_vector << 2;
+    }
+  while(current_type != BV_STOP);
+
+  return count;
+}
+
+int
 get_number_of_pointers_in_struct(void *structure)
 {
   if(structure == NULL || get_header_type(structure) != STRUCT_REP) return -1;
 
-  void *format_str_ptr = header_from_data(structure);
-  char *format_str = *((char **) format_str_ptr);
-  return 1 + number_of_pointers_in_format_str(format_str);
+  void **header_ptr = header_from_data(structure);
+
+  if(get_internal_ht(structure) == I_HT_BIT_VECTOR)
+    {
+      return get_number_of_pointers_in_bit_vector(*header_ptr);
+    }
+  else
+    {
+      char *format_str = *((char **) header_ptr);
+      return 1 + get_number_of_pointers_in_format_str(format_str);
+    }
 }
 
 /** Moves a pointer forward by @p ammount */
@@ -390,13 +533,9 @@ get_pointers_from_num(char **ptr_to_str
 }
 
 bool
-get_pointers_in_struct(void *structure, void **array[])
+get_pointers_from_format_string(void *structure, void **array[])
 {
-  if(structure == NULL || array == NULL) return false;
-  if(get_header_type(structure) != STRUCT_REP) return false;
-  assert(get_number_of_pointers_in_struct(structure) > 0);
-  
-  array[0] = header_from_data(structure); // Implement for bit-vector
+  array[0] = header_from_data(structure); 
   char *current_ptr = *array[0];
   size_t array_index = 1;
   void *current_data = structure;
@@ -420,8 +559,51 @@ get_pointers_in_struct(void *structure, void **array[])
         }
      }
 
-  
   return true;
+}
+
+bool
+get_pointers_from_bit_vector(void *structure, void **array[])
+{
+  unsigned long bit_vector = *(unsigned long *) header_from_data(structure);
+  size_t array_index = 0;
+  void *current_data = structure;
+  unsigned long current_type;
+  bool success = false;
+  
+  do
+    {
+      current_type = bit_vector >> 62;
+      if (current_type == BV_PTR)
+        {
+          array[array_index] = current_data;
+          ++array_index;
+          success = true;
+        }
+      bit_vector = bit_vector << 2;
+      size_t offset = get_size_of_bit_type(current_type);
+      current_data = move_ptr_forward(current_data, offset);
+    }
+  while(current_type != BV_STOP);
+
+  return success;
+}
+
+bool
+get_pointers_in_struct(void *structure, void **array[])
+{
+  if(structure == NULL || array == NULL) return false;
+  if(get_header_type(structure) != STRUCT_REP) return false;
+  if(get_number_of_pointers_in_struct(structure) < 1) return false;
+
+  if(get_internal_ht(structure) == I_HT_BIT_VECTOR)
+    {
+      return get_pointers_from_bit_vector(structure, array);
+    }
+  else
+    {
+      return get_pointers_from_format_string(structure, array);
+    }
 }
 
 
