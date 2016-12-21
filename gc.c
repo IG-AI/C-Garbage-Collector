@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
+
+#include "header.h"
+#include "stack_search.h"
+
 
 #include "gc.h"
 
@@ -111,6 +116,12 @@ set_page_bump(page_t *page, int bytes)
   page->bump += bytes;
 }
 
+
+void
+reset_page(page_t * page)
+{
+  page->bump = page->start;
+}
 
 int
 get_page_size(page_t *page)
@@ -251,21 +262,54 @@ h_alloc(heap_t * h, size_t bytes)
 void *
 h_alloc_struct(heap_t * h, char * layout)
 {
+  assert(*layout != '\0');
+  assert(layout != NULL);
   size_t size = get_struct_size(layout);
-  //size_t bytes = de_code(layout);
+  assert(size > 0);
   void * ptr = h_alloc(h, size);
   return create_struct_header(layout, ptr);
 }
 
 
 void *
-h_alloc_data(heap_t *h, size_t bytes)
+h_alloc_data(heap_t * h, size_t bytes)
 {
+  assert(bytes > 0);
   size_t size = get_data_size(bytes);
+  assert(size <= 2048);
   void * ptr = h_alloc(h, size);
   return create_data_header(bytes, ptr);
 }
-/*
+
+
+void
+h_alloc_raw(heap_t * h, void * ptr_to_data)
+{
+  assert(ptr_to_data != NULL);
+  size_t data_size = get_existing_size(ptr_to_data);
+  int page_nr = 0;
+  int number_of_pages = h->number_of_pages - 1;
+  int page_avail = get_page_avail(h->pages[page_nr]);
+
+  while( (int)data_size > page_avail){
+    if(page_nr == number_of_pages - 1){
+      return;
+    }
+    page_nr += 1;
+    page_avail = get_page_avail(h->pages[page_nr]);
+   }
+
+  void *page_bump = get_page_bump(h->pages[page_nr]);
+  void * ptr_to_write_to = page_bump;
+  set_page_bump(h->pages[page_nr], data_size);
+  memcpy(ptr_to_write_to, ptr_to_data, data_size);
+  
+  return; 
+    
+
+}
+
+
 //Puts all the pointer found on stack into an array
 void pointers_to_array(heap_t *h, void *array[])
 {
@@ -288,27 +332,46 @@ void pointers_to_array(heap_t *h, void *array[])
 size_t 
 h_gc(heap_t *h)
 {
-  int collected = 0;
-  page_t *pages = h->pages; 
-  page_t swap = pages[h->number_of_pages - 1];
-  int max_num_of_ptrs = h->number_of_pages * (PAGE_SIZE / SMALLEST_ALLOC_SIZE);
-  void * collection[max_num_of_ptrs];
+  size_t used_before_gc = h_used(h);
+  //page_t * pages = h->pages; 
+  page_t * swap = h->pages[h->number_of_pages - 1];
+  int max_num_ptrs_in_page = (PAGE_SIZE / SMALLEST_ALLOC_SIZE);
+  int max_num_of_ptrs_in_heap = h->number_of_pages * max_num_ptrs_in_page;
+  void * collection[max_num_of_ptrs_in_heap];
   pointers_to_array(h, collection);
-  for(int page = 0; page < h->number_of_pages -1; ++page)
+  for(size_t page = 0; page < h->number_of_pages -1; ++page)
     {
-      for(int i =0; i< max_num_of_ptrs; ++i)
+      int swap_array_len = 0;
+      void * swap_array[max_num_ptrs_in_page];
+      for(int i = 0; i < max_num_of_ptrs_in_heap; ++i)
         {
-          if (get_ptr_page(collection[i], h) == page)
+          int c = 0;
+          if (get_ptr_page(collection[i], h) == (int) page)
             {
               //Flytta data till pagen swap
+              void * src_ptr = (void *)( (unsigned long) collection[i] - sizeof(void *) );
+              void * dest_ptr = swap->bump;
+              size_t data_size = get_existing_size(collection[i]);
+              swap->bump += data_size;
+              void * pointer_to_swap_obj = memcpy(dest_ptr, src_ptr, data_size);
+              swap_array[c] = pointer_to_swap_obj;
+              ++c;
             }
+          swap_array_len = c;
         }
+      reset_page(h->pages[page]);
+      for(int j = 0; j <= swap_array_len; ++j){
+        h_alloc_raw(h, swap_array[j]);
+      }
+      reset_page(swap);
       //reset the page page = flytta tillbaka bump-ptr
       //flytta tillbaka allt från swap till page (vår allokering på pagen)
     }
-  return 0;
+  size_t used_after_gc = h_used(h);
+  size_t collected = used_before_gc - used_after_gc;
+  return collected;
 }
-*/
+
 
 //??
 size_t 

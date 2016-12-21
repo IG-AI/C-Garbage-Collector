@@ -9,7 +9,7 @@ TESTFLAGS =$(STD) -Wall -g -m64 -lcunit #-fprofile-arcs -ftest-coverage -coverag
 
 all: gc
 
-gc: gc.o stack_search.o
+gc: gc.o stack_search.o header.o
 	$(CC) $(LINKFLAGS) $@ $^
 
 gc.o: gc.c gc.h
@@ -18,8 +18,8 @@ gc.o: gc.c gc.h
 header.o: header.c header.h
 	@$(CC) $(COMPFLAGS) header.c
 
-stack_search.o: stack_search.c
-	$(CC) $(FLAGS) stack_search.c -o $@
+stack_search.o: stack_search.c stack_search.h
+	$(CC) $(COMPFLAGS) stack_search.c -o $@
 
 
 
@@ -31,7 +31,7 @@ test: test_gc test_header test_stack_search
 test_gc: gc_test
 	./gc_test
 
-gc_test: gc_test.c gc.o
+gc_test: gc_test.c gc.o header.o stack_search.o 
 	@$(CC)  $^ -o $@ $(TESTFLAGS)
 
 memtest_gc: gc_test

@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "gc.h"
 #include <time.h>
+
+#include "gc.h"
+#include "header.h"
 
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
@@ -127,10 +129,21 @@ test_h_size()
   time_t t;
   srand( (unsigned) time(&t));
 
+  int test_size = 2048;
+  int alloc_size = 2040;
+  heap_t *test_h_size_heap = h_init(test_size, true, 1);
+  h_alloc_data(test_h_size_heap, alloc_size);
+    
+  CU_ASSERT(h_avail(test_h_size_heap) == ( (size_t) (test_size) - get_data_size(alloc_size) ) );
+  CU_ASSERT(h_used(test_h_size_heap) == ( (size_t) get_data_size(alloc_size) ) );
+  CU_ASSERT(h_size(test_h_size_heap) == ( (size_t) test_size) );
+  h_delete(test_h_size_heap);  
+
+  
   for (int i = 1; i <= 42; i++) {
 
     int test_size = 2048;
-    int rand_nr = rand() % 2000;
+    int rand_nr = (rand() % 2000) + 1;
     heap_t *test_h_size_heap = h_init(test_size, true, 1);
     //printf("rand: %d\n",rand_nr);
     //printf("\nUsed: %lu\n", h_used(test_h_size_heap));
@@ -139,8 +152,8 @@ test_h_size()
     //printf("\nUsed after: %lu\n", h_used(test_h_size_heap));
     //printf("\nAvail after: %lu\n", h_avail(test_h_size_heap));
     
-    CU_ASSERT(h_avail(test_h_size_heap) == ( (size_t) (test_size) - rand_nr) );
-    CU_ASSERT(h_used(test_h_size_heap) == ( (size_t) rand_nr) );
+    CU_ASSERT(h_avail(test_h_size_heap) == ( (size_t) (test_size) - get_data_size(rand_nr) ) );
+    CU_ASSERT(h_used(test_h_size_heap) == ( (size_t) get_data_size(rand_nr) ) );
     CU_ASSERT(h_size(test_h_size_heap) == ( (size_t) test_size) );
     h_delete(test_h_size_heap);  
 
