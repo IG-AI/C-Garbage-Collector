@@ -57,6 +57,15 @@ size_for(char c)
   else                  return INVALID;
 }
 
+/**
+ *  @brief Duplicate a string
+ *
+ *  The duplicate is currently allocated on the regular heap but will be changed
+ *  to be allocated on our own heap in gc.c
+ *
+ *  @param  str the string to duplicate
+ *  @return a copy of @p str allocated on the heap
+ */
 char *
 str_duplicate(char *str)
 {
@@ -67,18 +76,36 @@ str_duplicate(char *str)
   return strdup(str);
 }
 
+/**
+ *  @brief Extract pointer to a header from a pointer to data.
+ *
+ *  @param  data pointer to the data to get the header from
+ *  @return pointer to the header belonging to @p data
+ */
 void *
-header_from_data(void *ptr)
+header_from_data(void *data)
 {
-  return (char *) ptr - HEADER_SIZE;
+  return (char *) data - HEADER_SIZE;
 }
 
+/**
+ *  @brief Extract pointer to data from a pointer to a header.
+ *
+ *  @param  header pointer to the header to get the data from
+ *  @return pointer to the data belonging to @p header
+ */
 void *
-data_from_header(void *ptr)
+data_from_header(void *header)
 {
-  return (char *) ptr + HEADER_SIZE;
+  return (char *) header + HEADER_SIZE;
 }
 
+/**
+ *  @brief Gives a copy of a header with type bits cleared.
+ *
+ *  @param  header the header to clear type bits from
+ *  @return a copy of @p header with type bits set to 00
+ */
 void *
 clear_type_bits(void *header)
 {
@@ -86,6 +113,12 @@ clear_type_bits(void *header)
   return (void *) ((header_u >> 2UL) << 2UL); // CROSS_PLATFORM
 }
 
+/**
+ *  @brief Set the type bits of a header to a specific type
+ *
+ *  @param  header_ptr pointer to the header to set type bits on
+ *  @param  type the type to set to @p header_ptr
+ */
 void
 set_type_bits(void *header_ptr, internal_ht type)
 {
@@ -148,6 +181,16 @@ create_struct_header(char *form_str, void *ptr)
 /*============================================================================
  *                             TYPE FUNCTIONS
  *===========================================================================*/
+/**
+ *  @brief Get the internal type of a header
+ *
+ *  The internal types differ from the external types by having both FORMAT_STR
+ *  and BIT_VECTOR as available types. These are known together as STRUCT_REP
+ *  externally
+ *
+ *  @param  data the data to get header type of
+ *  @return the header type of the header belonging to @p data
+ */
 internal_ht
 get_internal_ht(void *data)
 {
@@ -231,6 +274,7 @@ get_struct_size(char *form_str)
   return result + HEADER_SIZE;
 }
 
+/** Get the size of an existing data of type RAW_DATA */
 size_t
 get_raw_data_size(void *data)
 {
@@ -241,6 +285,7 @@ get_raw_data_size(void *data)
   return get_data_size(size);
 }
 
+/** Get the size of an existing data of type I_HT_FORMAT_STR */
 size_t
 get_format_str_size(void *structure)
 {
@@ -269,7 +314,7 @@ get_existing_size(void *ptr)
  *===========================================================================*/
 
 int
-number_of_pointers_in_str(char *str)
+number_of_pointers_in_format_str(char *str)
 {
   int result = 0;
   int multiplier = 0;
@@ -301,9 +346,10 @@ get_number_of_pointers_in_struct(void *structure)
 
   void *format_str_ptr = header_from_data(structure);
   char *format_str = *((char **) format_str_ptr);
-  return 1 + number_of_pointers_in_str(format_str);
+  return 1 + number_of_pointers_in_format_str(format_str);
 }
 
+/** Moves a pointer forward by @p ammount */
 void *
 move_ptr_forward(void *ptr, size_t ammount)
 {
