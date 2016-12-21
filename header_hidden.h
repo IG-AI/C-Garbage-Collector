@@ -1,6 +1,8 @@
 #ifndef __header_hidden__
 #define __header_hidden__
 
+int
+additional_if_format_str(void *data);
 
 #define HEADER_SIZE 8
 #define INVALID 0

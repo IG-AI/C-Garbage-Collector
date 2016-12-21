@@ -33,6 +33,7 @@ typedef enum internal_ht internal_ht;
 #define B_RAW_DATA 2UL
 #define B_BIT_VECTOR 3UL
 
+
 /*============================================================================
  *                             HELPER FUNCTIONS
  *===========================================================================*/
@@ -462,4 +463,14 @@ get_forwarding_address(void *data)
 
   void **header_ptr = header_from_data(data);
   return clear_type_bits(*header_ptr);
+}
+
+/*============================================================================
+ *                             TEST HELPING FUNCTIONS
+ *===========================================================================*/
+int
+additional_if_format_str(void *data)
+{
+  if(get_internal_ht(data) == I_HT_FORMAT_STR) return 1;
+  else return 0;
 }

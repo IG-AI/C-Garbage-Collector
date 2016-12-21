@@ -408,6 +408,15 @@ test_get_header_type_struct()
 }
 
 void
+test_get_header_type_format_str()
+{
+  void *ptr = calloc(1, get_struct_size("244*2i") );
+  void *result = create_struct_header("244*2i", ptr);
+  CU_ASSERT(STRUCT_REP == get_header_type(result));
+  free(ptr);
+}
+
+void
 test_get_header_type_forward()
 {
   void *ptr = calloc(1, get_struct_size("*") );
@@ -460,7 +469,7 @@ test_get_number_pointers_struct_no_ptr()
   void *ptr = calloc(1, get_struct_size("i"));
   void *data = create_struct_header("i", ptr);
   int result = get_number_of_pointers_in_struct(data);
-  CU_ASSERT(result == 1);
+  CU_ASSERT(result == 0 + additional_if_format_str(data));
   free(ptr);
 }
 
@@ -470,7 +479,7 @@ test_get_number_pointers_struct_one_ptr()
   void *ptr = calloc(1, get_struct_size("*"));
   void *data = create_struct_header("*", ptr);
   int result = get_number_of_pointers_in_struct(data);
-  CU_ASSERT(result == 2);
+  CU_ASSERT(result == 1 + additional_if_format_str(data));
   free(ptr);
 }
 
@@ -480,7 +489,7 @@ test_get_number_pointers_struct_multi_ptr()
   void *ptr = calloc(1, get_struct_size("***"));
   void *data = create_struct_header("***", ptr);
   int result = get_number_of_pointers_in_struct(data);
-  CU_ASSERT(result == 4);
+  CU_ASSERT(result == 3 + additional_if_format_str(data));
   free(ptr);
 }
 
@@ -491,17 +500,17 @@ test_get_number_pointers_struct_multi_ptr_nr()
   void *ptr = calloc(1, get_struct_size("3*"));
   void *data = create_struct_header("3*", ptr);
   int result = get_number_of_pointers_in_struct(data);
-  CU_ASSERT(result == 4);
+  CU_ASSERT(result == 3 + additional_if_format_str(data));
   free(ptr);
 }
 
 void
 test_get_number_pointers_struct_mixed_ptr()
 {
-  void *ptr = calloc(1, get_struct_size("*i3*"));
-  void *data = create_struct_header("*i3*", ptr);
+  void *ptr = calloc(1, get_struct_size("*300*i3*"));
+  void *data = create_struct_header("*300*i3*", ptr);
   int result = get_number_of_pointers_in_struct(data);
-  CU_ASSERT(result == 5);
+  CU_ASSERT(result == 304 + additional_if_format_str(data));
   free(ptr);
 }
 
@@ -560,9 +569,7 @@ test_get_pointers_struct_no_ptr()
   void *ptr = calloc(1, get_struct_size("i"));
   void *data = create_struct_header("i", ptr);
   bool result = get_pointers_in_struct(data, array);
-  CU_ASSERT_TRUE(result);
-  CU_ASSERT(array[0] != NULL);
-  CU_ASSERT(strcmp((char *) array[0], "i")); // Change with Bitvector
+  CU_ASSERT_FALSE(result);
   free(ptr);
 }
 
@@ -578,11 +585,7 @@ test_get_pointers_struct_one_ptr()
   
   bool result = get_pointers_in_struct(data, array);
   CU_ASSERT_TRUE(result);
-  for(int i = 0; i < size; ++i)
-    {
-      CU_ASSERT(array[i] != NULL);
-    }
-  CU_ASSERT(*(unsigned long*)array[1] == 1UL);
+  CU_ASSERT(*(unsigned long*)array[size - 1] == 1UL);
   free(ptr);
 }
 
@@ -601,10 +604,9 @@ test_get_pointers_struct_multi_ptr()
   
   bool result = get_pointers_in_struct(data, array);
   CU_ASSERT_TRUE(result);
-  CU_ASSERT(array[0] != NULL);
   for(unsigned long i = 1; i < 4; ++i)
     {
-      CU_ASSERT(*(unsigned long *)array[i] == i);
+      CU_ASSERT(*(unsigned long *)array[i-1] == i);
     }
   free(ptr);
 }
@@ -625,10 +627,9 @@ test_get_pointers_struct_multi_ptr_nr()
   
   bool result = get_pointers_in_struct(data, array);
   CU_ASSERT_TRUE(result);
-  CU_ASSERT(array[0] != NULL);
   for(unsigned long i = 1; i < 4; ++i)
     {
-      CU_ASSERT(*(unsigned long *)array[i] == i);
+      CU_ASSERT(*(unsigned long *)array[i-1] == i);
     }
   free(ptr);
 }
@@ -638,6 +639,24 @@ test_get_pointers_struct_mixed_ptr()
 {
   void *ptr = calloc(1, get_struct_size("*i3*"));
   void *data = create_struct_header("*i3*", ptr);
+  int size = get_number_of_pointers_in_struct(data);
+  void **array[size];
+  for(int i = 0; i < size; ++i) array[i] = NULL;
+  
+  bool result = get_pointers_in_struct(data, array);
+  CU_ASSERT_TRUE(result);
+  for(int i = 0; i < size; ++i)
+    {
+      CU_ASSERT(array[i] != NULL);
+    }
+  free(ptr);
+}
+
+void
+test_get_pointers_struct_big_format_str()
+{
+  void *ptr = calloc(1, get_struct_size("*320i3*"));
+  void *data = create_struct_header("*320i3*", ptr);
   int size = get_number_of_pointers_in_struct(data);
   void **array[size];
   for(int i = 0; i < size; ++i) array[i] = NULL;
@@ -1003,6 +1022,22 @@ test_forward_header_struct()
 }
 
 void
+test_forward_header_struct_format_str()
+{
+  void *old_ptr = calloc(1, get_struct_size("258*d2"));
+  void *data = create_struct_header("258*d2", old_ptr);
+  void *new_ptr = calloc(1, get_struct_size("258*d2"));
+  void *new_data = (void *)((unsigned long) new_ptr + 1);
+
+  bool result = forward_header(data, new_data);
+  CU_ASSERT_TRUE(result);
+  CU_ASSERT(get_header_type(data) == FORWARDING_ADDR);
+  free(old_ptr);
+  free(new_ptr);
+}
+
+
+void
 test_forward_header_raw_data()
 {
   void *old_ptr = calloc(1, get_data_size(8));
@@ -1331,8 +1366,11 @@ main(void)
                                , "Data header"
                                , test_get_header_type_data) )
        || (NULL == CU_add_test(suite_get_header_type
-                               , "Struct header"
+                               , "Bit vector header"
                                , test_get_header_type_struct) )
+       || (NULL == CU_add_test(suite_get_header_type
+                               , "Format string header"
+                               , test_get_header_type_format_str) )
        || (NULL == CU_add_test(suite_get_header_type
                                , "Forwarded header"
                                , test_get_header_type_forward) )
@@ -1403,8 +1441,8 @@ main(void)
                                , "Raw data"
                                , test_get_pointers_raw_data) )
        || (NULL == CU_add_test(suite_get_ptrs
-           , "Forwarding"
-           , test_get_pointers_forwarding_data) )
+                               , "Forwarding"
+                               , test_get_pointers_forwarding_data) )
        || (NULL == CU_add_test(suite_get_ptrs
                                , "No ptrs"
                                , test_get_pointers_struct_no_ptr) )
@@ -1420,7 +1458,9 @@ main(void)
        || (NULL == CU_add_test(suite_get_ptrs
                                , "Mixed ptrs"
                                , test_get_pointers_struct_mixed_ptr) )
-       
+       || (NULL == CU_add_test(suite_get_ptrs
+                               , "Big format string"
+                               , test_get_pointers_struct_big_format_str) )
        )
     {
       CU_cleanup_registry();
@@ -1558,8 +1598,11 @@ main(void)
                                , "Raw data"
                                , test_forward_header_raw_data) )
        || (NULL == CU_add_test(suite_forward_header
-                               , "Struct"
+                               , "Bit-vector"
                                , test_forward_header_struct) )
+       || (NULL == CU_add_test(suite_forward_header
+                               , "Format string"
+                               , test_forward_header_struct_format_str) )
     )
     {
       CU_cleanup_registry();
