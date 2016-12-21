@@ -19,7 +19,7 @@ header.o: header.c header.h
 	@$(CC) $(COMPFLAGS) header.c
 
 stack_search.o: stack_search.c
-	$(CC) $(FLAGS) stack_search.c -o $@
+	$(CC) $(COMPFLAGS) stack_search.c -o $@
 
 
 
@@ -31,7 +31,7 @@ test: test_gc test_header test_stack_search
 test_gc: gc_test
 	./gc_test
 
-gc_test: gc_test.c gc.o
+gc_test: gc_test.c gc.o stack_search.o
 	@$(CC)  $^ -o $@ $(TESTFLAGS)
 
 memtest_gc: gc_test
