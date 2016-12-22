@@ -166,16 +166,33 @@ test_h_size()
 void
 test_pointer_to_array()
 {
-  int test_size = 6144;
+  int test_size = 2048*3;
   heap_t *h = h_init(test_size, true, 1);
+  printf("\nNr pages after init: %d\n", h->number_of_pages);
   int max_num_ptrs_in_page = (2048 / 16);
   int max_num_of_ptrs_in_heap = h->number_of_pages * max_num_ptrs_in_page;
-  /* void * ptr1 = h_alloc_struct(h, "i");
+  printf("\nNr pages after calc: %d\n", h->number_of_pages);
+  printf("%p\n%p\n", h->pages[0]->start, (h->pages[0]->start + h->pages[0]->size) ); 
+  printf("\nMem: %p\n", h->memory);
+  printf("\nMem+siz: %p\n", h->memory + h->size);
+  void * ptr1 = h_alloc_struct(h, "i");
   write_int_to_heap(ptr1, 6);
   void * ptr2 = h_alloc_struct(h, "i");
-  write_int_to_heap(ptr2, 9); */
+  write_int_to_heap(ptr2, 9); 
+
+  printf("\nNr pages after writes: %d\n", h->number_of_pages);
+
+  printf("\nptr1: %d\n", *(int *)ptr1);
+  printf("\nptr2: %d\n", *(int *)ptr2);
+
+  printf("\nptr1: %p\n", ptr1);
+  printf("\nptr2: %p\n", ptr2);
+  
+
   void ** collection[max_num_of_ptrs_in_heap];
+  printf("\nNr pages before ptr array: %d\n", h->number_of_pages);
   pointers_to_array(h, collection);
+  printf("\nNr pages after ptr array: %d\n", h->number_of_pages);
   CU_ASSERT(collection[0] != NULL );
   // CU_ASSERT(**(int **) collection[0] == 6 );
   h_delete(h); 
@@ -214,10 +231,10 @@ main (int argc, char *argv[])
   suite1 = CU_add_suite("Heap Test", NULL, NULL);
 
   if (
-      (CU_add_test(suite1, "test_h_init()", test_h_init) == NULL) ||
-      (CU_add_test(suite1, "test_page()", test_pages) == NULL) ||
-      (CU_add_test(suite1, "test_h_alloc_struct/data()", test_h_alloc) == NULL) ||
-      (CU_add_test(suite1, "test_h_size/avail/used()", test_h_size) == NULL) ||
+      //(CU_add_test(suite1, "test_h_init()", test_h_init) == NULL) ||
+      // (CU_add_test(suite1, "test_page()", test_pages) == NULL) ||
+      //(CU_add_test(suite1, "test_h_alloc_struct/data()", test_h_alloc) == NULL) ||
+      //(CU_add_test(suite1, "test_h_size/avail/used()", test_h_size) == NULL) ||
       (CU_add_test(suite1, "test_pointer_to_array)", test_pointer_to_array) == NULL)// ||
       //(CU_add_test(suite1, "test_h_gc)", test_h_gc) == NULL) 
       )

@@ -32,7 +32,7 @@ test_gc: gc_test
 	./gc_test
 
 gc_test: gc_test.c gc.o header.o stack_search.o 
-	@$(CC)  $^ -o $@ $(TESTFLAGS)
+	@$(CC)  $^ -o $@ $(TESTFLAGS) #_POSIX_C_SOURCE 200809L
 
 memtest_gc: gc_test
 	valgrind -v --leak-check=full ./gc_test
