@@ -36,6 +36,9 @@ typedef struct alloc_map alloc_map_t;
  *         divided into.
  *  @param block_size the size in bytes of the memory block the map is
  *         going ot represent
+ *
+ *  @return pointer to the newly created allocation map.
+ *  
  */
 alloc_map_t *alloc_map_create(void *start_addr, size_t word_size, size_t block_size);
 
@@ -43,17 +46,22 @@ alloc_map_t *alloc_map_create(void *start_addr, size_t word_size, size_t block_s
  *  @brief Looks up if a memory address is pointing to the start of an object
  *         allocated on the gc-heap.
  *
- *  @param ptr pointer to the adress to look up.         
+ *  @param alloc_map pointer to the alloc map.
+ *  @param ptr pointer to the adress to look up.
+ *
+ *  @return A bool representing the bit of the supplied ptr.
  */
-bool alloc_map_ptr_is_used(void *ptr);
+bool alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr);
 
 /**
- *  @brief Flags an address as used.
+ *  @brief Flags an address.
  *
+ *  @param alloc_map pointer to the alloc map  
  *  @param ptr the pointer to set.
  *  @param state the value to set.
+ *
  */  
-bool alloc_map_set_ptr(void *ptr, bool state);
+void alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state);
 
 
 /**
