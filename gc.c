@@ -310,18 +310,29 @@ h_alloc_raw(heap_t * h, void * ptr_to_data)
 }
 
 
-//Puts all the pointer found on stack into an array
-void pointers_to_array(heap_t *h, void *array[])
+/**
+ *  @brief Puts all pointer found on stack into an array
+ *
+ *  @param  h the heap
+ *  @param  array the array to put pointer in
+ */
+void pointers_to_array(heap_t *h, void **array[])
 {
   void * stack_top = __builtin_frame_address(0);
   void *stack_bottom = (void *)*environ;
   void * heap_start = h->memory;
   void * heap_end = (h->memory + h->size);
-  void *pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
+  void **pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
+  printf("\nPointer: %p\n", *pointer);
+  printf("\nInt: %d\n", *(int*)*pointer);
+
   int i = 0;
   while (pointer != NULL)
     {
       array[i] = pointer;
+      printf("\nArray[%d]: %p\n", i, *array[i]);
+      printf("\nInt: %d\n", *(int*)*pointer);
+
       i += 1;
       pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
     }
@@ -337,7 +348,7 @@ h_gc(heap_t *h)
   page_t * swap = h->pages[h->number_of_pages - 1];
   int max_num_ptrs_in_page = (PAGE_SIZE / SMALLEST_ALLOC_SIZE);
   int max_num_of_ptrs_in_heap = h->number_of_pages * max_num_ptrs_in_page;
-  void * collection[max_num_of_ptrs_in_heap];
+  void ** collection[max_num_of_ptrs_in_heap];
   pointers_to_array(h, collection);
   for(size_t page = 0; page < h->number_of_pages -1; ++page)
     {
@@ -346,12 +357,12 @@ h_gc(heap_t *h)
       for(int i = 0; i < max_num_of_ptrs_in_heap; ++i)
         {
           int c = 0;
-          if (get_ptr_page(collection[i], h) == (int) page)
+          if (get_ptr_page(*collection[i], h) == (int) page)
             {
               //Flytta data till pagen swap
-              void * src_ptr = (void *)( (unsigned long) collection[i] - sizeof(void *) );
+              void * src_ptr = (void *)( (unsigned long) *collection[i] - sizeof(void *) );
               void * dest_ptr = swap->bump;
-              size_t data_size = get_existing_size(collection[i]);
+              size_t data_size = get_existing_size(*collection[i]);
               swap->bump += data_size;
               void * pointer_to_swap_obj = memcpy(dest_ptr, src_ptr, data_size);
               swap_array[c] = pointer_to_swap_obj;

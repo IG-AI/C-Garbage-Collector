@@ -112,6 +112,12 @@ void *
 h_alloc_data(heap_t *h, size_t bytes);
 
 
+
+
+
+void 
+pointers_to_array(heap_t *h, void **array[]);
+
 /**
  *  @brief Manually trigger garbage collection.
  *
@@ -121,6 +127,8 @@ h_alloc_data(heap_t *h, size_t bytes);
  *  @param  h the heap
  *  @return the number of bytes collected
  */
+
+
 size_t 
 h_gc(heap_t *h);
 
