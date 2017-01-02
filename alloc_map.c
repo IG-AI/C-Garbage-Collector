@@ -20,15 +20,17 @@ struct alloc_map
   uint8_t bits[];
 };
 
-static void *alloc_map_create_get_start_addr(size_t size)
+static void *
+alloc_map_create_get_start_addr(size_t size)
 {
   void *p = malloc(size);
   return p;
 }
 
-alloc_map_t *alloc_map_create(void *start_addr, size_t word_size, size_t block_size)
+alloc_map_t *
+alloc_map_create(void *start_addr, size_t word_size, size_t block_size)
 {
-  alloc_map_t *alloc_map = alloc_map_create_get_start_addr((block_size/word_size)+sizeof(size_t));
+  alloc_map_t *alloc_map = alloc_map_create_get_start_addr((block_size/word_size)+2*sizeof(size_t)+sizeof(void*));
   alloc_map->start_addr = start_addr;
   alloc_map->word_size = word_size;
   alloc_map->map_size = (block_size/word_size);
@@ -38,48 +40,53 @@ alloc_map_t *alloc_map_create(void *start_addr, size_t word_size, size_t block_s
   return alloc_map;
 }
 
-static size_t alloc_map_check_offset(alloc_map_t *alloc_map, void *ptr){
-  //printf("start-addr: %p \n", alloc_map->start_addr);
-  //printf("ptr:        %p \n", ptr);
-  //printf("start-addr: %lu \n", (size_t)alloc_map->start_addr);
-  //printf("ptr:        %lu \n", (size_t)ptr);
+static size_t 
+alloc_map_check_offset(alloc_map_t *alloc_map, void *ptr){
   size_t mem_offset = (size_t)ptr - (size_t)alloc_map->start_addr;
-  //printf("\nmem_offset: %lu\nalloc_map->map_size / alloc_map->word_size: %lu\n", mem_offset, alloc_map->map_size / alloc_map->word_size);
-  if((mem_offset % (alloc_map->word_size) != 0) || (alloc_map->map_size > (mem_offset/alloc_map->word_size)))
+  if(((mem_offset % (alloc_map->word_size)) == 0) && 
+     (alloc_map->map_size > (mem_offset/alloc_map->word_size)) &&
+     ((size_t)ptr >= (size_t)alloc_map->start_addr))
     {
       return mem_offset;
     }
   else 
     {
-      assert(false && "Memory address out of scope");
       return -1;
     }
 }
  
-bool alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr)
+bool 
+alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr)
 {
   size_t mem_offset = alloc_map_check_offset(alloc_map, ptr);
+  if(mem_offset == (size_t)-1){
+    assert(false && "Memory address out of scope");
+    return false;
+  }
   return alloc_map->bits[mem_offset / alloc_map->word_size] & On(mem_offset % alloc_map->word_size);
 }
 
 
-void alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state)
+bool
+alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state)
 {
   size_t mem_offset = alloc_map_check_offset(alloc_map, ptr);
+  if(mem_offset == (size_t)-1){
+    assert(false && "Memory address out of scope");
+    return false;
+  }
   if(state)
     {
       alloc_map->bits[mem_offset / alloc_map->word_size] |= On(mem_offset % alloc_map->word_size);
     }
   else
     {
-      alloc_map->bits[mem_offset / alloc_map->word_size] &= On(mem_offset % alloc_map->word_size);
+      alloc_map->bits[mem_offset / alloc_map->word_size] &= Off(mem_offset % alloc_map->word_size);
     }
+  return true;
 }
 
-void alloc_map_free(alloc_map_t * a)
-{
-  free(a);
-}
+
 
 
 /*  

@@ -5,7 +5,7 @@ CC =gcc
 STD =-std=c11
 LINKFLAGS =$(STD) -g -o
 COMPFLAGS =$(STD) -Wall -g -c -m64
-TESTFLAGS =$(STD) -Wall -g -m64 -lcunit #-fprofile-arcs -ftest-coverage -coverage
+TESTFLAGS =$(STD) -Wall -g -m64 -lcunit  #-fprofile-arcs -ftest-coverage -coverage
 
 all: gc
 
@@ -22,7 +22,7 @@ stack_search.o: stack_search.c stack_search.h
 	$(CC) $(COMPFLAGS) stack_search.c -o $@
 
 alloc_map.o: alloc_map.c alloc_map.h
-	$(CC) $(COMPFLAGS) alloc_map.c -o $@		
+	$(CC) $(COMPFLAGS) alloc_map.c -o $@
 
 
 
@@ -60,8 +60,11 @@ stack_search_test: stack_search.o stack_search_test.c
 test_alloc_map: alloc_map_test
 	@./alloc_map_test
 
-alloc_map_test: alloc_map.o alloc_map_test.c
-	@$(CC)  $^ -o $@ $(TESTFLAGS)
+alloc_map_test: alloc_map_during_test.o alloc_map_test.c
+	$(CC)  $^ -o $@  $(TESTFLAGS)
+
+alloc_map_during_test.o: alloc_map.c alloc_map.h
+	$(CC) $(COMPFLAGS) alloc_map.c -o $@ -DNDEBUG
 
 
 # CLEANUP

@@ -1,6 +1,8 @@
 /**
  *  @file  alloc_map.h
  *  @brief A module for creating and handling the allocation map.
+ *  Heavily based on bitmap provided by T. Wrigstad at:
+ *  https://github.com/IOOPM-UU/ioopm16/blob/master/forelasningar/fas1/f12/f12.pdf
  *
  *  @author Daniel Agstrand
  *  @author Henrik Bergendal
@@ -40,7 +42,10 @@ typedef struct alloc_map alloc_map_t;
  *  @return pointer to the newly created allocation map.
  *  
  */
-alloc_map_t *alloc_map_create(void *start_addr, size_t word_size, size_t block_size);
+alloc_map_t *
+alloc_map_create(void *start_addr, size_t word_size, size_t block_size);
+
+
 
 /**
  *  @brief Looks up if a memory address is pointing to the start of an object
@@ -51,7 +56,10 @@ alloc_map_t *alloc_map_create(void *start_addr, size_t word_size, size_t block_s
  *
  *  @return A bool representing the bit of the supplied ptr.
  */
-bool alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr);
+bool 
+alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr);
+
+
 
 /**
  *  @brief Flags an address.
@@ -61,12 +69,9 @@ bool alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr);
  *  @param state the value to set.
  *
  */  
-void alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state);
+bool 
+alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state);
 
 
-/**
- *  @brief Frees the memory used for the allocation map.
- */
-void alloc_map_free();
 
 #endif
