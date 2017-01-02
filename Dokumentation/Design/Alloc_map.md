@@ -1,7 +1,8 @@
 #Allokeringskarta
 
 ##Innehåll
--[Introduktion](#introduktion)
+- [Introduktion](#introduktion)
+- [Implementation](#implementation)
 
 ##Introduktion
 Ett sätt att minska risken för felaktiga pekarvärden är att använda
