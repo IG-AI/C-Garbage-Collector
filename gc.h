@@ -18,11 +18,11 @@
 #define __gc__
 
 
+
 /**
  *  @brief The opaque data type holding all the heap data.
  */
 typedef struct heap heap_t;
-typedef struct page page_t;
 
 
 /**
@@ -41,12 +41,7 @@ typedef struct page page_t;
 heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
-void *
-get_page_start(page_t *page);
 
-
-void *
-get_memory(heap_t *h);
 
 
 /**
@@ -88,12 +83,6 @@ h_delete_dbg(heap_t *h, void *dbg_value);
  *  @note   the heap does *not* retain an alias to layout.
  */
 
-void 
-write_pointer_to_heap(void ** allocated_memory, void * ptr_to_write);
-
-void 
-write_int_to_heap(void * allocated_memory, int int_to_write);
-
 void *
 h_alloc_struct(heap_t *h, char *layout);
 
@@ -115,8 +104,6 @@ h_alloc_data(heap_t *h, size_t bytes);
 
 
 
-void 
-pointers_to_array(heap_t *h, void **array[]);
 
 /**
  *  @brief Manually trigger garbage collection.
@@ -149,6 +136,7 @@ size_t
 h_gc_dbg(heap_t *h, bool unsafe_stack);
 
 
+
 /**
  *  @brief Returns the available free memory.
  *
@@ -157,6 +145,8 @@ h_gc_dbg(heap_t *h, bool unsafe_stack);
  */
 size_t 
 h_avail(heap_t *h);
+
+
 
 
 /**
@@ -171,6 +161,8 @@ h_avail(heap_t *h);
  */
 size_t 
 h_used(heap_t *h);
+
+
 
 /**
  *  @brief Return the byte  size of the heap as an int.

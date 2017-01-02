@@ -3,26 +3,27 @@
 #include <time.h>
 
 #include "gc.h"
+#include "gc_hidden.h"
 #include "header.h"
 
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
-struct heap{
-  void * memory;
-  size_t size;
-  bool unsafe_stack;
-  float gc_threshold;
-  int number_of_pages;
-  page_t * pages[];
-};
+/* struct heap{ */
+/*   void * memory; */
+/*   size_t size; */
+/*   bool unsafe_stack; */
+/*   float gc_threshold; */
+/*   int number_of_pages; */
+/*   page_t * pages[]; */
+/* }; */
 
 
-struct page{
-  void * start;
-  void * bump;
-  int size;
-};
+/* struct page{ */
+/*   void * start; */
+/*   void * bump; */
+/*   int size; */
+/* }; */
 
 
 struct test_struct{
@@ -30,6 +31,20 @@ struct test_struct{
   void * second;
   int third;
 };
+
+void 
+write_pointer_to_heap(void ** allocated_memory, void * ptr_to_write)
+{
+  *allocated_memory = ptr_to_write;
+}
+
+
+void 
+write_int_to_heap(void * allocated_memory, int int_to_write)
+{
+  *(int *)allocated_memory = int_to_write;
+}
+
 
 void 
 test_h_init ()
@@ -44,7 +59,7 @@ test_h_init ()
 
     heap_t *test_h_init_heap = h_init(test_size, true, 1);
     CU_ASSERT(test_h_init_heap != NULL);
-    CU_ASSERT(test_h_init_heap->size == (size_t)test_size);
+    CU_ASSERT(heap_get_size(test_h_init_heap) == (size_t)test_size);
     h_delete(test_h_init_heap);
   }
 }
@@ -60,8 +75,8 @@ test_pages ()
     int rand_int = (rand() %20) + 1;
     int test_size = 2048 * rand_int;
     heap_t *test_pages_heap = h_init(test_size, true, 1);
-    void * pages_start = test_pages_heap->memory + test_size;
-    void * pages_end = (test_pages_heap->memory + test_size + (sizeof(page_t) * test_pages_heap->number_of_pages) );
+    void *pages_start = get_memory(test_pages_heap) + test_size;
+    void *pages_end = (get_memory(test_pages_heap) + test_size + (sizeof(page_t) * heap_get_number_of_pages(test_pages_heap)) );
     for(int j = 0; j < rand_int; j++){
       void * ptr = (void *)test_pages_heap->pages[j];
       CU_ASSERT( ptr >= pages_start && ptr < pages_end);
@@ -163,39 +178,27 @@ test_h_size()
   
 }
 
+extern char **environ;
+
 void
-test_pointer_to_array()
+test_ptrs_from_stack()
 {
   int test_size = 2048*3;
   heap_t *h = h_init(test_size, true, 1);
-  printf("\nNr pages after init: %d\n", h->number_of_pages);
-  int max_num_ptrs_in_page = (2048 / 16);
-  int max_num_of_ptrs_in_heap = h->number_of_pages * max_num_ptrs_in_page;
-  printf("\nNr pages after calc: %d\n", h->number_of_pages);
-  printf("%p\n%p\n", h->pages[0]->start, (h->pages[0]->start + h->pages[0]->size) ); 
-  printf("\nMem: %p\n", h->memory);
-  printf("\nMem+siz: %p\n", h->memory + h->size);
+
   void * ptr1 = h_alloc_struct(h, "i");
   write_int_to_heap(ptr1, 6);
   void * ptr2 = h_alloc_struct(h, "i");
   write_int_to_heap(ptr2, 9); 
-
-  printf("\nNr pages after writes: %d\n", h->number_of_pages);
-
-  printf("\nptr1: %d\n", *(int *)ptr1);
-  printf("\nptr2: %d\n", *(int *)ptr2);
-
-  printf("\nptr1: %p\n", ptr1);
-  printf("\nptr2: %p\n", ptr2);
   
+  void *stack_top = get_stack_top();
+  size_t number_of_ptrs = get_number_of_ptrs_in_stack(h, stack_top);
+  void ** collection[number_of_ptrs];
 
-  void ** collection[max_num_of_ptrs_in_heap];
-  printf("\nNr pages before ptr array: %d\n", h->number_of_pages);
-  pointers_to_array(h, collection);
-  printf("\nNr pages after ptr array: %d\n", h->number_of_pages);
+  get_ptrs_from_stack(h, stack_top, collection, number_of_ptrs);
   CU_ASSERT(collection[0] != NULL );
-  // CU_ASSERT(**(int **) collection[0] == 6 );
   h_delete(h); 
+
 }
 
 void
@@ -214,6 +217,30 @@ test_h_gc()
   h_delete(test_h_size_heap);   
 }
 
+void 
+test_h_delete_dbg(void)
+{
+  int test_size = 6144;
+  heap_t *h = h_init(test_size, true, 1);
+  
+  void *ptr1 = h_alloc_struct(h, "i");
+  write_int_to_heap(ptr1, 6);
+  printf("\n%p\n", ptr1);
+  printf("\n%i\n", *(int *)ptr1);
+  
+  void * ptr2 = h_alloc_struct(h, "i");
+  write_int_to_heap(ptr2, 9);
+  printf("\n2 %p\n", ptr2);
+  printf("\n2 %i\n", *(int *)ptr2);
+  
+  h_delete_dbg(h, NULL);
+  printf("\n%p\n", ptr1);
+  CU_ASSERT( ptr1 == NULL);
+  CU_ASSERT( *(int *)ptr1 == 6);
+   CU_ASSERT( ptr2 == NULL);
+  CU_ASSERT( *(int *)ptr2 == 9);
+} 
+
 
 
 
@@ -231,12 +258,13 @@ main (int argc, char *argv[])
   suite1 = CU_add_suite("Heap Test", NULL, NULL);
 
   if (
-      //(CU_add_test(suite1, "test_h_init()", test_h_init) == NULL) ||
-      // (CU_add_test(suite1, "test_page()", test_pages) == NULL) ||
-      //(CU_add_test(suite1, "test_h_alloc_struct/data()", test_h_alloc) == NULL) ||
-      //(CU_add_test(suite1, "test_h_size/avail/used()", test_h_size) == NULL) ||
-      (CU_add_test(suite1, "test_pointer_to_array)", test_pointer_to_array) == NULL)// ||
-      //(CU_add_test(suite1, "test_h_gc)", test_h_gc) == NULL) 
+      (CU_add_test(suite1, "test_h_init()", test_h_init) == NULL) ||
+      (CU_add_test(suite1, "test_page()", test_pages) == NULL) ||
+      (CU_add_test(suite1, "test_h_alloc_struct/data()", test_h_alloc) == NULL) ||
+      (CU_add_test(suite1, "test_h_size/avail/used()", test_h_size) == NULL) ||
+      (CU_add_test(suite1, "test_ptrs_from_stack", test_ptrs_from_stack) == NULL) ||
+      (CU_add_test(suite1, "test_h_delete_dbg", test_h_delete_dbg) == NULL)
+      //|| (CU_add_test(suite1, "test_h_gc)", test_h_gc) == NULL)
       )
     {
       CU_cleanup_registry();
