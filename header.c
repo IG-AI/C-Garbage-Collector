@@ -137,6 +137,12 @@ set_type_bits(void *header_ptr, internal_ht type)
   *(void **)header_ptr = (void *) (header_u | type_bits);
 }
 
+bool
+format_str_contains_ptrs(char *form_str)
+{
+  return strchr(form_str, PTR) != NULL;
+}
+
 
 /*============================================================================
  *                             BIT VECTOR FUNCTIONS
@@ -259,26 +265,35 @@ create_data_header(size_t bytes, void *ptr)
   return data_from_header(ptr);
 }
 
+
 void *
 create_struct_header(char *form_str, void *ptr)
 {
-  if (form_str == NULL || ptr == NULL) return NULL;
-  if (get_struct_size(form_str) == INVALID) return NULL;
+  if(form_str == NULL || ptr == NULL) return NULL;
+  if(get_struct_size(form_str) == INVALID) return NULL;
 
-  void *bit_vector = bit_vector_create(form_str);
-  char **ptr_to_header = (char **) ptr;
-
-  if(bit_vector != NULL)
+  if(!format_str_contains_ptrs(form_str))
     {
-      *ptr_to_header = bit_vector;
-      set_type_bits(ptr_to_header, I_HT_BIT_VECTOR);
+      size_t data_size = get_struct_size(form_str) - HEADER_SIZE;
+      return create_data_header(data_size, ptr);
     }
   else
     {
-      *ptr_to_header = str_duplicate(form_str);
-      set_type_bits(ptr_to_header, I_HT_FORMAT_STR);
+      void *bit_vector = bit_vector_create(form_str);
+      char **ptr_to_header = (char **) ptr;
+
+      if(bit_vector != NULL)
+        {
+          *ptr_to_header = bit_vector;
+          set_type_bits(ptr_to_header, I_HT_BIT_VECTOR);
+        }
+      else
+        {
+          *ptr_to_header = str_duplicate(form_str);
+          set_type_bits(ptr_to_header, I_HT_FORMAT_STR);
+        }
+      return data_from_header(ptr);
     }
-  return data_from_header(ptr);
 }
 
 /*============================================================================
@@ -431,7 +446,7 @@ get_existing_size(void *ptr)
  *                             Getting pointers functions
  *===========================================================================*/
 
-int
+size_t
 get_number_of_pointers_in_format_str(char *str)
 {
   int result = 0;
@@ -457,7 +472,7 @@ get_number_of_pointers_in_format_str(char *str)
   return result;
 }
 
-int
+size_t
 get_number_of_pointers_in_bit_vector(void *header)
 {
   unsigned long bit_vector = (unsigned long) header;
@@ -475,10 +490,10 @@ get_number_of_pointers_in_bit_vector(void *header)
   return count;
 }
 
-int
+size_t
 get_number_of_pointers_in_struct(void *structure)
 {
-  if(structure == NULL || get_header_type(structure) != STRUCT_REP) return -1;
+  if(structure == NULL || get_header_type(structure) != STRUCT_REP) return 0;
 
   void **header_ptr = header_from_data(structure);
 

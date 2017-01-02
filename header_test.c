@@ -371,6 +371,18 @@ test_create_struct_header_complex()
 }
 
 void
+test_create_struct_header_no_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("32i3l"));
+  void *result = create_struct_header("32i3l", ptr);
+  CU_ASSERT(result != NULL);
+  CU_ASSERT((size_t) result - (size_t) ptr == HEADER_SIZE);
+  CU_ASSERT(RAW_DATA == get_header_type(result));
+  CU_ASSERT(get_existing_size(result) == get_struct_size("32i3l"));
+  free(ptr);
+}
+
+void
 test_create_struct_header_too_big_size()
 {
   void *ptr = calloc(1, HEADER_SIZE);
@@ -399,11 +411,20 @@ test_get_header_type_data()
 }
 
 void
-test_get_header_type_struct()
+test_get_header_type_struct_ptr()
 {
   void *ptr = calloc(1, get_struct_size("*") );
   void *result = create_struct_header("*", ptr);
   CU_ASSERT(STRUCT_REP == get_header_type(result));
+  free(ptr);
+}
+
+void
+test_get_header_type_struct_no_ptr()
+{
+  void *ptr = calloc(1, get_struct_size("i") );
+  void *result = create_struct_header("i", ptr);
+  CU_ASSERT(RAW_DATA == get_header_type(result));
   free(ptr);
 }
 
@@ -437,7 +458,7 @@ void
 test_get_number_pointers_null_ptr()
 {
   int result = get_number_of_pointers_in_struct(NULL);
-  CU_ASSERT(result == -1);
+  CU_ASSERT(result == 0);
 }
 
 void
@@ -446,7 +467,7 @@ test_get_number_pointers_raw_data()
   void *ptr = calloc(1, get_data_size(sizeof(int) ) );
   void *data = create_data_header(sizeof(int), ptr);
   int result = get_number_of_pointers_in_struct(data);
-  CU_ASSERT(result == -1);
+  CU_ASSERT(result == 0);
   free(ptr);
 }
 
@@ -458,7 +479,7 @@ test_get_number_pointers_forwarding_data()
   void *new_ptr = calloc(1, get_data_size(sizeof(int) ) );
   forward_header(data, new_ptr);
   int result = get_number_of_pointers_in_struct(data);
-  CU_ASSERT(result == -1);
+  CU_ASSERT(result == 0);
   free(ptr);
   free(new_ptr);
 }
@@ -469,7 +490,7 @@ test_get_number_pointers_struct_no_ptr()
   void *ptr = calloc(1, get_struct_size("i"));
   void *data = create_struct_header("i", ptr);
   int result = get_number_of_pointers_in_struct(data);
-  CU_ASSERT(result == 0 + additional_if_format_str(data));
+  CU_ASSERT(result == 0);
   free(ptr);
 }
 
@@ -1338,10 +1359,12 @@ main(void)
        || (NULL == CU_add_test(suite_create_struct_header
                                , "Single \"*\""
                                , test_create_struct_header_single_ptr) )
-       
        || (NULL == CU_add_test(suite_create_struct_header
                                , "Complex format string"
                                , test_create_struct_header_complex) )
+       || (NULL == CU_add_test(suite_create_struct_header
+                               , "No ptrs"
+                               , test_create_struct_header_no_ptr) )
        || (NULL == CU_add_test(suite_create_struct_header
                                , "Format string rep. too big size"
                                , test_create_struct_header_too_big_size) )
@@ -1367,7 +1390,10 @@ main(void)
                                , test_get_header_type_data) )
        || (NULL == CU_add_test(suite_get_header_type
                                , "Bit vector header"
-                               , test_get_header_type_struct) )
+                               , test_get_header_type_struct_ptr) )
+       || (NULL == CU_add_test(suite_get_header_type
+                               , "Data from format str header"
+                               , test_get_header_type_struct_no_ptr) )
        || (NULL == CU_add_test(suite_get_header_type
                                , "Format string header"
                                , test_get_header_type_format_str) )

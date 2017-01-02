@@ -33,9 +33,11 @@ typedef enum header_type header_type;
 /**
  *  @brief Creates a header and saves it on the heap
  *
- *  This function is called when the header has to contain information
- *  about pointers inside of data.
- *  The header created will be of the type STRUCT_REP
+ *  This function is called when the header is to be created for
+ *  data represented by a format string.
+ *  If there are pointers in the format string the header created will be
+ *  of the type STRUCT_REP, else it will be converted into RAW_DATA.
+ *  
  *  The @p format_string will be copied and doesn't need to be placed
  *  on the heap before hand.
  *  
@@ -80,9 +82,9 @@ header_type get_header_type(void *);
  *
  *  @param  structure the structure to look for pointers in
  *  @return number of pointers found in @p structure if its header has the type
- *          STRUCT_REP. Otherwise it will return -1
+ *          STRUCT_REP. Otherwise it will return 0
  */
-int get_number_of_pointers_in_struct(void *structure);
+size_t get_number_of_pointers_in_struct(void *structure);
 
 /**
  *  @brief Finds all pointers inside @p structure and places pointers to
