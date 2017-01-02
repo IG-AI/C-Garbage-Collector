@@ -85,34 +85,3 @@ alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state)
     }
   return true;
 }
-
-
-
-
-/*  
-bitset_t *bs_new(size_t siz)
-{
-  bitset_t *b = calloc(1, siz + sizeof(size_t));
-  return b;
-}
-void bs_free(bitset_t *b)
-{
-  free(b);
-}
-
-bool bs_contains(bitset_t *b, size_t v)
-{
-  Index_check(v, b->size / 8);
-  return b->bits[v / 8] & On(v % 8);
-}
-void bs_set(bitset_t *b, size_t v)
-{
-  Index_check(v, b->size / 8);
-  b->bits[v / 8] |= On(v % 8);
-}
-void bs_unset(bitset_t *b, size_t v)
-{
-  Index_check(v, b->size / 8);
-  b->bits[v / 8] &= Off(v % 8);
-}
-*/
