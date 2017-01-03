@@ -21,22 +21,6 @@ i två delar – passiv och aktiv – ger vi varje sida statusen passiv eller ak
 osäker pekare till en adress A medför nu att den omslutande sidan P inte får
 flyttas vid kompaktering.
 
-###Allokeringskarta
-Ytterligare ett sätt att minska risken för felaktiga pekarvärden är att använda
-en allokeringskarta. En allokeringskarta är en array av booleans där varje plats
-i arrayen motsvarar en valid adress för en allokering, och där true betyder
-att något allokerats på den platsen (false – inte). Om man t.ex. har (vilket är
-rimligt) en minsta objektstorlek på 16 bytes 14 behöver man alltså en array med
-1024 element för att hålla reda på 16 kb. Om man använder en bitvektor där
-en enskild bit är en boolean behövs alltså bara 128 bytes för att hålla reda på 16
-kb, vilket är <1% overhead.
-Om vi återgår till vårt exempel där vi hittar 0x39C5F6 (slutpriset på en
-lägenhet) på stacken kan vi se om den boolean som motsvarar den adressen
-i allokeringskartan är true eller false. Om värdet är false kan vi helt
-ignorera 0x39C5F6. Om värdet är true måste vi behandla det som en pekare.
-Det bitset som delats ut på kursen är fritt fram att använda för att implemente-
-ra allokeringskartan.
-
 ###Höga adresser
 Detta är enkelt att implementera och brukar ge hög avkastning. Använd t.ex.
 posix_memalign för att allokera minnet till programmets egen heap och ange
