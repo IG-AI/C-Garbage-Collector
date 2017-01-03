@@ -6,8 +6,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../../gc.h"
+
 #ifdef GC_TEST
-extern heap_t *h; // Assume single heap for this program for simplicity
+extern heap_t *heap;
 #endif
 
 typedef struct node node;
@@ -36,7 +38,7 @@ struct node
   void *key;
   void *value;
   struct node *left;
-  struct node *right;
+  struct node *righ;
 };
 
 static node *tree_internal_node_new(void *key, void *value);
@@ -54,7 +56,7 @@ void tree_path_for_key(tree *t, void *key, char **buffer)
   node *n = t->root;
 
 #ifdef GC_TEST
-  char *path = *buffer ? *buffer : h_alloc_data(h, tree_depth(t) + 1);
+  char *path = *buffer ? *buffer : h_alloc_data(heap, tree_depth(t) + 1);
 #else
   char *path = *buffer ? *buffer : malloc(tree_depth(t) + 1);
 #endif
@@ -144,7 +146,7 @@ char *tree_walk(tree *t, char *path)
 static node *tree_internal_node_new(void *key, void *value)
 {
 #ifdef GC_TEST
-  node *result = h_alloc_struct(h, "****");
+  node *result = h_alloc_struct(heap, "****");
 #else
   node *result = malloc(sizeof(*result));
 #endif
@@ -155,7 +157,7 @@ static node *tree_internal_node_new(void *key, void *value)
 tree *tree_new(cmp_func key_cmp)
 {
 #ifdef GC_TEST
-  tree *result = h_alloc_struct(h, "**");
+  tree *result = h_alloc_struct(heap, "**");
 #else
   tree *result = malloc(sizeof(*result));
 #endif

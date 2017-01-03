@@ -5,6 +5,9 @@
 #include "tree.h"
 #include "list.h"
 #include "undo.h"
+#include "../../gc.h"
+
+extern heap_t *heap;
 
 typedef struct good good;
 typedef struct db db;
@@ -28,7 +31,7 @@ struct db
 
 good *good_new(char *name, char *desc, int price, int amount)
 {
-  good *result = malloc(sizeof(*result));
+  good *result = h_alloc_data(heap, sizeof(*result));
 
   result->name = name;
   result->desc = desc;
@@ -49,7 +52,7 @@ void good_delete(good *g)
 
 db *db_new()
 {
-  db *result = malloc(sizeof(*result));
+  db *result = h_alloc_struct(heap ,"2*");
   *result = (db) {
     .goods        = tree_new((cmp_func) strcmp),
     .undo_actions = list_new()

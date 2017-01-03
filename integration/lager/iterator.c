@@ -2,7 +2,7 @@
 #include "list.h"
 
 #ifdef GC_TEST
-extern heap_t *h; // Assume single heap for this program for simplicity
+extern heap_t *heap; // Assume single heap for this program for simplicity
 #endif
 
 typedef struct node node;
@@ -23,7 +23,7 @@ struct node
 iter *iterator_new(void *current)
 {
 #ifdef GC_TEST
-  iter *result = h_alloc_struct("*");
+  iter *result = h_alloc_struct(heap, "*");
 #else
   iter *result = malloc(sizeof(*result));
 #endif
