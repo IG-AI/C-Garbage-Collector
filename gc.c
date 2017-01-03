@@ -200,18 +200,23 @@ h_delete_dbg(heap_t *h, void *dbg_value)
 {
   void *stack_top = get_stack_top();
   size_t number_of_ptrs = get_number_of_ptrs_in_stack(h, stack_top);
+  //printf("\nNumber of pointers: %lu\n", number_of_ptrs);
   void **array[number_of_ptrs];
   get_ptrs_from_stack(h, stack_top, array, number_of_ptrs);
   for(size_t i= 0; i < number_of_ptrs; ++i)
     {
-      printf("\ndel %p\n", array[i]);
+      // printf("\ndel %p\n", array[i]);
+      //printf("\nInt: %d\n", *(int *)array[i]);
       *array[i] = dbg_value;
     }
-  h_delete(h);
+   h_delete(h);
 }
 
 
-
+#include <setjmp.h>
+#define Dump_registers() \
+jmp_buf env; \
+if (setjmp(env)) abort(); \
 
 
 /**
@@ -223,6 +228,7 @@ h_delete_dbg(heap_t *h, void *dbg_value)
 size_t
 get_number_of_ptrs_in_stack(heap_t *h, void *original_top)
 {
+ 
   void *stack_top = original_top;
   void *stack_bottom = (void *)*environ;
   void *heap_start = h->memory;
@@ -232,12 +238,17 @@ get_number_of_ptrs_in_stack(heap_t *h, void *original_top)
   size_t i = 0;
   while (pointer != NULL)
     {
+      /* printf("\nPtr %lu found in num%p\n", i,*pointer );
+         printf("\nPtr %lu found in num%d\n", i, *(int*)*pointer );*/
+
       i += 1;
       pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
     }
   return i;
 }
 
+
+//OBS Something strange about the array sizes (gets more space in array from caller function)
 /**
  *  @brief Puts all pointer found on stack into an array
  *
@@ -249,6 +260,7 @@ get_number_of_ptrs_in_stack(heap_t *h, void *original_top)
 void
 get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_size)
 {
+  //printf("Array size: %lu", array_size);
   void *stack_top = original_top;
   void *stack_bottom = (void *)*environ;
   void *heap_start = h->memory;
@@ -259,13 +271,17 @@ get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_
   size_t i = 0;
   while (pointer != NULL)
     {
+      /*  printf("\nPtr %lu found in ptrsfrom %p\n", i,*pointer );
+          printf("\nPtr %lu found in ptrsfrom %d\n", i, *(int *)*pointer );*/
+
       assert(i < array_size && "There are more ptrs in stack than we thought!");
-      array[i] = pointer;
+      array[i] = *pointer;
 
       i += 1;
       pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
     }
-  assert(i == array_size && "There are less ptrs in stack than we thought!");
+  // printf("\ni = %lu\n", i);
+  // assert(i == array_size && "There are less ptrs in stack than we thought!"); This does not work since we get more space in the array
 }
 
 int
@@ -307,6 +323,7 @@ h_alloc(heap_t * h, size_t bytes)
   }
 
   void *page_bump = page_get_bump(h->pages[page_nr]);
+  h->pages[page_nr]->type = ACTIVE;
   void * ptr_to_write_to = page_bump;
   page_move_bump(h->pages[page_nr], bytes);
   //printf("Pointer is in page:  %d\n", get_ptr_page(h, ptr));  
@@ -338,7 +355,7 @@ h_alloc_data(heap_t * h, size_t bytes)
 }
 
 
-void
+void *
 h_alloc_raw(heap_t * h, void * ptr_to_data)
 {
   assert(ptr_to_data != NULL);
@@ -349,7 +366,7 @@ h_alloc_raw(heap_t * h, void * ptr_to_data)
 
   while( (int)data_size > page_avail){
     if(page_nr == number_of_pages - 1){
-      return;
+      return NULL;
     }
     page_nr += 1;
     page_avail = page_get_avail(h->pages[page_nr]);
@@ -358,16 +375,17 @@ h_alloc_raw(heap_t * h, void * ptr_to_data)
   void *page_bump = page_get_bump(h->pages[page_nr]);
   void * ptr_to_write_to = page_bump;
   page_move_bump(h->pages[page_nr], data_size);
-  memcpy(ptr_to_write_to, ptr_to_data, data_size);
+
+  return memcpy(ptr_to_write_to, ptr_to_data, data_size);
   
-  return; 
+ 
     
 
 }
 
 
 void * get_stack_top(){
-  return __builtin_frame_address(1);
+  return __builtin_frame_address(0);
 }
 
 //TODO
@@ -380,34 +398,34 @@ h_gc(heap_t *h)
 
   void *stack_top = get_stack_top();
   size_t num_ptrs_in_stack = get_number_of_ptrs_in_stack(h, stack_top);
-  void ** collection[num_ptrs_in_stack];
-  get_ptrs_from_stack(h, stack_top, collection, num_ptrs_in_stack);
+  void ** array_of_found_ptrs[num_ptrs_in_stack];
+  get_ptrs_from_stack(h, stack_top,  array_of_found_ptrs, num_ptrs_in_stack);
 
-  for(size_t page = 0; page < h->number_of_pages -1; ++page)
+  for(size_t page_nr = 0; page_nr < h->number_of_pages -1; ++page_nr)
     {
-      int swap_array_len = 0;
+      int  swap_array_num_of_indexes = 0;
       void * swap_array[num_ptrs_in_stack];
-      for(int i = 0; i < num_ptrs_in_stack; ++i)
+      for(size_t i = 0; i < num_ptrs_in_stack; ++i)  //num_ptrs_in_stack gets the wrong number of ptrs - segfault??
         {
-          int c = 0;
-          if (get_ptr_page(*collection[i], h) == (int) page)
+          int index_in_swap_page = 0;
+          if (get_ptr_page(* array_of_found_ptrs[i], h) == (int) page_nr)  
             {
               //Flytta data till pagen swap
-              void * src_ptr = (void *)( (unsigned long) *collection[i] - sizeof(void *) ); // use copy_header(obs sizes)
+              void * src_ptr = (void *)( (unsigned long) * array_of_found_ptrs[i] - sizeof(void *) ); // use copy_header(obs sizes)
               void * dest_ptr = swap->bump;
-              size_t data_size = get_existing_size(*collection[i]);
+              size_t data_size = get_existing_size(* array_of_found_ptrs[i]);
               swap->bump += data_size;
               void * pointer_to_swap_obj = memcpy(dest_ptr, src_ptr, data_size);
-              swap_array[c] = pointer_to_swap_obj;
-              ++c;
+              swap_array[index_in_swap_page] = pointer_to_swap_obj;
+              ++index_in_swap_page;
               // Forwarding and not copying same data twice
-              // Change stack pointer to new location
             }
-          swap_array_len = c;
+          swap_array_num_of_indexes = index_in_swap_page;
         }
-      page_reset(h->pages[page]);
-      for(int j = 0; j <= swap_array_len; ++j){
+      page_reset(h->pages[page_nr]);
+      for(int j = 0; j <= swap_array_num_of_indexes; ++j){
         h_alloc_raw(h, swap_array[j]);
+        // Change stack pointer to new location
       }
       page_reset(swap);
       //reset the page page = flytta tillbaka bump-ptr

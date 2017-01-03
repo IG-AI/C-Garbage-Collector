@@ -180,8 +180,9 @@ test_h_size()
 
 extern char **environ;
 
+
 void
-test_ptrs_from_stack()
+test_get_number_of_ptrs_in_stack()
 {
   int test_size = 2048*3;
   heap_t *h = h_init(test_size, true, 1);
@@ -193,29 +194,39 @@ test_ptrs_from_stack()
   
   void *stack_top = get_stack_top();
   size_t number_of_ptrs = get_number_of_ptrs_in_stack(h, stack_top);
-  void ** collection[number_of_ptrs];
+  // printf("\nNum of ptrs: %lu \n", number_of_ptrs);
+  CU_ASSERT (number_of_ptrs > 0);
+  h_delete(h); 
+
+}
+void
+test_ptrs_from_stack()
+{
+  int test_size = 2048*3;
+  heap_t *h = h_init(test_size, true, 1);
+
+  void *ptr1 = h_alloc_struct(h, "i");
+  write_int_to_heap(ptr1, 6);
+  void *ptr2 = h_alloc_struct(h, "i");
+  write_int_to_heap(ptr2, 9); 
+  
+  void *stack_top = get_stack_top();
+  size_t number_of_ptrs = get_number_of_ptrs_in_stack(h, stack_top);
+  void **collection[number_of_ptrs];
+  // printf("\n%lu", number_of_ptrs);
 
   get_ptrs_from_stack(h, stack_top, collection, number_of_ptrs);
   CU_ASSERT(collection[0] != NULL );
+  /* printf("\n1: %p\n", collection[0]);
+  printf("\n2: %p\n", collection[1]);
+  printf("\n1: %d\n", *(int*)*collection[0]);
+  printf("\n2: %d\n",*(int *)*collection[1]);*/
+  CU_ASSERT(*(int *)*collection[1] == 6); 
+  CU_ASSERT(*(int *)*collection[0] == 9); 
   h_delete(h); 
 
 }
 
-void
-test_h_gc()
-{
-   time_t t;
-  srand( (unsigned) time(&t));
-
-  int test_size = 6144;
-  heap_t *test_h_size_heap = h_init(test_size, true, 1);
-  void * ptr1 = h_alloc_struct(test_h_size_heap, "i");
-  write_int_to_heap(ptr1, 6);
-  h_gc(test_h_size_heap); 
-  CU_ASSERT(*(int *) ptr1 == 6);
-
-  h_delete(test_h_size_heap);   
-}
 
 void 
 test_h_delete_dbg(void)
@@ -224,25 +235,35 @@ test_h_delete_dbg(void)
   heap_t *h = h_init(test_size, true, 1);
   
   void *ptr1 = h_alloc_struct(h, "i");
-  write_int_to_heap(ptr1, 6);
-  printf("\n%p\n", ptr1);
-  printf("\n%i\n", *(int *)ptr1);
-  
+  write_int_to_heap(ptr1, 6); 
   void * ptr2 = h_alloc_struct(h, "i");
   write_int_to_heap(ptr2, 9);
-  printf("\n2 %p\n", ptr2);
-  printf("\n2 %i\n", *(int *)ptr2);
+
   
   h_delete_dbg(h, NULL);
-  printf("\n%p\n", ptr1);
+  //printf("\nptr1 %p\n", ptr1);
+
   CU_ASSERT( ptr1 == NULL);
-  CU_ASSERT( *(int *)ptr1 == 6);
-   CU_ASSERT( ptr2 == NULL);
-  CU_ASSERT( *(int *)ptr2 == 9);
+  CU_ASSERT( ptr2 == NULL);
 } 
 
 
 
+void
+test_h_gc()
+{
+  time_t t;
+  srand( (unsigned) time(&t));
+
+  int test_size = 6144;
+  heap_t *h = h_init(test_size, true, 1);
+  void * ptr1 = h_alloc_struct(h, "i");
+  write_int_to_heap(ptr1, 6);
+  h_gc(h); 
+  //CU_ASSERT(*(int *) ptr1 == 6);
+
+  h_delete(h);   
+}
 
 
 int
@@ -263,8 +284,9 @@ main (int argc, char *argv[])
       (CU_add_test(suite1, "test_h_alloc_struct/data()", test_h_alloc) == NULL) ||
       (CU_add_test(suite1, "test_h_size/avail/used()", test_h_size) == NULL) ||
       (CU_add_test(suite1, "test_ptrs_from_stack", test_ptrs_from_stack) == NULL) ||
-      (CU_add_test(suite1, "test_h_delete_dbg", test_h_delete_dbg) == NULL)
-      //|| (CU_add_test(suite1, "test_h_gc)", test_h_gc) == NULL)
+      (CU_add_test(suite1, "test_get_number_of_ptrs_in_stack", test_get_number_of_ptrs_in_stack) == NULL) ||
+      (CU_add_test(suite1, "test_h_delete_dbg", test_h_delete_dbg) == NULL) || 
+      (CU_add_test(suite1, "test_h_gc)", test_h_gc) == NULL)
       )
     {
       CU_cleanup_registry();
