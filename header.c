@@ -441,6 +441,14 @@ get_existing_size(void *ptr)
   return INVALID;
 }
 
+size_t
+get_existing_data_size(void *ptr)
+{
+  size_t raw_size = get_existing_size(ptr);
+  if(raw_size == INVALID) return INVALID;
+  return raw_size - HEADER_SIZE;
+}
+
 
 /*============================================================================
  *                             Getting pointers functions

@@ -68,11 +68,16 @@ void *
 get_stack_top();
 
 size_t
-get_number_of_ptrs_in_stack(heap_t *h, void *original_bottom);
+get_number_of_ptrs_in_stack(heap_t *h, void *original_top);
 
-void
-get_ptrs_from_stack(heap_t *h, void *original_bottom, void **array[], size_t array_size);
+size_t
+get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_size);
 
+size_t
+get_number_of_active_ptrs(heap_t *h, void *original_top);
+
+size_t
+get_active_ptrs(heap_t *h, void *original_top, void **array[], size_t array_size);
 
 
 #endif

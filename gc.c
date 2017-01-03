@@ -202,10 +202,11 @@ h_delete_dbg(heap_t *h, void *dbg_value)
   size_t number_of_ptrs = get_number_of_ptrs_in_stack(h, stack_top);
   //printf("\nNumber of pointers: %lu\n", number_of_ptrs);
   void **array[number_of_ptrs];
-  get_ptrs_from_stack(h, stack_top, array, number_of_ptrs);
-  for(size_t i= 0; i < number_of_ptrs; ++i)
+  size_t actual_nr_of_ptrs = get_ptrs_from_stack(h, stack_top, array, number_of_ptrs);
+  //printf("\nActual number of pointers: %lu\n", actual_nr_of_ptrs);
+  for(size_t i= 0; i < actual_nr_of_ptrs; ++i)
     {
-      // printf("\ndel %p\n", array[i]);
+      //printf("\ndel %p\n", array[i]);
       //printf("\nInt: %d\n", *(int *)array[i]);
       *array[i] = dbg_value;
     }
@@ -218,6 +219,83 @@ h_delete_dbg(heap_t *h, void *dbg_value)
 jmp_buf env; \
 if (setjmp(env)) abort(); \
 
+
+size_t
+get_number_of_active_heap_ptrs_rec(void *ptr)
+{
+  if(get_header_type(ptr) != STRUCT_REP)
+    {
+      return 0;
+    }
+  else 
+    {
+      size_t num_ptrs = get_number_of_pointers_in_struct(ptr);
+      size_t result = num_ptrs;
+      void **array[num_ptrs];
+      bool success = get_pointers_in_struct(ptr, array);
+      if(!success) return 0;
+      
+      for(size_t i = 0; i < num_ptrs; ++i)
+        {
+          result += get_number_of_active_heap_ptrs_rec(*array[i]);
+        }
+      return result;
+    }
+}
+
+size_t
+get_number_of_active_ptrs(heap_t *h, void *original_top)
+{
+  void *stack_top = original_top;
+  void *stack_bottom = (void *)*environ;
+  void *heap_start = h->memory;
+  void *heap_end = (h->memory + h->size);
+  void **pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
+
+  size_t i = 0;
+  while (pointer != NULL)
+    {
+      i += 1;
+      i += get_number_of_active_heap_ptrs_rec(pointer);
+      pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
+    }
+  return i;
+}
+
+void
+get_active_heap_ptrs_rec(void *ptr, void **array[], size_t *index)
+{
+  if(get_header_type(ptr) != STRUCT_REP)
+    {
+      return;
+    }
+  else 
+    {
+      size_t num_ptrs = get_number_of_pointers_in_struct(ptr);
+      if(num_ptrs == 0) return;
+      void ***sub_array =  &(array[*index]);
+      bool success = get_pointers_in_struct(ptr, sub_array);
+      if(!success) return;
+      *index += num_ptrs;
+      
+      for(size_t i = 0; i < num_ptrs; ++i)
+        {
+          get_active_heap_ptrs_rec(*sub_array[i], array, index);
+        }
+    }
+}
+
+size_t
+get_active_ptrs(heap_t *h, void *original_top, void **array[], size_t array_size)
+{
+  size_t num_stack_ptrs = get_ptrs_from_stack(h, original_top, array, array_size);
+  size_t index = num_stack_ptrs;
+  for(size_t i = 0; i < num_stack_ptrs; ++i)
+    {
+      get_active_heap_ptrs_rec(*array[i], array, &index);
+    }
+  return num_stack_ptrs;
+}
 
 /**
  *  @brief Gets the number of pointer found on stack
@@ -257,7 +335,7 @@ get_number_of_ptrs_in_stack(heap_t *h, void *original_top)
  *  @param  array the array to put pointer in
  *  @param  array_size the size of the array
  */
-void
+size_t
 get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_size)
 {
   //printf("Array size: %lu", array_size);
@@ -280,6 +358,7 @@ get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_
       i += 1;
       pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
     }
+  return i;
   // printf("\ni = %lu\n", i);
   // assert(i == array_size && "There are less ptrs in stack than we thought!"); This does not work since we get more space in the array
 }
@@ -354,33 +433,59 @@ h_alloc_data(heap_t * h, size_t bytes)
   return create_data_header(bytes, ptr);
 }
 
+int
+find_next_active_page(heap_t *h, size_t index)
+{
+  for(int i =index +1; i < (int)h->number_of_pages; ++i)
+    {
+    if(h->pages[i]->type == ACTIVE)
+      {return i; }
+    }
+  return -1;
+}
+
+page_t *
+find_first_passive_page(heap_t *h)
+{
+  for(int i =0; i < (int)h->number_of_pages; ++i)
+    {
+    if(h->pages[i]->type == PASSIVE)
+      {return h->pages[i]; }
+    }
+  return NULL;
+}
+
+
 
 void *
-h_alloc_raw(heap_t * h, void * ptr_to_data)
+h_alloc_raw(heap_t *h, void *ptr_to_data)
 {
   assert(ptr_to_data != NULL);
-  size_t data_size = get_existing_size(ptr_to_data);
-  int page_nr = 0;
-  int number_of_pages = h->number_of_pages - 1;
-  int page_avail = page_get_avail(h->pages[page_nr]);
-
-  while( (int)data_size > page_avail){
-    if(page_nr == number_of_pages - 1){
-      return NULL;
+  size_t raw_size = get_existing_size(ptr_to_data);
+  int index_next_act = find_next_active_page(h, 0);
+  page_t *page_to_write_to;
+  while (index_next_act >=0) 
+    {
+      if ( page_get_avail(h->pages[index_next_act])> raw_size){
+      page_to_write_to = h->pages[index_next_act];
+      break;
+      }
+      else {
+        index_next_act = find_next_active_page(h, index_next_act);
+      }
     }
-    page_nr += 1;
-    page_avail = page_get_avail(h->pages[page_nr]);
-   }
-
-  void *page_bump = page_get_bump(h->pages[page_nr]);
-  void * ptr_to_write_to = page_bump;
-  page_move_bump(h->pages[page_nr], data_size);
-
-  return memcpy(ptr_to_write_to, ptr_to_data, data_size);
-  
+  if(index_next_act <0) {
+     page_to_write_to = find_first_passive_page(h);
+  }
  
-    
+  void *page_bump = page_get_bump(page_to_write_to);
+  void * ptr_to_write_to = page_bump;
+  page_move_bump(page_to_write_to, raw_size);
 
+  void *ptr_to_moved_data = copy_header(ptr_to_data, ptr_to_write_to);
+  forward_header(ptr_to_data, ptr_to_moved_data);
+  size_t data_size = get_existing_data_size(ptr_to_data);
+  return memcpy(ptr_to_moved_data, ptr_to_data, data_size);
 }
 
 
@@ -388,6 +493,89 @@ void * get_stack_top(){
   return __builtin_frame_address(0);
 }
 
+
+void
+set_active_to_transition(heap_t *h)
+{
+  for(int i =0; i < (int)h->number_of_pages; ++i)
+    {
+    if(h->pages[i]->type == ACTIVE)
+      {
+        h->pages[i]->type = TRANSITION;
+      }
+    }
+}
+
+/*
+void
+set_unsafe_pages(heap_t *h)
+{
+
+}
+*/
+void
+forward_internal_array_ptrs_with_offset(void **array[], 
+                                        size_t start_index,
+                                        size_t array_size,
+                                        void *ptr_to_original_data,
+                                        void *ptr_to_new_data)
+{
+  long offset = (long) ptr_to_new_data - (long) ptr_to_original_data;
+  void *lower_range = ptr_to_original_data;
+  void *upper_range = (void *) ((unsigned long) lower_range + get_existing_data_size(ptr_to_new_data));
+  
+  for(size_t index = start_index; index < array_size; ++index)
+    {
+      if(lower_range < *array[index] && *array[index] < upper_range)
+        {
+          *array[index] = *array[index] + offset;
+        }
+    }
+}
+
+size_t 
+h_gc(heap_t *h)
+{
+  set_active_to_transition(h);
+
+  void *stack_top = get_stack_top();
+  size_t num_active_ptrs = get_number_of_active_ptrs(h, stack_top);
+  void ** array_of_found_ptrs[num_active_ptrs];
+  size_t num_stack_ptrs = get_active_ptrs(h, stack_top,  array_of_found_ptrs, num_active_ptrs);
+  
+  // set_unsafe_pages();
+
+ for(size_t page_nr = 0; page_nr < h->number_of_pages; ++page_nr)
+    {
+      if (page_get_type(h->pages[page_nr]) == TRANSITION)
+        {
+          for(size_t ptr_index = 0; ptr_index < num_active_ptrs; ++ptr_index)
+            {
+              void *ptr_to_original_data = *array_of_found_ptrs[ptr_index];
+              if (get_ptr_page(ptr_to_original_data, h) == (int) page_nr) 
+                {
+                  void *ptr_to_new_data = NULL;
+                  if(get_header_type(ptr_to_original_data) == FORWARDING_ADDR)
+                    {
+                      ptr_to_new_data = get_forwarding_address(ptr_to_original_data);
+                    }
+                  else
+                    {
+                      ptr_to_new_data = h_alloc_raw(h, *array_of_found_ptrs[ptr_index]);
+                      forward_internal_array_ptrs_with_offset(array_of_found_ptrs, ptr_index, num_active_ptrs,
+                                                              ptr_to_original_data, ptr_to_new_data);
+                    }
+                  *array_of_found_ptrs[ptr_index] = ptr_to_new_data;
+                }
+            }
+          page_set_type(h->pages[page_nr], PASSIVE);
+        }
+      //set all unsafe -> active
+    }
+ return 0;
+}
+
+/*
 //TODO
 size_t 
 h_gc(heap_t *h)
@@ -426,6 +614,7 @@ h_gc(heap_t *h)
       for(int j = 0; j <= swap_array_num_of_indexes; ++j){
         h_alloc_raw(h, swap_array[j]);
         // Change stack pointer to new location
+        *array_of_found_ptrs[i] =
       }
       page_reset(swap);
       //reset the page page = flytta tillbaka bump-ptr
@@ -435,7 +624,7 @@ h_gc(heap_t *h)
   size_t collected = used_before_gc - used_after_gc;
   return collected;
 }
-
+*/
 
 //??
 size_t 
