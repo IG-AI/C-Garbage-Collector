@@ -4,9 +4,7 @@
 #include "list.h"
 #include "../../gc.h"
 
-#ifdef GC_TEST
 extern heap_t *heap;
-#endif
 
 typedef struct list list;
 typedef struct node node;
@@ -52,20 +50,12 @@ void list_visit(list *l, list_visitor_func f, void *ptr)
 
 list *list_new()
 {
-#ifdef GC_TEST
   return h_alloc_struct(heap, "**i");
-#else
-  return calloc(1, sizeof(struct list));
-#endif
 }
 
 static inline node *list_internal_node_new(void *elem, node *next)
 {
-#ifdef GC_TEST
   node *result = h_alloc_struct(heap, "**");
-#else
-  node *result = malloc(sizeof(*result));
-#endif
   
   *result = (struct node) { .elem = elem, .next = next };
 

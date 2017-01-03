@@ -1,9 +1,7 @@
 #include <stdlib.h>
 #include "list.h"
 
-#ifdef GC_TEST
-extern heap_t *heap; // Assume single heap for this program for simplicity
-#endif
+extern heap_t *heap;
 
 typedef struct node node;
 
@@ -22,11 +20,7 @@ struct node
 
 iter *iterator_new(void *current)
 {
-#ifdef GC_TEST
   iter *result = h_alloc_struct(heap, "*");
-#else
-  iter *result = malloc(sizeof(*result));
-#endif
   result->current = (node *)current;
   return result;
 }

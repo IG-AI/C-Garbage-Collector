@@ -99,7 +99,6 @@ char *ask_question_shelf(char *prompt)
          isdigit(result[0]) &&
          isascii(result[1]) &&
          isascii(result[2])) {
-    free(result);
     result = ask_question_string(prompt);
   }
   return result;
@@ -114,7 +113,6 @@ long ask_question_int(char *prompt)
 
   while (is_number(buf) == false)
     {
-      free(buf);
       buf = NULL;
       len = 0;
       
@@ -123,7 +121,6 @@ long ask_question_int(char *prompt)
     }
   
   long result = atol(buf);
-  free(buf);
   return result;
 }
 
@@ -190,7 +187,6 @@ bool user_event_edit_good_internal(db *db, good *g)
             ++edits; 
 
             printf("Old name: '%s'\n", good_name(copy));
-            free(good_name(copy));
             good_set_name(copy, ask_question_string("New name: "));
             break;
           }
@@ -200,7 +196,6 @@ bool user_event_edit_good_internal(db *db, good *g)
             ++edits; 
 
             printf("Old description: '%s'\n", good_desc(copy));
-            free(good_desc(copy));
             good_set_desc(copy, ask_question_string("New description: "));
             break;
           }
@@ -235,7 +230,6 @@ bool user_event_edit_good(db *db)
 
   char *name = ask_question_string("Name of good to edit: ");
   good *g = db_get_good(db, name);
-  free(name);
   
   if (g == NULL)
     {
@@ -305,7 +299,6 @@ bool user_event_remove_good(db *db)
   if (db_get_good(db, name))
     {
       db_remove_good(db, name);
-      free(name);
       return true;
     }
   else
