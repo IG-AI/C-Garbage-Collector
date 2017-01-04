@@ -7,6 +7,9 @@ tree.o: tree.c
 db: db.o tui.o tree.o list.o iterator.o undo.o
 	gcc -Wall -std=gnu11 -pedantic -ggdb -o db db.o tui.o tree.o list.o iterator.o undo.o
 
+dbgc: db.o tui.o tree.o list.o iterator.o undo.o gc.o
+	gcc -Wall -std=gnu11 -pedantic -ggdb -DGC -o db db.o tui.o tree.o list.o iterator.o undo.o gc.o
+
 gc_perf_test:
 	gcc -Wall -std=gnu11 -pedantic -O1 gc_perf_test.c list.c iterator.c -o gc_perf_test
 
