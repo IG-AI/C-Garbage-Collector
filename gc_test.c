@@ -9,6 +9,8 @@
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
+#define WORD_SIZE 8
+
 /* struct heap{ */
 /*   void * memory; */
 /*   size_t size; */
@@ -71,7 +73,7 @@ test_pages ()
   time_t t;
   srand( (unsigned) time(&t));
 
-  for (int i = 1; i <= 420; i++) {
+  for (int i = 1; i <= 1; i++) {
     int rand_int = (rand() %20) + 1;
     int test_size = 2048 * rand_int;
     heap_t *test_pages_heap = h_init(test_size, true, 1);
@@ -110,7 +112,7 @@ test_h_alloc ()
   void * ptr4 = h_alloc_data(test_h_alloc_heap, 2040);
 
   void * ptr5 = h_alloc_struct(test_h_alloc_heap, "i*i");
-  struct test_struct ts = ( (struct test_struct) {1, malloc(4),3}); 
+  struct test_struct ts = ( (struct test_struct) {1, &ptr5 ,3}); 
   *(struct test_struct *)ptr5 = ts;
   //printf("\nTest struct:  %d %p %d  \n", (*(struct test_struct *)ptr5).first, 
   //       (*(struct test_struct *)ptr5).second,
@@ -127,7 +129,7 @@ test_h_alloc ()
   //printf("\nAvail: %lu \n", h_avail(test_h_alloc_heap));
 
 
-  CU_ASSERT(*(int *) ptr1 == 6);
+  CU_ASSERT(*(int *)ptr1 == 6);
   CU_ASSERT(*(int *)ptr2 == 9);
   CU_ASSERT_PTR_EQUAL(test_pointer, ptr3);
   CU_ASSERT(ptr4 != NULL);
@@ -162,17 +164,16 @@ test_h_size()
     int rand_nr = (rand() % 2000) + 1;
   
     heap_t *test_h_size_heap = h_init(test_size, true, 1);
-    //  printf("rand: %d\n",rand_nr);
-    //printf("\nUsed: %lu\n", h_used(test_h_size_heap));
-    //printf("\nAvail: %lu\n", h_avail(test_h_size_heap));
     h_alloc_data(test_h_size_heap, rand_nr);
-    //printf("\nUsed after: %lu\n", h_used(test_h_size_heap));
-    //printf("\nAvail after: %lu\n", h_avail(test_h_size_heap));
+
+    if(rand_nr % WORD_SIZE != 0){
+      rand_nr += WORD_SIZE - (rand_nr % WORD_SIZE);
+    }
     
     CU_ASSERT(h_avail(test_h_size_heap) == ( (size_t) (test_size) - get_data_size(rand_nr) ) );
     CU_ASSERT(h_used(test_h_size_heap) == ( (size_t) get_data_size(rand_nr) ) );
     CU_ASSERT(h_size(test_h_size_heap) == ( (size_t) test_size) );
-    h_delete(test_h_size_heap);  
+    h_delete(test_h_size_heap);
 
   }
   
@@ -221,8 +222,8 @@ test_ptrs_from_stack()
   printf("\n2: %p\n", collection[1]);
   printf("\n1: %d\n", *(int*)*collection[0]);
   printf("\n2: %d\n",*(int *)*collection[1]);*/
-  CU_ASSERT(*(int *)*collection[1] == 6); 
-  CU_ASSERT(*(int *)*collection[0] == 9); 
+  CU_ASSERT(*(int *) *collection[1] == 6); 
+  CU_ASSERT(*(int *) *collection[0] == 9); 
   h_delete(h); 
 
 }
@@ -236,13 +237,12 @@ test_h_delete_dbg(void)
   
   void *ptr1 = h_alloc_struct(h, "i");
   write_int_to_heap(ptr1, 6); 
-  void * ptr2 = h_alloc_struct(h, "i");
+  void *ptr2 = h_alloc_struct(h, "i");
   write_int_to_heap(ptr2, 9);
 
   
   h_delete_dbg(h, NULL);
-  //printf("\nptr1 %p\n", ptr1);
-
+ 
   CU_ASSERT( ptr1 == NULL);
   CU_ASSERT( ptr2 == NULL);
 } 
@@ -257,11 +257,13 @@ test_h_gc()
 
   int test_size = 6144;
   heap_t *h = h_init(test_size, true, 1);
-  void * ptr1 = h_alloc_struct(h, "i");
+  void * ptr1 = h_alloc_struct(h, "i*");
   write_int_to_heap(ptr1, 6);
-  h_gc(h); 
-  //CU_ASSERT(*(int *) ptr1 == 6);
-
+  write_pointer_to_heap(ptr1 + sizeof(int), (void *) 3UL);
+  size_t cleaned = h_gc(h); 
+  CU_ASSERT(*(int *) ptr1 == 6);
+  CU_ASSERT(*(unsigned long *)(ptr1 + sizeof(int)) == 3UL);
+  CU_ASSERT(cleaned == 0);
   h_delete(h);   
 }
 
@@ -285,7 +287,7 @@ main (int argc, char *argv[])
       (CU_add_test(suite1, "test_h_size/avail/used()", test_h_size) == NULL) ||
       (CU_add_test(suite1, "test_ptrs_from_stack", test_ptrs_from_stack) == NULL) ||
       (CU_add_test(suite1, "test_get_number_of_ptrs_in_stack", test_get_number_of_ptrs_in_stack) == NULL) ||
-      (CU_add_test(suite1, "test_h_delete_dbg", test_h_delete_dbg) == NULL) || 
+      (CU_add_test(suite1, "test_h_delete_dbg", test_h_delete_dbg) == NULL) ||
       (CU_add_test(suite1, "test_h_gc)", test_h_gc) == NULL)
       )
     {

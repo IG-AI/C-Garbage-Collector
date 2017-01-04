@@ -51,14 +51,22 @@ test_alloc_map_create()
 void
 test_alloc_map_sets()
 {
-  int i = (256*sizeof(unsigned long))/(sizeof(unsigned long)/sizeof(int));
-  unsigned long *start_addr = malloc(i*sizeof(unsigned long));
-  alloc_map_t *alloc_map = alloc_map_create(start_addr, sizeof(int), 256*sizeof(int));
+  int type_size = sizeof(int);
+  typedef int type_t;
 
+  int block_size = 256;
+
+  size_t i = (block_size*type_size);
+  type_t *start_addr = malloc(i*sizeof(type_t));
+  alloc_map_t *alloc_map = alloc_map_create(start_addr,type_size, i);
+
+  alloc_map_print_in_use(alloc_map);
   CU_ASSERT_FALSE(alloc_map_ptr_used(alloc_map, (void *)&(start_addr[1])));
 
   alloc_map_set(alloc_map, (void *)&(start_addr[1]), true);
   CU_ASSERT_TRUE(alloc_map_ptr_used(alloc_map, (void *)&(start_addr[1])));
+
+  alloc_map_print_in_use(alloc_map);
 
   alloc_map_set(alloc_map, (void *)&(start_addr[1]), false);
   CU_ASSERT_FALSE(alloc_map_ptr_used(alloc_map, (void *)&(start_addr[1])));

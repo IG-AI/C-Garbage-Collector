@@ -51,7 +51,7 @@ void test_stack_find_ptr()
         {
           finished = true;
         }
-      else if(**(unsigned long **)pointer == (unsigned long)target)
+      else if(*(unsigned long *)pointer == (unsigned long)target)
         {
           found_addr = true;        
          }
@@ -151,35 +151,35 @@ void test_stack_edges()
         {
           finished = true;
         }
-      else if(**(unsigned long **)pointer == (unsigned long) mem_start)
+      else if(*(unsigned long *)pointer == (unsigned long) mem_start)
         {          
           found_start = true;  
         }
-      else if(**(unsigned long **)pointer == (unsigned long) mem_before)
+      else if(*(unsigned long *)pointer == (unsigned long) mem_before)
         {          
           found_before = true;  
         }
-      else if(**(unsigned long **)pointer == (unsigned long) mem_lower_inside)
+      else if(*(unsigned long *)pointer == (unsigned long) mem_lower_inside)
         {          
           found_lower_inside = true;  
         }
-      else if(**(unsigned long **)pointer == (unsigned long) mem_one_above_inside)
+      else if(*(unsigned long *)pointer == (unsigned long) mem_one_above_inside)
         {          
           found_one_above_inside = true;
         }
-      else if (**(unsigned long **)pointer == (unsigned long) mem_middle) 
+      else if (*(unsigned long *)pointer == (unsigned long) mem_middle) 
         {      
           found_middle = true;  
         }
-      else if(**(unsigned long **)pointer == (unsigned long) mem_one_below_end)
+      else if(*(unsigned long *)pointer == (unsigned long) mem_one_below_end)
         {          
           found_one_below_end = true;
         }
-      else if (**(unsigned long **)pointer == (unsigned long) mem_upper_end)
+      else if (*(unsigned long *)pointer == (unsigned long) mem_upper_end)
         {          
           found_upper_end = true;        
         }
-      else if(**(unsigned long **)pointer == (unsigned long) mem_after)
+      else if(*(unsigned long *)pointer == (unsigned long) mem_after)
         {          
           found_after = true;
         }

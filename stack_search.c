@@ -25,7 +25,7 @@ void **stack_find_next_ptr(void **stack_bottom, void *stack_top, void *heap_star
       if( *(unsigned long *)result <= (unsigned long)heap_end
           && *(unsigned long *)result >= (unsigned long)heap_start)
         {
-          return stack_bottom;
+          return result;
         }
     }
   return NULL;

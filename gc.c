@@ -20,7 +20,7 @@
 
 
 #define HEADER_SIZE 8
-#define WORD_SIZE 2
+#define WORD_SIZE 8
 #define PAGE_SIZE 2048
 #define SMALLEST_ALLOC_SIZE 16
 
@@ -166,10 +166,9 @@ void *memory = malloc(bytes + (sizeof(page_t) * number_of_pages) );
     return NULL;
   }
 
-  alloc_map_t * alloc_map2 = alloc_map_create(memory, WORD_SIZE, (bytes / WORD_SIZE) );
-  alloc_map_t * alloc_map = NULL;
-  
-  *heap = ( (heap_t) {memory, alloc_map2, bytes, unsafe_stack, gc_threshold, number_of_pages} );
+  alloc_map_t * alloc_map = alloc_map_create(memory, WORD_SIZE, bytes);
+  //alloc_map_print_in_use(alloc_map);
+  *heap = ( (heap_t) {memory, alloc_map, bytes, unsafe_stack, gc_threshold, number_of_pages} );
   
   void *start_of_pages = memory + bytes;
   create_pages(memory, start_of_pages, number_of_pages, page_size, heap);
@@ -199,6 +198,7 @@ void
 h_delete(heap_t *h)
 {
   free(h->memory);
+  free(h->alloc_map);
   free(h);
 }
 
@@ -214,8 +214,6 @@ h_delete_dbg(heap_t *h, void *dbg_value)
   //printf("\nActual number of pointers: %lu\n", actual_nr_of_ptrs);
   for(size_t i= 0; i < actual_nr_of_ptrs; ++i)
     {
-      //printf("\ndel %p\n", array[i]);
-      //printf("\nInt: %d\n", *(int *)array[i]);
       *array[i] = dbg_value;
     }
    h_delete(h);
@@ -229,7 +227,7 @@ if (setjmp(env)) abort(); \
 
 
 size_t
-get_number_of_active_heap_ptrs_rec(void *ptr)
+get_number_of_active_heap_ptrs_rec(heap_t *h, void *ptr)
 {
   if(get_header_type(ptr) != STRUCT_REP)
     {
@@ -245,7 +243,10 @@ get_number_of_active_heap_ptrs_rec(void *ptr)
       
       for(size_t i = 0; i < num_ptrs; ++i)
         {
-          result += get_number_of_active_heap_ptrs_rec(*array[i]);
+          if(alloc_map_ptr_used(h->alloc_map, *array[i]))
+            {
+              result += get_number_of_active_heap_ptrs_rec(h, *array[i]);
+            }
         }
       return result;
     }
@@ -263,15 +264,18 @@ get_number_of_active_ptrs(heap_t *h, void *original_top)
   size_t i = 0;
   while (pointer != NULL)
     {
-      i += 1;
-      i += get_number_of_active_heap_ptrs_rec(pointer);
-      pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
+      if(alloc_map_ptr_used(h->alloc_map, *pointer))
+        {
+          i += 1;
+          i += get_number_of_active_heap_ptrs_rec(h, *pointer);
+          pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
+        }
     }
   return i;
 }
 
 void
-get_active_heap_ptrs_rec(void *ptr, void **array[], size_t *index)
+get_active_heap_ptrs_rec(heap_t *h, void *ptr, void **array[], size_t *index)
 {
   if(get_header_type(ptr) != STRUCT_REP)
     {
@@ -281,14 +285,25 @@ get_active_heap_ptrs_rec(void *ptr, void **array[], size_t *index)
     {
       size_t num_ptrs = get_number_of_pointers_in_struct(ptr);
       if(num_ptrs == 0) return;
-      void ***sub_array =  &(array[*index]);
-      bool success = get_pointers_in_struct(ptr, sub_array);
+      void **temp_array[num_ptrs];
+      bool success = get_pointers_in_struct(ptr, temp_array);
       if(!success) return;
-      *index += num_ptrs;
-      
+
+      size_t num_valid_ptrs = 0;
+      void ***sub_array =  &(array[*index]);
       for(size_t i = 0; i < num_ptrs; ++i)
         {
-          get_active_heap_ptrs_rec(*sub_array[i], array, index);
+          if(alloc_map_ptr_used(h->alloc_map, *temp_array[i]))
+            {
+              array[*index] = temp_array[i];
+              *index += 1;
+              ++num_valid_ptrs;
+            }
+        }
+      
+      for(size_t i = 0; i < num_valid_ptrs; ++i)
+        {
+          get_active_heap_ptrs_rec(h, *sub_array[i], array, index);
         }
     }
 }
@@ -300,7 +315,7 @@ get_active_ptrs(heap_t *h, void *original_top, void **array[], size_t array_size
   size_t index = num_stack_ptrs;
   for(size_t i = 0; i < num_stack_ptrs; ++i)
     {
-      get_active_heap_ptrs_rec(*array[i], array, &index);
+      get_active_heap_ptrs_rec(h, *array[i], array, &index);
     }
   return num_stack_ptrs;
 }
@@ -324,10 +339,12 @@ get_number_of_ptrs_in_stack(heap_t *h, void *original_top)
   size_t i = 0;
   while (pointer != NULL)
     {
-      /* printf("\nPtr %lu found in num%p\n", i,*pointer );
-         printf("\nPtr %lu found in num%d\n", i, *(int*)*pointer );*/
-
-      i += 1;
+      //printf("\nPtr %lu found in num%p\n", i,pointer );
+      //printf("\nPtr %lu found in num%d\n", i, *(int*)*pointer );
+      if(alloc_map_ptr_used(h->alloc_map, *pointer))
+        {
+          i += 1;
+        }
       pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
     }
   return i;
@@ -357,13 +374,16 @@ get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_
   size_t i = 0;
   while (pointer != NULL)
     {
-      /*  printf("\nPtr %lu found in ptrsfrom %p\n", i,*pointer );
-          printf("\nPtr %lu found in ptrsfrom %d\n", i, *(int *)*pointer );*/
+      if(alloc_map_ptr_used(h->alloc_map, *pointer))
+        {
+          /*  printf("\nPtr %lu found in ptrsfrom %p\n", i,*pointer );
+              printf("\nPtr %lu found in ptrsfrom %d\n", i, *(int *)*pointer );*/
 
-      assert(i < array_size && "There are more ptrs in stack than we thought!");
-      array[i] = *pointer;
+          assert(i < array_size && "There are more ptrs in stack than we thought!");
+          array[i] = pointer;
 
-      i += 1;
+          i += 1;
+        }
       pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
     }
   return i;
@@ -431,7 +451,9 @@ h_alloc_struct(heap_t * h, char * layout)
   size_t size = get_struct_size(layout);
   assert(size > 0);
   void * ptr = h_alloc(h, size);
-  return create_struct_header(layout, ptr);
+  void * return_ptr = create_struct_header(layout, ptr);
+  alloc_map_set(h->alloc_map, return_ptr, true); 
+  return return_ptr;
 }
 
 
@@ -440,9 +462,11 @@ h_alloc_data(heap_t * h, size_t bytes)
 {
   assert(bytes > 0);
   size_t size = get_data_size(bytes);
-  assert(size <= 2048);
+  assert(size <= PAGE_SIZE);
   void * ptr = h_alloc(h, size);
-  return create_data_header(bytes, ptr);
+  void * return_ptr = create_data_header(bytes, ptr);
+  alloc_map_set(h->alloc_map, return_ptr, true); 
+  return return_ptr;
 }
 
 int
@@ -473,7 +497,15 @@ void *
 h_alloc_raw(heap_t *h, void *ptr_to_data)
 {
   assert(ptr_to_data != NULL);
+  printf("\n Moving: %p\n", ptr_to_data);
+  printf(" Moving Data: %p\n", *(void **)ptr_to_data);
   size_t raw_size = get_existing_size(ptr_to_data);
+  if(raw_size < SMALLEST_ALLOC_SIZE){
+    raw_size = SMALLEST_ALLOC_SIZE;
+  }
+  if(raw_size % WORD_SIZE != 0){
+    raw_size += WORD_SIZE - (raw_size % WORD_SIZE);
+  }
   int index_next_act = find_next_active_page(h, 0);
   page_t *page_to_write_to;
   while (index_next_act >=0) 
@@ -494,10 +526,14 @@ h_alloc_raw(heap_t *h, void *ptr_to_data)
   void * ptr_to_write_to = page_bump;
   page_move_bump(page_to_write_to, raw_size);
 
+  size_t data_size = get_existing_data_size(ptr_to_data);
   void *ptr_to_moved_data = copy_header(ptr_to_data, ptr_to_write_to);
   forward_header(ptr_to_data, ptr_to_moved_data);
-  size_t data_size = get_existing_data_size(ptr_to_data);
-  return memcpy(ptr_to_moved_data, ptr_to_data, data_size);
+
+  void * return_ptr = memcpy(ptr_to_moved_data, ptr_to_data, data_size);
+  alloc_map_set(h->alloc_map, return_ptr, true); 
+  alloc_map_set(h->alloc_map, ptr_to_data, false); 
+  return return_ptr;
 }
 
 
@@ -548,11 +584,21 @@ forward_internal_array_ptrs_with_offset(void **array[],
 size_t 
 h_gc(heap_t *h)
 {
+  return h_gc_dbg(h, false);
+}
+
+
+//??
+size_t 
+h_gc_dbg(heap_t *h, bool unsafe_stack)
+{
+  alloc_map_print_in_use(h->alloc_map);
+  size_t used_before_gc = h_used(h);
   set_active_to_transition(h);
 
   void *stack_top = get_stack_top();
   size_t num_active_ptrs = get_number_of_active_ptrs(h, stack_top);
-  void ** array_of_found_ptrs[num_active_ptrs];
+  void **array_of_found_ptrs[num_active_ptrs];
   size_t num_stack_ptrs = get_active_ptrs(h, stack_top,  array_of_found_ptrs, num_active_ptrs);
   
   // set_unsafe_pages();
@@ -564,7 +610,7 @@ h_gc(heap_t *h)
           for(size_t ptr_index = 0; ptr_index < num_active_ptrs; ++ptr_index)
             {
               void *ptr_to_original_data = *array_of_found_ptrs[ptr_index];
-              if (get_ptr_page(ptr_to_original_data, h) == (int) page_nr) 
+              if (get_ptr_page(h, ptr_to_original_data) == (int) page_nr) 
                 {
                   void *ptr_to_new_data = NULL;
                   if(get_header_type(ptr_to_original_data) == FORWARDING_ADDR)
@@ -574,6 +620,8 @@ h_gc(heap_t *h)
                   else
                     {
                       ptr_to_new_data = h_alloc_raw(h, *array_of_found_ptrs[ptr_index]);
+                      alloc_map_print_in_use(h->alloc_map);
+
                       forward_internal_array_ptrs_with_offset(array_of_found_ptrs, ptr_index, num_active_ptrs,
                                                               ptr_to_original_data, ptr_to_new_data);
                     }
@@ -581,68 +629,17 @@ h_gc(heap_t *h)
                 }
             }
           page_set_type(h->pages[page_nr], PASSIVE);
+          page_reset(h->pages[page_nr]);
         }
       //set all unsafe -> active
     }
- return 0;
-}
+ alloc_map_print_in_use(h->alloc_map);
 
-/*
-//TODO
-size_t 
-h_gc(heap_t *h)
-{
-  size_t used_before_gc = h_used(h);
-  //page_t * pages = h->pages; 
-  page_t * swap = h->pages[h->number_of_pages - 1];
-
-  void *stack_top = get_stack_top();
-  size_t num_ptrs_in_stack = get_number_of_ptrs_in_stack(h, stack_top);
-  void ** array_of_found_ptrs[num_ptrs_in_stack];
-  get_ptrs_from_stack(h, stack_top,  array_of_found_ptrs, num_ptrs_in_stack);
-
-  for(size_t page_nr = 0; page_nr < h->number_of_pages -1; ++page_nr)
-    {
-      int  swap_array_num_of_indexes = 0;
-      void * swap_array[num_ptrs_in_stack];
-      for(size_t i = 0; i < num_ptrs_in_stack; ++i)  //num_ptrs_in_stack gets the wrong number of ptrs - segfault??
-        {
-          int index_in_swap_page = 0;
-          if (get_ptr_page(* array_of_found_ptrs[i], h) == (int) page_nr)  
-            {
-              //Flytta data till pagen swap
-              void * src_ptr = (void *)( (unsigned long) * array_of_found_ptrs[i] - sizeof(void *) ); // use copy_header(obs sizes)
-              void * dest_ptr = swap->bump;
-              size_t data_size = get_existing_size(* array_of_found_ptrs[i]);
-              swap->bump += data_size;
-              void * pointer_to_swap_obj = memcpy(dest_ptr, src_ptr, data_size);
-              swap_array[index_in_swap_page] = pointer_to_swap_obj;
-              ++index_in_swap_page;
-              // Forwarding and not copying same data twice
-            }
-          swap_array_num_of_indexes = index_in_swap_page;
-        }
-      page_reset(h->pages[page_nr]);
-      for(int j = 0; j <= swap_array_num_of_indexes; ++j){
-        h_alloc_raw(h, swap_array[j]);
-        // Change stack pointer to new location
-        *array_of_found_ptrs[i] =
-      }
-      page_reset(swap);
-      //reset the page page = flytta tillbaka bump-ptr
-      //flytta tillbaka allt från swap till page (vår allokering på pagen)
-    }
   size_t used_after_gc = h_used(h);
   size_t collected = used_before_gc - used_after_gc;
+  printf("\n Before: %lu\n", used_before_gc);
+  printf("\n After: %lu\n", used_after_gc);
   return collected;
-}
-*/
-
-//??
-size_t 
-h_gc_dbg(heap_t *h, bool unsafe_stack)
-{
-  return 0; 
 }
 
 

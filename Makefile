@@ -38,7 +38,7 @@ gc_test: gc_test.c gc.o header.o stack_search.o alloc_map.o
 	@$(CC)  $^ -o $@ $(TESTFLAGS)
 
 memtest_gc: gc_test
-	valgrind -v --leak-check=full ./gc_test
+	valgrind --leak-check=full --log-file=memtest.txt ./gc_test  #-v 
 
 
 # Header
