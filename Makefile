@@ -10,6 +10,7 @@ TESTFLAGS =$(STD) -Wall -g -m64 -lcunit  #-fprofile-arcs -ftest-coverage -covera
 all: gc
 
 gc: gc.o stack_search.o header.o
+
 	$(CC) $(LINKFLAGS) $@ $^
 
 gc.o: gc.c gc.h
@@ -40,6 +41,7 @@ gc_test: gc_test.c gc.o header.o stack_search.o
 memtest_gc: gc_test
 	valgrind -v --leak-check=full ./gc_test
 
+
 # Header
 test_header: header_test
 	@./header_test
@@ -54,6 +56,7 @@ test_stack_search: stack_search_test
 
 stack_search_test: stack_search.o stack_search_test.c 
 	@$(CC)  $^ -o $@ $(TESTFLAGS)
+
 
 
 # Alloc_map
@@ -86,7 +89,6 @@ clean_gc:
 clean_header:
 	@rm -f header_test
 	@echo "Header files cleared"
-
 
 clean_stack_search:
 	@rm -f stack_search_test

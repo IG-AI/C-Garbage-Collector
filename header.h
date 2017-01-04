@@ -33,9 +33,11 @@ typedef enum header_type header_type;
 /**
  *  @brief Creates a header and saves it on the heap
  *
- *  This function is called when the header has to contain information
- *  about pointers inside of data.
- *  The header created will be of the type STRUCT_REP
+ *  This function is called when the header is to be created for
+ *  data represented by a format string.
+ *  If there are pointers in the format string the header created will be
+ *  of the type STRUCT_REP, else it will be converted into RAW_DATA.
+ *  
  *  The @p format_string will be copied and doesn't need to be placed
  *  on the heap before hand.
  *  
@@ -80,9 +82,9 @@ header_type get_header_type(void *);
  *
  *  @param  structure the structure to look for pointers in
  *  @return number of pointers found in @p structure if its header has the type
- *          Structure_rep. Otherwise it will return -1
+ *          STRUCT_REP. Otherwise it will return 0
  */
-int get_number_of_pointers_in_struct(void *structure);
+size_t get_number_of_pointers_in_struct(void *structure);
 
 /**
  *  @brief Finds all pointers inside @p structure and places pointers to
@@ -90,6 +92,7 @@ int get_number_of_pointers_in_struct(void *structure);
  *
  *  The function will only return valid information if a struct_header has been
  *  created and placed just before the struct in the heap.
+ *  
  *  @p structure has to have the header type Structure_rep.
  *  @p array must be of size get_numer_of_pointers_in_structure(@p structure).
  *
@@ -130,5 +133,36 @@ size_t get_data_size(size_t bytes);
  *  @return size of data combined with header
  */
 size_t get_existing_size(void *data);
+
+/**
+ *  @brief Creates a copy of a header and saves the copy on the heap
+ *
+ *  
+ *  @param  data the data containing the header to be copied 
+ *  @param  heap_ptr the place on the heap where the header will be saved
+ *  @return pointer to where the data should be placed
+ *          NULL if @p data is NULL or @p heap_ptr is NULL
+ */
+void *copy_header(void *data , void *heap_ptr);
+
+/**
+ *  @brief forwards a header 
+ *
+ *  
+ *  @param  data the data containing the header to be forwarded 
+ *  @param  new_data the data the header will be forwarded to
+ *  @return true if the forwarding was successfull, false otherwise
+ */
+bool forward_header(void *data, void *new_data);
+
+/**
+ *  @brief Gets the address that data has been forwarded to 
+ *
+ *  @param  data the data containing the header to get forwarding address from
+ *  @return the address where @p data has been forwarded to
+ *          NULL if @p data isn't of type FORWARDING_ADDR
+ */
+void *get_forwarding_address(void *data);
+
 
 #endif
