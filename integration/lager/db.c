@@ -5,9 +5,11 @@
 #include "tree.h"
 #include "list.h"
 #include "undo.h"
-#include "../../gc.h"
 
-extern heap_t *heap;
+#ifdef GC
+#include "../../gc.h"
+extern heap_t heap;
+#endif
 
 typedef struct good good;
 typedef struct db db;
@@ -31,8 +33,11 @@ struct db
 
 good *good_new(char *name, char *desc, int price, int amount)
 {
+#ifdef GC
   good *result = h_alloc_data(heap, sizeof(*result));
-
+#else
+  good *result = malloc(sizeof(*result));
+#endif
   result->name = name;
   result->desc = desc;
   result->shelves = list_new();
@@ -44,15 +49,27 @@ good *good_new(char *name, char *desc, int price, int amount)
 
 void good_delete(good *g)
 {
+#ifdef GC
+#else
   free(g->name);
   free(g->desc);
-  list_delete(g->shelves); // TODO: free shelf data
+#endif
+
+  list_delete(g->shelves);
+
+#ifdef GC
+#else
   free(g);
+#endif
 }
 
 db *db_new()
 {
+#ifdef GC
   db *result = h_alloc_struct(heap ,"2*");
+#else
+  db *result = malloc(sizeof(*result));
+#endif
   *result = (db) {
     .goods        = tree_new((cmp_func) strcmp),
     .undo_actions = list_new()
@@ -66,13 +83,19 @@ void db_delete(db *db)
   while (undo_action)
     {
       undo_action_delete(undo_action);
+#ifdef GC
+#else
       free(undo_action);
+#endif
       undo_action = undo_pop(db->undo_actions);
     }
   list_delete(db->undo_actions);
 
   tree_delete_visit(db->goods, (tree_visitor_func) entry_deep_free_func);
+#ifdef GC
+#else
   free(db);
+#endif
 }
 
 static inline void db_internal_replace_good(db *db, good *from, good *to, bool undo)
@@ -167,7 +190,10 @@ bool db_undo_last_action(db *db)
             assert(false);
           }
         }
+#ifdef GC
+#else
       free(action);
+#endif
       return true;
     }
   else
@@ -243,10 +269,18 @@ good *good_deep_copy(good *good)
 
 void good_deep_free(good *g)
 {
+#ifdef GC
+#else
   free(g->name);
   free(g->desc);
+#endif
+
   list_delete(g->shelves);
+
+#ifdef GC
+#else
   free(g);
+#endif
 }
 
 void entry_deep_free_func(char *key, good *value)

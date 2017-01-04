@@ -6,9 +6,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef GC
 #include "../../gc.h"
-
 extern heap_t *heap;
+#endif
 
 typedef struct node node;
 typedef void (*tree_internal_visitor_func)(node *n, void *ptr);
@@ -36,7 +37,7 @@ struct node
   void *key;
   void *value;
   struct node *left;
-  struct node *righ;
+  struct node *right;
 };
 
 static node *tree_internal_node_new(void *key, void *value);
@@ -53,7 +54,11 @@ void tree_path_for_key(tree *t, void *key, char **buffer)
 {
   node *n = t->root;
 
-  char *path = *buffer ? *buffer : h_alloc_data(heap, tree_depth(t) + 1);
+#ifdef GC
+  char *path = *buffer ? *buffer : h_alloc_data(h, tree_depth(t) + 1);
+#else
+  char *path = *buffer ? *buffer : malloc(tree_depth(t) + 1);
+#endif
   char *start = path;
   
   while (n)
@@ -139,14 +144,22 @@ char *tree_walk(tree *t, char *path)
 
 static node *tree_internal_node_new(void *key, void *value)
 {
-  node *result = h_alloc_struct(heap, "****");
+#ifdef GC
+  node *result = h_alloc_struct(h, "****");
+#else
+  node *result = malloc(sizeof(*result));
+#endif
   *result = (struct node) { .key = key, .value = value };
   return result;
 }
 
 tree *tree_new(cmp_func key_cmp)
 {
-  tree *result = h_alloc_struct(heap, "**");
+#ifdef GC
+  tree *result = h_alloc_struct(h, "**");
+#else
+  tree *result = malloc(sizeof(*result));
+#endif
   *result = (struct tree) { .key_cmp = key_cmp };
   return result;
 }
@@ -339,7 +352,10 @@ bool tree_remove(tree *t, void *key)
     {
       node *to_remove = *n;
       tree_internal_node_remove_from_tree(n);
+#ifdef GC
+#else
       free(to_remove);
+#endif
       return true;
     }
   else
@@ -396,7 +412,24 @@ void tree_internal_populate(tree *t, struct record *d, int size)
 
 void tree_balance(tree *t)
 {
+#ifdef GC
   assert(false);
+#else
+  if (tree_size(t) < 3) return;
+
+  struct dump dump = (struct dump) { .data = calloc(tree_size(t), sizeof(struct record)) };
+  tree_visit(t, inorder, tree_internal_dump_func, &dump);
+
+  tree *new_tree = tree_new(t->key_cmp);
+  tree_internal_populate(new_tree, dump.data, dump.size);
+
+  node *old_root = t->root;
+  t->root = new_tree->root;
+  new_tree->root = old_root; 
+
+  free(dump.data);
+  tree_delete(new_tree);
+#endif
 }
 
 struct depth_cache

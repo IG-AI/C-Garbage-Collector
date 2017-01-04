@@ -6,21 +6,27 @@
 #include <alloca.h>
 #include "db.h"
 #include "list.h"
-#include "../../gc.h"
 
-heap_t *heap;
+#ifdef GC
+#include "../../gc.h"
+heap_t heap;
+#endif
 
 static inline void clear_screen()
 {
   printf("\e[1;1H\e[2J");
 }
 
-static inline void tui_getline(char **buf, size_t *len) //TODO
+static inline void tui_getline(char **buf, size_t *len)
 {
   if (len == 0 || *buf == NULL)
     {
       *len = 128;
+#ifdef GC
       *buf = h_alloc_data(heap,*len * sizeof(char));
+#else
+      *buf = calloc(*len, sizeof(char));
+#endif
     }
   
   size_t read = 0;
@@ -36,9 +42,13 @@ static inline void tui_getline(char **buf, size_t *len) //TODO
         {
           /// Grow buffer size using realloc
           *len *= 2;
+#ifdef GC
           char *new_buf = h_alloc_data(heap, *len * sizeof(char));
           strncpy(new_buf, *buf, *len / 2);
           *buf = new_buf;
+#else
+          *buf = realloc(*buf, *len);
+#endif
           continue;
         }
     }
@@ -418,9 +428,18 @@ void event_loop(db* db)
 
 int main(int argc, char *argv[])
 {
+#ifdef GC
   heap = h_init(102400, false, 0.5);
+#else
   db *db = db_new();
+#endif
+
   event_loop(db);
+
+#ifdef GC
   h_delete(heap);
+#else
+  db_delete(db);
+#endif
   return 0;
 }

@@ -2,9 +2,11 @@
 #include "undo.h"
 #include "list.h"
 #include "db.h"
-#include "../../gc.h"
 
-extern heap_t *heap;
+#ifdef GC
+#include "../../gc.h"
+extern heap_t heap;
+#endif 
 
 void undo_store_action(undo_t *undo, action_t *action)
 {
@@ -49,7 +51,11 @@ void undo_action_delete(action_t *a)
 
 action_t *undo_new_add_action(good *g)
 {
+#ifdef GC
   action_t *action = h_alloc_data(heap, sizeof(action_t));
+#else
+  action_t *action = calloc(1, sizeof(action_t));
+#endif
   action->type = add;
   action->name = good_name(g);
   action->good = g;
@@ -58,7 +64,11 @@ action_t *undo_new_add_action(good *g)
 
 action_t *undo_new_remove_action(good *g)
 {
+#ifdef GC
   action_t *action = h_alloc_data(heap, sizeof(action_t));
+#else
+  action_t *action = calloc(1, sizeof(action_t));
+#endif
   action->type = remove;
   action->name = good_name(g);
   action->good = g;
@@ -67,7 +77,11 @@ action_t *undo_new_remove_action(good *g)
 
 action_t *undo_new_edit_action(char *original_key, good *g)
 {
+#ifdef GC
   action_t *action = h_alloc_data(heap, sizeof(action_t));
+#else
+  action_t *action = calloc(1, sizeof(action_t));
+#endif
   action->type = edit;
   action->name = original_key;
   action->good = g;

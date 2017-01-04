@@ -1,7 +1,11 @@
 #include <stdlib.h>
 #include "list.h"
 
+
+#ifdef GC
+#include "../../gc.h"
 extern heap_t *heap;
+#endif
 
 typedef struct node node;
 
@@ -20,7 +24,11 @@ struct node
 
 iter *iterator_new(void *current)
 {
-  iter *result = h_alloc_struct(heap, "*");
+#ifdef GC
+  iter *result = h_alloc_struct("*");
+#else
+  iter *result = malloc(sizeof(*result));
+#endif
   result->current = (node *)current;
   return result;
 }
@@ -46,6 +54,10 @@ bool iterator_has_more(iter *iter)
 
 void iterator_delete(iter *iter)
 {
+#ifdef GC
+  return;
+#else
   free(iter);
+#endif
 }
 

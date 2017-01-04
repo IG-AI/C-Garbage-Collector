@@ -15,9 +15,9 @@ struct int_cell
   int value;
 };
 
-#ifdef GC_TEST
-#include "gc.h"
-heap_t *h; 
+#ifdef GC
+#include "../../gc.h"
+heap_t *heap; 
 #endif
 
 static inline int_cell *populate_lists(list **lists, uint no_lists, uint list_max)
@@ -26,8 +26,8 @@ static inline int_cell *populate_lists(list **lists, uint no_lists, uint list_ma
   list *l = lists[rand() % no_lists];
 
   // Build an int cell (deviation from spec)
-#ifdef GC_TEST
-  int_cell *c = h_alloc_data(h, sizeof(int_cell));
+#ifdef GC
+  int_cell *c = h_alloc_data(heap, sizeof(int_cell));
 #else
   int_cell *c = malloc(sizeof(int_cell));
 #endif
@@ -75,10 +75,10 @@ int main(int argc, char *argv[])
 
   printf("Searching %d times in %d elements\n", N, M);
   
-#ifdef GC_TEST
+#ifdef GC
   /// An approximation of 2x memory, adjust if neeced
   const uint HEAP_MAX = 6 * Lists * M * sizeof(void *) + Lists * 6 * sizeof(void *);
-  h = h_init(HEAP_MAX, true, 0.5);
+  heap = h_init(HEAP_MAX, true, 0.5);
 #endif
 
   list *lists[Lists];
@@ -96,8 +96,8 @@ int main(int argc, char *argv[])
       *cursor++ = populate_lists(lists, Lists, M * Lists);
     }
 
-#ifdef GC_TEST
-  h_gc(h);
+#ifdef GC
+  h_gc(heap);
 #endif
 
   /// What happens to performance if we do all searches in list 0
@@ -113,8 +113,8 @@ int main(int argc, char *argv[])
     }
   printf("Number of elements found: %d\n", hits);
   
-#ifdef GC_TEST
-  h_delete(h);
+#ifdef GC
+  h_delete(heap);
 #endif
 
   return 0;

@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "list.h"
-#include "../../gc.h"
 
+#ifdef GC
+#include "../../gc.h"
 extern heap_t *heap;
+#endif
 
 typedef struct list list;
 typedef struct node node;
@@ -50,12 +52,20 @@ void list_visit(list *l, list_visitor_func f, void *ptr)
 
 list *list_new()
 {
-  return h_alloc_struct(heap, "**i");
+#ifdef GC
+  return h_alloc_struct(h, "**i");
+#else
+  return calloc(1, sizeof(struct list));
+#endif
 }
 
 static inline node *list_internal_node_new(void *elem, node *next)
 {
-  node *result = h_alloc_struct(heap, "**");
+#ifdef GC
+  node *result = h_alloc_struct(h, "**");
+#else
+  node *result = malloc(sizeof(*result));
+#endif
   
   *result = (struct node) { .elem = elem, .next = next };
 
@@ -125,8 +135,10 @@ bool list_remove(list *l, int index)
       /// Unlink
       *cursor = (*cursor)->next;
       --l->size;
-
+#ifdef GC
+#else
       free(tmp);
+#endif
 
       return true;
     }
@@ -164,7 +176,10 @@ void list_delete(list *l)
     {
       list_remove(l, 0);
     }
+#ifdef GC
+#else
   free(l);
+#endif
 }
 
 size_t list_length(list *l)
