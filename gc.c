@@ -11,12 +11,16 @@
 #include "header.h"
 #include "stack_search.h"
 #include "header_hidden.h"
+#include "alloc_map.h"
 
 #include <errno.h>
 #include "gc.h"
 #include "gc_hidden.h"
 
 
+
+#define HEADER_SIZE 8
+#define WORD_SIZE 2
 #define PAGE_SIZE 2048
 #define SMALLEST_ALLOC_SIZE 16
 
@@ -127,6 +131,7 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   
 
   heap_t *heap = malloc( sizeof(void*)
+                         + sizeof(alloc_map_t *)
                          + sizeof(size_t)
                          + sizeof(bool) 
                          + sizeof(float) 
@@ -160,8 +165,11 @@ void *memory = malloc(bytes + (sizeof(page_t) * number_of_pages) );
     free(heap);
     return NULL;
   }
+
+  alloc_map_t * alloc_map2 = alloc_map_create(memory, WORD_SIZE, (bytes / WORD_SIZE) );
+  alloc_map_t * alloc_map = NULL;
   
-  *heap = ( (heap_t) {memory, bytes, unsafe_stack, gc_threshold, number_of_pages} );
+  *heap = ( (heap_t) {memory, alloc_map2, bytes, unsafe_stack, gc_threshold, number_of_pages} );
   
   void *start_of_pages = memory + bytes;
   create_pages(memory, start_of_pages, number_of_pages, page_size, heap);
@@ -385,7 +393,11 @@ h_alloc(heap_t * h, size_t bytes)
   }
 
   if(bytes < SMALLEST_ALLOC_SIZE){
-    bytes = SMALLEST_ALLOC_SIZE; //plus header??
+    bytes = SMALLEST_ALLOC_SIZE;
+  }
+
+  if(bytes % WORD_SIZE != 0){
+    bytes += WORD_SIZE - (bytes % WORD_SIZE);
   }
 
   int page_nr = 0;

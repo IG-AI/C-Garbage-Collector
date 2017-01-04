@@ -15,6 +15,7 @@
 #include <stdlib.h>
 
 #include "gc.h"
+#include "alloc_map.h"
 
 #ifndef __gc_hidden__
 #define __gc_hidden__
@@ -43,6 +44,7 @@ struct page
 
 struct heap{
   void *memory;
+  alloc_map_t * alloc_map;
   size_t size;
   bool unsafe_stack;
   float gc_threshold;
