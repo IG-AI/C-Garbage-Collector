@@ -30,12 +30,17 @@ alloc_map_create_get_start_addr(size_t size)
 alloc_map_t *
 alloc_map_create(void *start_addr, size_t word_size, size_t block_size)
 {
-  alloc_map_t *alloc_map = alloc_map_create_get_start_addr((block_size/word_size)+2*sizeof(size_t)+sizeof(void*));
+  alloc_map_t *alloc_map = alloc_map_create_get_start_addr((block_size/word_size)+2*sizeof(size_t)+sizeof(void*)+1);
   alloc_map->start_addr = start_addr;
   alloc_map->word_size = word_size;
   alloc_map->map_size = (block_size/word_size);
-  for(size_t i = 0; i <= (alloc_map->map_size/alloc_map->word_size); ++i){
+  for(size_t i = 0; i <= ((alloc_map->map_size)); ++i){
+    /*(i%2 == 0)?
+      (alloc_map->bits[i] = 0):
+      (alloc_map->bits[i] = 1);
+    */
     alloc_map->bits[i] = 0;
+    //printf("i:%lu\n", i);
   }
   return alloc_map;
 }
@@ -84,4 +89,24 @@ alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state)
       alloc_map->bits[mem_offset / alloc_map->word_size] &= Off(mem_offset % alloc_map->word_size);
     }
   return true;
+}
+
+void
+alloc_map_print_in_use(alloc_map_t *alloc_map)
+{
+  printf("\nStart addr: %p\n", alloc_map->start_addr);
+  printf("Word size: %lu\n", alloc_map->word_size);
+  printf("Map size:  %lu\n", alloc_map->map_size);
+  for(size_t i = 0; i < alloc_map->map_size; ++i)
+    {
+      (i%16 == 0)? printf("\n"): 1+1 ;
+      (i%256 == 0)? printf("\n"):  1+1 ;
+
+
+      void * test_ptr = (void *)((size_t)(alloc_map->start_addr) + (i*alloc_map->word_size));
+
+      alloc_map_ptr_used(alloc_map, test_ptr) ?  printf("1") : printf("0");
+    }
+
+  printf("\n");
 }
