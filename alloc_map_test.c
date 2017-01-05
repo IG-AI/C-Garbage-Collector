@@ -28,18 +28,20 @@ test_alloc_map_create()
   int block_size = 256;
   size_t i = (block_size*type_size);
   type_t *start_addr = malloc(i*sizeof(type_t));
-  alloc_map_t *alloc_map_create_alloc_map = alloc_map_create(start_addr,type_size, i);
+  alloc_map_t *alloc_map_create_alloc_map = malloc(alloc_map_mem_size_needed(type_size, i));
+  alloc_map_create(alloc_map_create_alloc_map, start_addr,type_size, i);
   
   //checks creation and values in the struct
   CU_ASSERT(alloc_map_create_alloc_map->word_size == 4);
   CU_ASSERT(alloc_map_create_alloc_map->start_addr == start_addr);
-  CU_ASSERT(alloc_map_create_alloc_map->map_size == 255);
+  CU_ASSERT(alloc_map_create_alloc_map->map_size == 256);
   
   CU_ASSERT_FALSE(alloc_map_ptr_used(alloc_map_create_alloc_map, (void *)&(start_addr[1])));
 
   free(start_addr);
   free(alloc_map_create_alloc_map);
 }
+
 
 void
 test_alloc_map_sets()
@@ -50,7 +52,8 @@ test_alloc_map_sets()
   int block_size = 2048;
   size_t i = (block_size*type_size);
   type_t *start_addr = malloc(i*sizeof(type_t));
-  alloc_map_t *alloc_map = alloc_map_create(start_addr,type_size, i);
+  alloc_map_t *alloc_map = malloc(alloc_map_mem_size_needed(type_size, i));
+  alloc_map_create(alloc_map, start_addr,type_size, i);
 
   CU_ASSERT_FALSE(alloc_map_ptr_used(alloc_map, (void *)&(start_addr[1])));
   alloc_map_set(alloc_map, (void *)&(start_addr[1]), true);
@@ -58,6 +61,7 @@ test_alloc_map_sets()
 
   alloc_map_set(alloc_map, (void *)&(start_addr[1]), false);
   CU_ASSERT_FALSE(alloc_map_ptr_used(alloc_map, (void *)&(start_addr[1])));
+
 
   free(start_addr);
   free(alloc_map);
@@ -71,7 +75,8 @@ test_alloc_map_sets_edge()
   int block_size = 1024;
   size_t i = (block_size*type_size);
   type_t *start_addr = malloc(i*sizeof(type_t));
-  alloc_map_t *alloc_map = alloc_map_create(start_addr,type_size, i);
+  alloc_map_t *alloc_map = malloc(alloc_map_mem_size_needed(type_size, i));
+  alloc_map_create(alloc_map, start_addr,type_size, i);
 
   
    //Check for lowest valid address
@@ -115,6 +120,7 @@ test_alloc_map_sets_edge()
   free(alloc_map);
 }
 
+
 int
 main (int argc, char *argv[])
 {
@@ -128,9 +134,9 @@ main (int argc, char *argv[])
   suite1 = CU_add_suite("Alloc_map Test", NULL, NULL);
 
   if (
-      // (CU_add_test(suite1, "test_alloc_map_test()", test_alloc_map_create) == NULL)
-      // ||
-      (CU_add_test(suite1, "test_alloc_map_sets()", test_alloc_map_sets) == NULL)
+       (CU_add_test(suite1, "test_alloc_map_test()", test_alloc_map_create) == NULL)
+       ||
+       (CU_add_test(suite1, "test_alloc_map_sets()", test_alloc_map_sets) == NULL)
        ||
        (CU_add_test(suite1, "test_alloc_map_sets_edge()", test_alloc_map_sets_edge) == NULL)
       )

@@ -37,13 +37,13 @@ typedef struct alloc_map alloc_map_t;
  *  @param word_size the size of the words which the memory block is
  *         divided into.
  *  @param block_size the size in bytes of the memory block the map is
- *         going ot represent
+ *         going to represent
  *
  *  @return pointer to the newly created allocation map.
  *  
  */
-alloc_map_t *
-alloc_map_create(void *start_addr, size_t word_size, size_t block_size);
+void 
+alloc_map_create(alloc_map_t *alloc_map, void *start_addr, size_t word_size, size_t block_size);
 
 
 
@@ -54,7 +54,8 @@ alloc_map_create(void *start_addr, size_t word_size, size_t block_size);
  *  @param alloc_map pointer to the alloc map.
  *  @param ptr pointer to the adress to look up.
  *
- *  @return A bool representing the bit of the supplied ptr.
+ *  @return A bool representing the bit of the supplied ptr. False if @p ptr not
+ *          in scope of @p alloc_map
  */
 bool 
 alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr);
@@ -72,6 +73,10 @@ alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr);
 bool 
 alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state);
 
-void alloc_map_print_in_use();
 
+void
+alloc_map_print_in_use();
+
+size_t
+alloc_map_mem_size_needed(size_t word_size, size_t block_size);
 #endif
