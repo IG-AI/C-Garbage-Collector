@@ -124,8 +124,13 @@ page_set_type(page_t *page, page_type_t type)
 heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
 {
-  assert(bytes >= PAGE_SIZE);
+  assert(bytes >= PAGE_SIZE*2);
+  if(!(bytes >= PAGE_SIZE*2)) return NULL;
   assert(bytes % PAGE_SIZE == 0);
+  if(!(bytes % PAGE_SIZE == 0)) return NULL;
+  assert(0 < gc_threshold && gc_threshold <= 1);
+  if(!(0 < gc_threshold && gc_threshold <= 1)) return NULL;
+
   size_t page_size = PAGE_SIZE;
   size_t number_of_pages = (bytes / page_size);
   
@@ -135,7 +140,7 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
                          + sizeof(size_t)
                          + sizeof(bool) 
                          + sizeof(float) 
-                         + sizeof(int) 
+                         + sizeof(size_t) 
                          + (sizeof(void *) * (number_of_pages) ) );
 
   if(heap == NULL){
@@ -167,7 +172,7 @@ void *memory = malloc(bytes + (sizeof(page_t) * number_of_pages) );
   }
 
   alloc_map_t * alloc_map = alloc_map_create(memory, WORD_SIZE, bytes);
-  alloc_map_print_in_use(alloc_map);
+  //  alloc_map_print_in_use(alloc_map);
   *heap = ( (heap_t) {memory, alloc_map, bytes, unsafe_stack, gc_threshold, number_of_pages} );
   
   void *start_of_pages = memory + bytes;

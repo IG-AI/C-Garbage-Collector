@@ -17,7 +17,8 @@
 #ifndef __gc__
 #define __gc__
 
-
+#define UNSAFE_STACK true
+#define SAFE_STACK false
 
 /**
  *  @brief The opaque data type holding all the heap data.

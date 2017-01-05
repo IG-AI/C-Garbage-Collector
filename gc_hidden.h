@@ -20,6 +20,8 @@
 #ifndef __gc_hidden__
 #define __gc_hidden__
 
+#pragma pack(1)
+
 extern char **environ;
 
 typedef struct page page_t;
@@ -42,9 +44,10 @@ struct page
 };
 
 
-struct heap{
+struct heap
+{
   void *memory;
-  alloc_map_t * alloc_map;
+  alloc_map_t *alloc_map;
   size_t size;
   bool unsafe_stack;
   float gc_threshold;

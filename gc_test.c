@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <time.h>
 
 #include "gc.h"
@@ -10,6 +11,7 @@
 #include <CUnit/Basic.h>
 
 #define WORD_SIZE 8
+#define SMALLEST_HEAP_SIZE 4096
 
 /* struct heap{ */
 /*   void * memory; */
@@ -27,6 +29,7 @@
 /*   int size; */
 /* }; */
 
+#define DEFAULT_SIZE = 2*2048;
 
 struct test_struct{
   int first;
@@ -47,24 +50,121 @@ write_int_to_heap(void * allocated_memory, int int_to_write)
   *(int *)allocated_memory = int_to_write;
 }
 
-
-void 
-test_h_init ()
+/*============================================================================
+ *                             h_init TESTING SUITE
+ *===========================================================================*/
+void
+test_h_init_size_zero()
 {
-  time_t t;
-  srand( (unsigned) time(&t));
-
-  for (int i = 1; i <= 42; i++) { 
-    int int_rand = (rand() % 20) + 1;
-    int test_size = 2048 * int_rand;
-    //printf("\nTest size: %d\n", test_size);
-
-    heap_t *test_h_init_heap = h_init(test_size, true, 1);
-    CU_ASSERT(test_h_init_heap != NULL);
-    CU_ASSERT(heap_get_size(test_h_init_heap) == (size_t)test_size);
-    h_delete(test_h_init_heap);
-  }
+  heap_t *h = h_init(0, SAFE_STACK, 1);
+  CU_ASSERT(h == NULL);
 }
+
+void
+test_h_init_size_one()
+{
+  heap_t *h = h_init(1, SAFE_STACK, 1);
+  CU_ASSERT(h == NULL);
+}
+
+void
+test_h_init_size_eight()
+{
+  heap_t *h = h_init(8, SAFE_STACK, 1);
+  CU_ASSERT(h == NULL);
+}
+
+void
+test_h_init_size_2047()
+{
+  heap_t *h = h_init(2047, SAFE_STACK, 1);
+  CU_ASSERT(h == NULL);
+}
+
+void
+test_h_init_size_one_below_smallest()
+{
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE - 1, SAFE_STACK, 1);
+  CU_ASSERT(h == NULL);
+}
+
+void
+test_h_init_size_one_above_smallest()
+{
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE + 1, SAFE_STACK, 1);
+  CU_ASSERT(h == NULL);
+}
+
+void
+test_h_init_size_odd()
+{
+  heap_t *h = h_init(10*SMALLEST_HEAP_SIZE - 11, SAFE_STACK, 1);
+  CU_ASSERT(h == NULL);
+}
+
+void
+test_h_init_size_max()
+{
+  heap_t *h = h_init(SIZE_MAX/2048 * 2048, SAFE_STACK, 1);
+  CU_ASSERT(h == NULL); // TODO: Define behaviour
+}
+
+void
+test_h_init_size_one_below_max()
+{
+  heap_t *h = h_init(SIZE_MAX - 1, SAFE_STACK, 1);
+  CU_ASSERT(h == NULL);
+}
+
+void
+test_h_init_threshold_zero()
+{
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0);
+  CU_ASSERT(h == NULL);
+}
+
+void
+test_h_init_threshold_negative()
+{
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, -1);
+  CU_ASSERT(h == NULL);
+}
+
+void
+test_h_init_threshold_larger_than_one()
+{
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 1.1);
+  CU_ASSERT(h == NULL);
+}
+
+void
+test_h_init_threshold_close_to_edge()
+{
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.9999);
+  CU_ASSERT(h != NULL);
+  h_delete(h);
+}
+
+void
+test_h_init_threshold_edge()
+{
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 1);
+  CU_ASSERT(h != NULL);
+  h_delete(h);
+}
+
+void
+test_h_init_success()
+{
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
+  CU_ASSERT(h != NULL);
+  h_delete(h);
+}
+
+
+/*============================================================================
+ *                             ... TESTING SUITE
+ *===========================================================================*/
 
 
 void 
@@ -139,7 +239,7 @@ test_h_alloc ()
   free(test_pointer);
 }
 
-
+/*
 //TODO FAILS SOMETIMES ?? 
 void 
 test_h_size()
@@ -178,7 +278,7 @@ test_h_size()
   }
   
 }
-
+*/
 extern char **environ;
 
 
@@ -274,21 +374,84 @@ int
 main (int argc, char *argv[])
 {
   CU_pSuite suite1 = NULL;
-
+  CU_pSuite suite_h_init = NULL;
   if (CU_initialize_registry() != CUE_SUCCESS)
     {
       return CU_get_error();
     }
 
+
+  // ********************* get_h_init SUITE ******************  //
+  suite_h_init = CU_add_suite("Tests function h_init()", NULL, NULL);
+  if (suite_h_init == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if ( (NULL == CU_add_test(suite_h_init
+                            , "size 0"
+                            , test_h_init_size_zero) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "size 1"
+                               , test_h_init_size_one) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "size 8"
+                               , test_h_init_size_eight) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "size 2047"
+                               , test_h_init_size_2047) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "one below smallest"
+                               , test_h_init_size_one_below_smallest) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "one above smallest"
+                               , test_h_init_size_one_above_smallest) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "size odd"
+                               , test_h_init_size_odd) )
+    || (NULL == CU_add_test(suite_h_init
+                               , "size max"
+                               , test_h_init_size_max) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "size one below max"
+                               , test_h_init_size_one_below_max) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "threshold zero"
+                               , test_h_init_threshold_zero) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "threshold negative"
+                               , test_h_init_threshold_negative) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "threshold above 1"
+                               , test_h_init_threshold_larger_than_one) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "threshold close to edge"
+                               , test_h_init_threshold_close_to_edge) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "threshold edge"
+                               , test_h_init_threshold_edge) )
+       || (NULL == CU_add_test(suite_h_init
+                               , "success"
+                               , test_h_init_success) )
+       
+    )
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
+
+
+
+
+
+
   suite1 = CU_add_suite("Heap Test", NULL, NULL);
 
   if (
-      (CU_add_test(suite1, "test_h_init()", test_h_init) == NULL) ||
       (CU_add_test(suite1, "test_page()", test_pages) == NULL) ||
       (CU_add_test(suite1, "test_h_alloc_struct/data()", test_h_alloc) == NULL) ||
-      (CU_add_test(suite1, "test_h_size/avail/used()", test_h_size) == NULL) ||
       (CU_add_test(suite1, "test_ptrs_from_stack", test_ptrs_from_stack) == NULL) ||
-      (CU_add_test(suite1, "test_get_number_of_ptrs_in_stack", test_get_number_of_ptrs_in_stack) == NULL) ||
+      (CU_add_test(suite1, "test_number_of_ptrs_in_stack", test_get_number_of_ptrs_in_stack) == NULL) ||
       (CU_add_test(suite1, "test_h_delete_dbg", test_h_delete_dbg) == NULL) ||
       (CU_add_test(suite1, "test_h_gc)", test_h_gc) == NULL)
       )

@@ -34,7 +34,6 @@ alloc_map_create(void *start_addr, size_t word_size, size_t block_size)
   alloc_map->start_addr = start_addr;
   alloc_map->word_size = word_size;
   alloc_map->map_size = (block_size/word_size);
-  printf("Map size: %lu\n", alloc_map->map_size);
   for(size_t i = 0; i <= ((alloc_map->map_size) /(alloc_map->word_size)); ++i){
     /*(i%2 == 0)?
       (alloc_map->bits[i] = 0):
