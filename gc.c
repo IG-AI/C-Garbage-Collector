@@ -711,7 +711,7 @@ forward_internal_array_ptrs_with_offset(void **array[],
 size_t 
 h_gc(heap_t *h)
 {
-  return h_gc_dbg(h, false);
+  return h_gc_dbg(h, SAFE_STACK);
 }
 
 void
@@ -719,10 +719,10 @@ set_unsafe_pages(heap_t *h, void **array[], size_t array_size)
 {
   for(size_t i = 0; i < array_size; ++i)
     {
-      if(!(alloc_map_ptr_used(h->alloc_map, *array[i])))
+      if((alloc_map_ptr_used(h->alloc_map, *array[i])))
         {
           int index = get_ptr_page(h, *array[i]);
-          if(h->pages[index]->type == ACTIVE)
+          if(h->pages[index]->type == TRANSITION)
             {
               h->pages[index]->type = UNSAFE;
             }
@@ -756,7 +756,7 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
   void **array_of_found_ptrs[num_active_ptrs];
   size_t num_stack_ptrs = get_active_ptrs(h, stack_top,  array_of_found_ptrs, num_active_ptrs);
  
-  if(unsafe_stack)
+  if(unsafe_stack == UNSAFE_STACK)
     {
       set_unsafe_pages(h, array_of_found_ptrs, num_stack_ptrs);
     }
@@ -765,7 +765,7 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
     {
       if (page_get_type(h->pages[page_nr]) == TRANSITION)
         {
-          for(size_t ptr_index = 0; ptr_index < num_active_ptrs && array_of_found_ptrs[ptr_index] != NULL; ++ptr_index)
+          for(size_t ptr_index = 0; ptr_index < num_active_ptrs; ++ptr_index)
             {
               void *ptr_to_original_data = *array_of_found_ptrs[ptr_index];
               if (get_ptr_page(h, ptr_to_original_data) == (int) page_nr) 
@@ -792,8 +792,8 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
           page_set_type(h->pages[page_nr], PASSIVE);
           page_reset(h->pages[page_nr]);
         }
-      set_unsafe_pages_to_active(h);
     }
+  set_unsafe_pages_to_active(h);
   size_t used_after_gc = h_used(h);
   size_t collected = used_before_gc - used_after_gc;
   return collected;

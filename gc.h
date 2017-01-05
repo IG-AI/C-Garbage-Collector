@@ -43,8 +43,6 @@ heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
 
-
-
 /**
  *  @brief Delete a heap.
  *
@@ -57,8 +55,11 @@ h_delete(heap_t *h);
 /**
  *  @brief Delete a heap and trace, killing off stack pointers.
  *
+ *  Only valid pointers will be replaced. A valid pointer is a pointer
+ *  with the address of an allocated space in @p h.
+ *
  *  @param h the heap
- *  @param dbg_value a value to be written into every pointer into @p h
+ *  @param dbg_value a value to be written into every valid pointer into @p h
  *         on the stack
  */
 void 
@@ -83,7 +84,6 @@ h_delete_dbg(heap_t *h, void *dbg_value);
  *  
  *  @note   the heap does *not* retain an alias to layout.
  */
-
 void *
 h_alloc_struct(heap_t *h, char *layout);
 
@@ -102,10 +102,6 @@ void *
 h_alloc_data(heap_t *h, size_t bytes);
 
 
-
-
-
-
 /**
  *  @brief Manually trigger garbage collection.
  *
@@ -115,10 +111,9 @@ h_alloc_data(heap_t *h, size_t bytes);
  *  @param  h the heap
  *  @return the number of bytes collected
  */
-
-
 size_t 
 h_gc(heap_t *h);
+
 
 
 /**
@@ -149,13 +144,11 @@ h_avail(heap_t *h);
 
 
 
-
 /**
- *  @brief Returns the bytes currently in use by user structures.
+ *  @brief Returns the bytes currently in use in a heap.
  *
- *  This should not include the collector's own meta data. Notably,
- *  this means that h_avail + h_used will not equal the size of
- *  the heap passed to h_init.
+ *  This includes any meta-data specific to user allocated structures
+ *  and any internal padding.
  *
  *  @param  h the heap
  *  @return the bytes currently in use by user structures.
@@ -166,12 +159,11 @@ h_used(heap_t *h);
 
 
 /**
- *  @brief Return the byte  size of the heap as an int.
+ *  @brief Return the byte  size of the heap.
  *  
  *  @param h the heap
  *  @return the byte size of the heap.
  */
-
 size_t 
 h_size(heap_t *h);
 
