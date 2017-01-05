@@ -257,9 +257,11 @@ test_h_gc()
 
   int test_size = 6144;
   heap_t *h = h_init(test_size, true, 1);
-  void * ptr1 = h_alloc_struct(h, "i*");
+  void * ptr1 = h_alloc_struct(h, "i**");
+  void *data_ptr = h_alloc_data(h, 16);
   write_int_to_heap(ptr1, 6);
-  write_pointer_to_heap(ptr1 + sizeof(int), (void *) 3UL);
+  write_pointer_to_heap((void *)((unsigned long) ptr1 + sizeof(int)), (void *) 3UL);
+  write_pointer_to_heap((void *)((unsigned long) ptr1 + sizeof(int) + sizeof(void *)), data_ptr);
   size_t cleaned = h_gc(h); 
   CU_ASSERT(*(int *) ptr1 == 6);
   CU_ASSERT(*(unsigned long *)(ptr1 + sizeof(int)) == 3UL);
