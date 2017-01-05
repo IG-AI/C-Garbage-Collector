@@ -30,11 +30,11 @@ alloc_map_create_get_start_addr(size_t size)
 alloc_map_t *
 alloc_map_create(void *start_addr, size_t word_size, size_t block_size)
 {
-  alloc_map_t *alloc_map = alloc_map_create_get_start_addr((block_size/word_size)+2*sizeof(size_t)+sizeof(void*));
+  alloc_map_t *alloc_map = alloc_map_create_get_start_addr((block_size/word_size)+2*sizeof(size_t)+sizeof(void*) + 1);
   alloc_map->start_addr = start_addr;
   alloc_map->word_size = word_size;
   alloc_map->map_size = (block_size/word_size);
-  for(size_t i = 0; i <= ((alloc_map->map_size) /(alloc_map->word_size)); ++i){
+  for(size_t i = 0; i <= (alloc_map->map_size); ++i){
     /*(i%2 == 0)?
       (alloc_map->bits[i] = 0):
       (alloc_map->bits[i] = 1);
@@ -94,7 +94,7 @@ alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state)
 void
 alloc_map_print_in_use(alloc_map_t *alloc_map)
 {
-  printf("\n");
+  printf("\nstart of alloc map\n");
   for(size_t i = 0; i < alloc_map->map_size; ++i)
     {
       (i%16 == 0)? printf("\n"): printf("") ;
@@ -106,5 +106,5 @@ alloc_map_print_in_use(alloc_map_t *alloc_map)
       alloc_map_ptr_used(alloc_map, test_ptr) ?  printf("1") : printf("0");
     }
 
-  printf("\n");
+  printf("\nend of alloc map\n");
 }

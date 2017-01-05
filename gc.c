@@ -172,7 +172,7 @@ void *memory = malloc(bytes + (sizeof(page_t) * number_of_pages) );
   }
 
   alloc_map_t * alloc_map = alloc_map_create(memory, WORD_SIZE, bytes);
-  //  alloc_map_print_in_use(alloc_map);
+  //alloc_map_print_in_use(alloc_map);
   *heap = ( (heap_t) {memory, alloc_map, bytes, unsafe_stack, gc_threshold, number_of_pages} );
   
   void *start_of_pages = memory + bytes;
@@ -223,12 +223,6 @@ h_delete_dbg(heap_t *h, void *dbg_value)
     }
    h_delete(h);
 }
-
-
-#include <setjmp.h>
-#define Dump_registers() \
-jmp_buf env; \
-if (setjmp(env)) abort(); \
 
 
 size_t
@@ -411,79 +405,30 @@ get_ptr_page(heap_t *h, void * ptr)
   return -1;
 }
 
-void *
-h_alloc(heap_t * h, size_t bytes)
-{
-  if(h_avail(h) < h->gc_threshold){  //TODO 
-    //run gc
-  }
-
-  if(bytes < SMALLEST_ALLOC_SIZE){
-    bytes = SMALLEST_ALLOC_SIZE;
-  }
-
-  if(bytes % WORD_SIZE != 0){
-    bytes += WORD_SIZE - (bytes % WORD_SIZE);
-  }
-
-  int page_nr = 0;
-  int number_of_pages = h->number_of_pages;
-  int page_avail = page_get_avail(h->pages[page_nr]);
-  //printf("\nAvailable in page(%d):  %d, to write: %lu \n", page_nr, page_avil, bytes);
-  while( (int)bytes > page_avail){
-    if(page_nr == number_of_pages - 1){
-      return NULL;
-    }
-    page_nr += 1;
-    page_avail = page_get_avail(h->pages[page_nr]);
-    //printf("Available in page(%d):  %d,\n", page_nr, page_avil);
-  }
-
-  void *page_bump = page_get_bump(h->pages[page_nr]);
-  h->pages[page_nr]->type = ACTIVE;
-  void * ptr_to_write_to = page_bump;
-  page_move_bump(h->pages[page_nr], bytes);
-  //printf("Pointer is in page:  %d\n", get_ptr_page(h, ptr));  
-
-  return ptr_to_write_to; 
-}
-
-
-void *
-h_alloc_struct(heap_t * h, char * layout)
-{
-  assert(*layout != '\0');
-  assert(layout != NULL);
-  size_t size = get_struct_size(layout);
-  assert(size > 0);
-  void * ptr = h_alloc(h, size);
-  void * return_ptr = create_struct_header(layout, ptr);
-  alloc_map_set(h->alloc_map, return_ptr, true); 
-  return return_ptr;
-}
-
-
-void *
-h_alloc_data(heap_t * h, size_t bytes)
-{
-  assert(bytes > 0);
-  size_t size = get_data_size(bytes);
-  assert(size <= PAGE_SIZE);
-  void * ptr = h_alloc(h, size);
-  void * return_ptr = create_data_header(bytes, ptr);
-  alloc_map_set(h->alloc_map, return_ptr, true); 
-  return return_ptr;
-}
 
 int
 find_next_active_page(heap_t *h, size_t index)
 {
-  for(int i =index +1; i < (int)h->number_of_pages; ++i)
+  for(int i = index; i < (int)h->number_of_pages; ++i)
     {
     if(h->pages[i]->type == ACTIVE)
       {return i; }
     }
   return -1;
+}
+
+size_t
+number_of_passive_pages(heap_t *h)
+{
+  size_t count = 0; 
+  for(int i =0; i < (int)h->number_of_pages; ++i)
+    {
+    if(h->pages[i]->type == PASSIVE)
+      {
+        count += 1;
+      }
+    }
+  return count;
 }
 
 page_t *
@@ -498,13 +443,121 @@ find_first_passive_page(heap_t *h)
 }
 
 
+bool
+run_gc_if_above_threshold(heap_t *h, size_t bytes) //Bra namn ???
+{
+if(((float)h_used(h)+bytes)/(float)h->size > h->gc_threshold){  
+     size_t cleaned = h_gc(h);
+     if (cleaned == 0)
+       {
+         return true;
+       }
+     else if(((float)h_used(h)+bytes)/(float)h->size > h->gc_threshold)
+       {
+         return true;
+       }   
+ }
+ return false;
+}
+
+
+
+void *
+h_alloc(heap_t * h, size_t bytes)
+{
+  if (run_gc_if_above_threshold(h, bytes))
+    {
+      return NULL;
+    }
+
+  if(bytes < SMALLEST_ALLOC_SIZE){
+    bytes = SMALLEST_ALLOC_SIZE;
+  }
+
+  if(bytes % WORD_SIZE != 0){
+    bytes += WORD_SIZE - (bytes % WORD_SIZE);
+  }
+
+
+
+  int index_next_act = find_next_active_page(h, 0);
+  page_t *page_to_write_to;
+  while (index_next_act >= 0) 
+    {
+      if ( page_get_avail(h->pages[index_next_act])> bytes){
+      page_to_write_to = h->pages[index_next_act];
+      //printf("\nActive found:  %d\n", index_next_act);
+      break;
+      }
+      else {
+        index_next_act = find_next_active_page(h, index_next_act + 1);
+      }
+      
+    }
+  if(index_next_act < 0) {
+    if (number_of_passive_pages(h) <= 1)
+      {
+        bool not_cleaned_enough = run_gc_if_above_threshold(h, bytes);
+        if(not_cleaned_enough)
+          {
+            return NULL;
+          }
+        else if (number_of_passive_pages(h) <= 1)
+          {
+            return NULL;
+          }        
+      }
+     page_to_write_to = find_first_passive_page(h);
+     //printf("\nNo active, open new:  %d\n", index_next_act);
+     page_to_write_to->type = ACTIVE;
+  }
+
+  
+  void *page_bump = page_get_bump(page_to_write_to);
+  void * ptr_to_write_to = page_bump;
+  page_move_bump(page_to_write_to, bytes);
+  //printf("Pointer is in page:  %d\n", get_ptr_page(h, ptr));  
+
+  return ptr_to_write_to; 
+}
+
+
+void *
+h_alloc_struct(heap_t * h, char * layout)
+{
+  assert(*layout != '\0');
+  assert(layout != NULL);
+  size_t size = get_struct_size(layout);
+  assert(size > 0);
+  void * ptr = h_alloc(h, size);
+  if (ptr == NULL) return NULL;
+  void * return_ptr = create_struct_header(layout, ptr);
+  alloc_map_set(h->alloc_map, return_ptr, true); 
+  return return_ptr;
+}
+
+
+void *
+h_alloc_data(heap_t * h, size_t bytes)
+{
+  assert(bytes > 0);
+  size_t size = get_data_size(bytes);
+  assert(size <= PAGE_SIZE);
+  void * ptr = h_alloc(h, size);
+  if (ptr == NULL) return NULL;
+  void * return_ptr = create_data_header(bytes, ptr);
+  alloc_map_set(h->alloc_map, return_ptr, true); 
+  return return_ptr;
+}
+
+
 
 void *
 h_alloc_raw(heap_t *h, void *ptr_to_data)
 {
   assert(ptr_to_data != NULL);
-  printf("\n Moving: %p\n", ptr_to_data);
-  printf(" Moving Data: %p\n", *(void **)ptr_to_data);
+  //printf("\n Moving: %p\n", ptr_to_data);
+  //printf(" Moving Data: %p\n", *(void **)ptr_to_data);
   size_t raw_size = get_existing_size(ptr_to_data);
   if(raw_size < SMALLEST_ALLOC_SIZE){
     raw_size = SMALLEST_ALLOC_SIZE;
@@ -514,18 +567,19 @@ h_alloc_raw(heap_t *h, void *ptr_to_data)
   }
   int index_next_act = find_next_active_page(h, 0);
   page_t *page_to_write_to;
-  while (index_next_act >=0) 
+  while (index_next_act >= 0) 
     {
       if ( page_get_avail(h->pages[index_next_act])> raw_size){
       page_to_write_to = h->pages[index_next_act];
       break;
       }
       else {
-        index_next_act = find_next_active_page(h, index_next_act);
+        index_next_act = find_next_active_page(h, index_next_act + 1);
       }
     }
-  if(index_next_act <0) {
+  if(index_next_act < 0) {
      page_to_write_to = find_first_passive_page(h);
+     page_to_write_to->type = ACTIVE;
   }
  
   void *page_bump = page_get_bump(page_to_write_to);
@@ -587,10 +641,43 @@ forward_internal_array_ptrs_with_offset(void **array[],
     }
 }
 
+#include <setjmp.h>
+#define Dump_registers() \
+jmp_buf env; \
+if (setjmp(env)) abort(); \
+
 size_t 
 h_gc(heap_t *h)
 {
   return h_gc_dbg(h, false);
+}
+
+void
+set_unsafe_pages(heap_t *h, void **array[], size_t array_size)
+{
+  for(size_t i = 0; i < array_size; ++i)
+    {
+      if(!(alloc_map_ptr_used(h->alloc_map, *array[i])))
+        {
+          int index = get_ptr_page(h, *array[i]);
+          if(h->pages[index]->type == ACTIVE)
+            {
+              h->pages[index]->type = UNSAFE;
+            }
+        }
+    }
+}
+
+void
+set_unsafe_pages_to_active(heap_t *h)
+{
+  for(int i =0; i < (int)h->number_of_pages; ++i)
+    {
+    if(h->pages[i]->type == UNSAFE)
+      { 
+        h->pages[i]->type = ACTIVE;
+      }
+    }
 }
 
 
@@ -598,18 +685,23 @@ h_gc(heap_t *h)
 size_t 
 h_gc_dbg(heap_t *h, bool unsafe_stack)
 {
-  
+   Dump_registers()
+
   //alloc_map_print_in_use(h->alloc_map);
   size_t used_before_gc = h_used(h);
   set_active_to_transition(h);
 
   void *stack_top = get_stack_top();
   size_t num_active_ptrs = get_number_of_active_ptrs(h, stack_top);
-  printf("num active ptrs: %lu\n", num_active_ptrs);
+  //printf("num active ptrs: %lu\n", num_active_ptrs);
   void **array_of_found_ptrs[num_active_ptrs];
   size_t num_stack_ptrs = get_active_ptrs(h, stack_top,  array_of_found_ptrs, num_active_ptrs);
-  
-  // set_unsafe_pages();
+ 
+
+  if(unsafe_stack)
+    {
+      set_unsafe_pages(h, array_of_found_ptrs, num_stack_ptrs);
+    }
 
  for(size_t page_nr = 0; page_nr < h->number_of_pages; ++page_nr)
     {
@@ -639,14 +731,14 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
           page_set_type(h->pages[page_nr], PASSIVE);
           page_reset(h->pages[page_nr]);
         }
-      //set all unsafe -> active
+      set_unsafe_pages_to_active(h);
     }
  //alloc_map_print_in_use(h->alloc_map);
 
   size_t used_after_gc = h_used(h);
   size_t collected = used_before_gc - used_after_gc;
-  printf("\n Before: %lu\n", used_before_gc);
-  printf("\n After: %lu\n", used_after_gc);
+  //printf("\n Before: %lu\n", used_before_gc);
+  //printf("\n After: %lu\n", used_after_gc);
   return collected;
 }
 

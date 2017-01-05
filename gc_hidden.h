@@ -32,6 +32,7 @@ enum page_type
     PASSIVE
     , ACTIVE
     , TRANSITION
+    , UNSAFE
   };
 
 
@@ -59,6 +60,9 @@ struct heap
 void *
 get_page_start(page_t *page);
 
+
+int
+get_ptr_page(heap_t *h, void * ptr);
 
 void *
 get_memory(heap_t *h);

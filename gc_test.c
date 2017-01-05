@@ -196,9 +196,20 @@ test_pages ()
   }
 }
 
+void
+test_get_ptr_page()
+{
+  int test_size = 6144;
+  heap_t *test_h_alloc_heap = h_init(test_size, true, 1); 
+
+  void * ptr1 = h_alloc_struct(test_h_alloc_heap, "i");
+  write_int_to_heap(ptr1, 6);
+
+  CU_ASSERT(get_ptr_page(test_h_alloc_heap, ptr1) != -1);
+}
 
 void
-test_h_alloc ()
+test_h_alloc()
 {
   int test_size = 6144;
   heap_t *test_h_alloc_heap = h_init(test_size, true, 1);
@@ -238,6 +249,36 @@ test_h_alloc ()
   h_delete(test_h_alloc_heap);
   free(test_pointer);
 }
+
+
+
+void
+test_h_alloc_threshold ()
+{
+  int test_size = 6144;
+  heap_t *test_h_alloc_heap = h_init(test_size, true, 0.3);
+
+  void *ptr1 = h_alloc_data(test_h_alloc_heap, 5);
+  void *ptr2 = h_alloc_data(test_h_alloc_heap, 1990);
+
+  CU_ASSERT(ptr1 != NULL);
+  CU_ASSERT(ptr2 == NULL);
+  
+  h_delete(test_h_alloc_heap);
+
+  heap_t *test_h_alloc_heap_passive = h_init(test_size, true, 1);
+  void *ptr3 = h_alloc_data(test_h_alloc_heap_passive, 2000);
+  void *ptr4 = h_alloc_data(test_h_alloc_heap_passive, 2000);
+  void *ptr5 = h_alloc_data(test_h_alloc_heap_passive, 2000);
+
+  CU_ASSERT(ptr3 != NULL);
+  CU_ASSERT(ptr4 != NULL);
+  CU_ASSERT(ptr5 == NULL);
+  
+}
+
+
+
 
 /*
 //TODO FAILS SOMETIMES ?? 
@@ -453,7 +494,9 @@ main (int argc, char *argv[])
       (CU_add_test(suite1, "test_ptrs_from_stack", test_ptrs_from_stack) == NULL) ||
       (CU_add_test(suite1, "test_number_of_ptrs_in_stack", test_get_number_of_ptrs_in_stack) == NULL) ||
       (CU_add_test(suite1, "test_h_delete_dbg", test_h_delete_dbg) == NULL) ||
-      (CU_add_test(suite1, "test_h_gc)", test_h_gc) == NULL)
+      (CU_add_test(suite1, "test_h_gc)", test_h_gc) == NULL)||
+      (CU_add_test(suite1, "test_h_alloc_threshold)", test_h_alloc_threshold) == NULL)||
+      (CU_add_test(suite1, "test_get_ptr_page)", test_get_ptr_page) == NULL)
       )
     {
       CU_cleanup_registry();
