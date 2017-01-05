@@ -25,7 +25,10 @@
 #define SMALLEST_ALLOC_SIZE 16
 
 
-
+#include <setjmp.h>
+#define Dump_registers()                        \
+  jmp_buf env;                                  \
+  if (setjmp(env)) abort();                     \
 
 
 /*============================================================================
@@ -44,13 +47,13 @@
 void 
 create_pages(void *memory, page_t *start_of_pages, int number_of_pages, size_t page_size, heap_t *h)
 {
-  for (int i = 0; i < number_of_pages; ++i) {
-    unsigned long page_start =  (unsigned long) memory + (i * page_size);
-    *start_of_pages = ( (page_t) {(void *) page_start, (void *)page_start, page_size, PASSIVE} );
-    h->pages[i] = start_of_pages;
-
-    start_of_pages ++;
-  }
+  for (int i = 0; i < number_of_pages; ++i) 
+    {
+      unsigned long page_start =  (unsigned long) memory + (i * page_size);
+      *start_of_pages = ( (page_t) {(void *) page_start, (void *)page_start, page_size, PASSIVE} );
+      h->pages[i] = start_of_pages;
+      ++start_of_pages;
+    }
 } 
 
 void *
@@ -148,23 +151,23 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   }
 
 
-/*  void *memory; */
+  /*  void *memory; */
 
-/* size_t mem_size = bytes + (sizeof(page_t) * number_of_pages); */
+  /* size_t mem_size = bytes + (sizeof(page_t) * number_of_pages); */
 
-/* //mem_size = 1000*6144; */
+  /* //mem_size = 1000*6144; */
 
-/* int res = posix_memalign(&memory, 128, mem_size); */
+  /* int res = posix_memalign(&memory, 128, mem_size); */
 
-/* //printf("ptr=%p ret=%d errno=%d ", memory, res, errno); */
+  /* //printf("ptr=%p ret=%d errno=%d ", memory, res, errno); */
 
-/* //printf("\nRes %d", res); */
+  /* //printf("\nRes %d", res); */
 
-/* printf("\nmem %lu\n", *(unsigned long *)memory); */
+  /* printf("\nmem %lu\n", *(unsigned long *)memory); */
   
-void *memory = malloc(bytes + (sizeof(page_t) * number_of_pages) );
+  void *memory = malloc(bytes + (sizeof(page_t) * number_of_pages) );
 
-//printf("\nmem2 %lu\n", *(unsigned long *)memory2);
+  //printf("\nmem2 %lu\n", *(unsigned long *)memory2);
 
   if(memory == NULL){
     free(heap);
@@ -213,18 +216,23 @@ h_delete_dbg(heap_t *h, void *dbg_value)
 {
   void *stack_top = get_stack_top();
   size_t number_of_ptrs = get_number_of_ptrs_in_stack(h, stack_top);
-  //printf("\nNumber of pointers: %lu\n", number_of_ptrs);
   void **array[number_of_ptrs];
   size_t actual_nr_of_ptrs = get_ptrs_from_stack(h, stack_top, array, number_of_ptrs);
-  //printf("\nActual number of pointers: %lu\n", actual_nr_of_ptrs);
   for(size_t i= 0; i < actual_nr_of_ptrs; ++i)
     {
       *array[i] = dbg_value;
     }
-   h_delete(h);
+  h_delete(h);
 }
 
-
+/**
+ *  @brief Recursively gets the number of all active pointers in the heap 
+ *
+ *  @param  h a pointer to the heap
+ *  @param  ptr a pointer to be searched recursively from
+ *
+ *  @return the number of all active pointers in the heap 
+ */
 size_t
 get_number_of_active_heap_ptrs_rec(heap_t *h, void *ptr)
 {
@@ -242,7 +250,6 @@ get_number_of_active_heap_ptrs_rec(heap_t *h, void *ptr)
       
       for(size_t i = 0; i < num_ptrs; ++i)
         {
-
           if(alloc_map_ptr_used(h->alloc_map, *array[i]))
             {
               ++result;
@@ -253,6 +260,14 @@ get_number_of_active_heap_ptrs_rec(heap_t *h, void *ptr)
     }
 }
 
+/**
+ *  @brief Gets the number of active pointers on the stack and in the heap 
+ *
+ *  @param  h a pointer to the heap
+ *  @param  original_top the top of the stack to search
+ *
+ *  @return the number of pointer found on stack and the heap
+ */
 size_t
 get_number_of_active_ptrs(heap_t *h, void *original_top)
 {
@@ -275,6 +290,15 @@ get_number_of_active_ptrs(heap_t *h, void *original_top)
   return i;
 }
 
+/**
+ *  @brief Recursively gets all the active pointers in the heap and puts them into an array
+ *
+ *  @param  h a pointer to the heap
+ *  @param  ptr a pointer to be searched recursively from
+ *  @param  array an array of double pointers 
+ *  @param  index where in the array to put found pointers
+ *
+ */
 void
 get_active_heap_ptrs_rec(heap_t *h, void *ptr, void **array[], size_t *index)
 {
@@ -308,6 +332,16 @@ get_active_heap_ptrs_rec(heap_t *h, void *ptr, void **array[], size_t *index)
     }
 }
 
+/**
+ *  @brief Gets all the active pointers on the stack and in the heap and puts them into an array
+ *
+ *  @param  h a pointer to the heap
+ *  @param  original_top the top of the stack to search
+ *  @param  array an array of double pointers 
+ *  @param  array_size the size of the array
+ *
+ *  @return the number of pointer found on stack and the heap
+ */
 size_t
 get_active_ptrs(heap_t *h, void *original_top, void **array[], size_t array_size)
 {
@@ -322,11 +356,14 @@ get_active_ptrs(heap_t *h, void *original_top, void **array[], size_t array_size
   return num_stack_ptrs;
 }
 
+
 /**
  *  @brief Gets the number of pointer found on stack
  *
- *  @param  h the heap
- *  @param  original_bottom the bottom of the stack to search
+ *  @param  h a pointer to the heap
+ *  @param  original_top the top of the stack to search
+ *
+ *  @return the number of pointer found on stack
  */
 size_t
 get_number_of_ptrs_in_stack(heap_t *h, void *original_top)
@@ -341,8 +378,6 @@ get_number_of_ptrs_in_stack(heap_t *h, void *original_top)
   size_t i = 0;
   while (pointer != NULL)
     {
-      //printf("\nPtr %lu found in num%p\n", i,pointer );
-      //printf("\nPtr %lu found in num%d\n", i, *(int*)*pointer );
       if(alloc_map_ptr_used(h->alloc_map, *pointer))
         {
           i += 1;
@@ -353,14 +388,15 @@ get_number_of_ptrs_in_stack(heap_t *h, void *original_top)
 }
 
 
-//OBS Something strange about the array sizes (gets more space in array from caller function)
 /**
- *  @brief Puts all pointer found on stack into an array
+ *  @brief Puts the pointers found on the stack in an array
  *
- *  @param  h the heap
- *  @param  original_bottom the bottom of the stack to search
- *  @param  array the array to put pointer in
- *  @param  array_size the size of the array
+ *  @param  h a pointer to the heap
+ *  @param  original_top the top of the stack to search
+ *  @param  array an empty array of double pointers 
+ *  @param  array_size the size of the array 
+ *
+ *  @return the number of pointer found on stack
  */
 size_t
 get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_size)
@@ -376,32 +412,30 @@ get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_
   while (pointer != NULL)
     {
       if(alloc_map_ptr_used(h->alloc_map, *pointer))
-        {
-          /*  printf("\nPtr %lu found in ptrsfrom %p\n", i,*pointer );
-              printf("\nPtr %lu found in ptrsfrom %d\n", i, *(int *)*pointer );*/
-
+        {       
           assert(i < array_size && "There are more ptrs in stack than we thought!");
           array[i] = pointer;
 
           i += 1;
         }
       pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
-    }  
-   return i;  
-// assert(i == array_size && "There are less ptrs in stack than we thought!"); This does not work since we get more space in the array
+    } 
+  assert(i == array_size && "There are less ptrs in stack than we thought!"); 
+  return i;  
 }
 
 int
 get_ptr_page(heap_t *h, void * ptr)
 {
   int number_of_pages = h->number_of_pages;
-  for (int i = 0; i < number_of_pages; ++i) {
-    page_t *current = h->pages[i];
-    if(ptr >= page_get_start(current) && ptr < page_get_end(current))
-      { 
-        return i;
-      }
-  }
+  for (int i = 0; i < number_of_pages; ++i) 
+    {
+      page_t *current = h->pages[i];
+      if(ptr >= page_get_start(current) && ptr < page_get_end(current))
+        { 
+          return i;
+        }
+    }
   return -1;
 }
 
@@ -411,8 +445,10 @@ find_next_active_page(heap_t *h, size_t index)
 {
   for(int i = index; i < (int)h->number_of_pages; ++i)
     {
-    if(h->pages[i]->type == ACTIVE)
-      {return i; }
+      if(h->pages[i]->type == ACTIVE)
+        {
+          return i; 
+        }
     }
   return -1;
 }
@@ -423,10 +459,10 @@ number_of_passive_pages(heap_t *h)
   size_t count = 0; 
   for(int i =0; i < (int)h->number_of_pages; ++i)
     {
-    if(h->pages[i]->type == PASSIVE)
-      {
-        count += 1;
-      }
+      if(h->pages[i]->type == PASSIVE)
+        {
+          count += 1;
+        }
     }
   return count;
 }
@@ -436,8 +472,10 @@ find_first_passive_page(heap_t *h)
 {
   for(int i =0; i < (int)h->number_of_pages; ++i)
     {
-    if(h->pages[i]->type == PASSIVE)
-      {return h->pages[i]; }
+      if(h->pages[i]->type == PASSIVE)
+        {
+          return h->pages[i]; 
+        }
     }
   return NULL;
 }
@@ -446,22 +484,32 @@ find_first_passive_page(heap_t *h)
 bool
 run_gc_if_above_threshold(heap_t *h, size_t bytes) //Bra namn ???
 {
-if(((float)h_used(h)+bytes)/(float)h->size > h->gc_threshold){  
-     size_t cleaned = h_gc(h);
-     if (cleaned == 0)
-       {
-         return true;
-       }
-     else if(((float)h_used(h)+bytes)/(float)h->size > h->gc_threshold)
-       {
-         return true;
-       }   
- }
- return false;
+  if(((float)h_used(h)+bytes)/(float)h->size > h->gc_threshold)
+    {  
+      size_t cleaned = h_gc(h);
+      if (cleaned == 0)
+        {
+          return true;
+        }
+      else if(((float)h_used(h)+bytes)/(float)h->size > h->gc_threshold)
+        {
+          return true;
+        }   
+    }
+  return false;
 }
 
 
-
+/**
+ *  @brief Allocates bytes amount of data on the heap
+ *
+ *  The function will garbage collect if the heap will reach the threshold after allocation, 
+ *  or if only one passive page remains.  
+ *
+ *  @param  h a pointer to the heap
+ *  @param  bytes the size of the data (including header) to be allocated
+ *  @return a pointer to the allocated data if successful or NULL otherwise 
+ */
 void *
 h_alloc(heap_t * h, size_t bytes)
 {
@@ -470,54 +518,53 @@ h_alloc(heap_t * h, size_t bytes)
       return NULL;
     }
 
-  if(bytes < SMALLEST_ALLOC_SIZE){
-    bytes = SMALLEST_ALLOC_SIZE;
-  }
+  if(bytes < SMALLEST_ALLOC_SIZE)
+    {
+      bytes = SMALLEST_ALLOC_SIZE;
+    }
 
-  if(bytes % WORD_SIZE != 0){
-    bytes += WORD_SIZE - (bytes % WORD_SIZE);
-  }
-
-
+  if(bytes % WORD_SIZE != 0)
+    {
+      bytes += WORD_SIZE - (bytes % WORD_SIZE);
+    }
 
   int index_next_act = find_next_active_page(h, 0);
   page_t *page_to_write_to;
   while (index_next_act >= 0) 
     {
-      if ( page_get_avail(h->pages[index_next_act])> bytes){
-      page_to_write_to = h->pages[index_next_act];
-      //printf("\nActive found:  %d\n", index_next_act);
-      break;
-      }
-      else {
-        index_next_act = find_next_active_page(h, index_next_act + 1);
-      }
-      
+      if ( page_get_avail(h->pages[index_next_act])> bytes)
+        {
+          page_to_write_to = h->pages[index_next_act];
+          break;
+        }
+      else 
+        {
+          index_next_act = find_next_active_page(h, index_next_act + 1);
+        }      
     }
-  if(index_next_act < 0) {
-    if (number_of_passive_pages(h) <= 1)
-      {
-        bool not_cleaned_enough = run_gc_if_above_threshold(h, bytes);
-        if(not_cleaned_enough)
-          {
-            return NULL;
-          }
-        else if (number_of_passive_pages(h) <= 1)
-          {
-            return NULL;
-          }        
-      }
-     page_to_write_to = find_first_passive_page(h);
-     //printf("\nNo active, open new:  %d\n", index_next_act);
-     page_to_write_to->type = ACTIVE;
-  }
+
+  if(index_next_act < 0) 
+    {
+      if (number_of_passive_pages(h) <= 1)
+        {
+          bool not_cleaned_enough = run_gc_if_above_threshold(h, bytes);
+          if(not_cleaned_enough)
+            {
+              return NULL;
+            }
+          else if (number_of_passive_pages(h) <= 1)
+            {
+              return NULL;
+            }        
+        }
+      page_to_write_to = find_first_passive_page(h);
+      page_to_write_to->type = ACTIVE;
+    }
 
   
   void *page_bump = page_get_bump(page_to_write_to);
   void * ptr_to_write_to = page_bump;
   page_move_bump(page_to_write_to, bytes);
-  //printf("Pointer is in page:  %d\n", get_ptr_page(h, ptr));  
-
   return ptr_to_write_to; 
 }
 
@@ -529,8 +576,10 @@ h_alloc_struct(heap_t * h, char * layout)
   assert(layout != NULL);
   size_t size = get_struct_size(layout);
   assert(size > 0);
+ 
   void * ptr = h_alloc(h, size);
   if (ptr == NULL) return NULL;
+  
   void * return_ptr = create_struct_header(layout, ptr);
   alloc_map_set(h->alloc_map, return_ptr, true); 
   return return_ptr;
@@ -543,44 +592,56 @@ h_alloc_data(heap_t * h, size_t bytes)
   assert(bytes > 0);
   size_t size = get_data_size(bytes);
   assert(size <= PAGE_SIZE);
+ 
   void * ptr = h_alloc(h, size);
   if (ptr == NULL) return NULL;
+  
   void * return_ptr = create_data_header(bytes, ptr);
   alloc_map_set(h->alloc_map, return_ptr, true); 
   return return_ptr;
 }
 
 
-
+/**
+ *  @brief reallocates data from one page to another
+ *
+ *  @param  h a pointer to the heap
+ *  @param  ptr_to_data a pointer to the data (without header) to be reallocated
+ *
+ *  @return a pointer to the reallocaded data
+ */
 void *
 h_alloc_raw(heap_t *h, void *ptr_to_data)
 {
   assert(ptr_to_data != NULL);
-  //printf("\n Moving: %p\n", ptr_to_data);
-  //printf(" Moving Data: %p\n", *(void **)ptr_to_data);
   size_t raw_size = get_existing_size(ptr_to_data);
-  if(raw_size < SMALLEST_ALLOC_SIZE){
-    raw_size = SMALLEST_ALLOC_SIZE;
-  }
-  if(raw_size % WORD_SIZE != 0){
-    raw_size += WORD_SIZE - (raw_size % WORD_SIZE);
-  }
+  if(raw_size < SMALLEST_ALLOC_SIZE)
+    {
+      raw_size = SMALLEST_ALLOC_SIZE;
+    }
+  if(raw_size % WORD_SIZE != 0)
+    {
+      raw_size += WORD_SIZE - (raw_size % WORD_SIZE);
+    }
   int index_next_act = find_next_active_page(h, 0);
   page_t *page_to_write_to;
   while (index_next_act >= 0) 
     {
-      if ( page_get_avail(h->pages[index_next_act])> raw_size){
-      page_to_write_to = h->pages[index_next_act];
-      break;
-      }
-      else {
-        index_next_act = find_next_active_page(h, index_next_act + 1);
-      }
+      if ( page_get_avail(h->pages[index_next_act])> raw_size)
+        {
+          page_to_write_to = h->pages[index_next_act];
+          break;
+        }
+      else 
+        {
+          index_next_act = find_next_active_page(h, index_next_act + 1);
+        }
     }
-  if(index_next_act < 0) {
-     page_to_write_to = find_first_passive_page(h);
-     page_to_write_to->type = ACTIVE;
-  }
+  if(index_next_act < 0) 
+    {
+      page_to_write_to = find_first_passive_page(h);
+      page_to_write_to->type = ACTIVE;
+    }
  
   void *page_bump = page_get_bump(page_to_write_to);
   void * ptr_to_write_to = page_bump;
@@ -607,20 +668,26 @@ set_active_to_transition(heap_t *h)
 {
   for(int i =0; i < (int)h->number_of_pages; ++i)
     {
-    if(h->pages[i]->type == ACTIVE)
-      {
-        h->pages[i]->type = TRANSITION;
-      }
+      if(h->pages[i]->type == ACTIVE)
+        {
+          h->pages[i]->type = TRANSITION;
+        }
     }
 }
 
-/*
-void
-set_unsafe_pages(heap_t *h)
-{
 
-}
-*/
+/**
+ *  @brief Reallocates pointers from a reallocated struct  
+ *
+ *  If a pointer in the array is within the range the offset is added to it 
+ *  to give it the correct address
+ *
+ *  @param array an array of double pointers to addresses on the heap
+ *  @param start_index the index of the array where to start forwarding
+ *  @param array_size the size of the array
+ *  @param ptr_to_original_data a pointer to the original data address 
+ *  @param ptr_to_new_data a pointer to the new data address
+ */
 void
 forward_internal_array_ptrs_with_offset(void **array[], 
                                         size_t start_index,
@@ -640,11 +707,6 @@ forward_internal_array_ptrs_with_offset(void **array[],
         }
     }
 }
-
-#include <setjmp.h>
-#define Dump_registers() \
-jmp_buf env; \
-if (setjmp(env)) abort(); \
 
 size_t 
 h_gc(heap_t *h)
@@ -673,37 +735,33 @@ set_unsafe_pages_to_active(heap_t *h)
 {
   for(int i =0; i < (int)h->number_of_pages; ++i)
     {
-    if(h->pages[i]->type == UNSAFE)
-      { 
-        h->pages[i]->type = ACTIVE;
-      }
+      if(h->pages[i]->type == UNSAFE)
+        { 
+          h->pages[i]->type = ACTIVE;
+        }
     }
 }
 
 
-//??
 size_t 
 h_gc_dbg(heap_t *h, bool unsafe_stack)
 {
-   Dump_registers()
+  Dump_registers();
 
-  //alloc_map_print_in_use(h->alloc_map);
   size_t used_before_gc = h_used(h);
   set_active_to_transition(h);
 
   void *stack_top = get_stack_top();
   size_t num_active_ptrs = get_number_of_active_ptrs(h, stack_top);
-  //printf("num active ptrs: %lu\n", num_active_ptrs);
   void **array_of_found_ptrs[num_active_ptrs];
   size_t num_stack_ptrs = get_active_ptrs(h, stack_top,  array_of_found_ptrs, num_active_ptrs);
  
-
   if(unsafe_stack)
     {
       set_unsafe_pages(h, array_of_found_ptrs, num_stack_ptrs);
     }
 
- for(size_t page_nr = 0; page_nr < h->number_of_pages; ++page_nr)
+  for(size_t page_nr = 0; page_nr < h->number_of_pages; ++page_nr)
     {
       if (page_get_type(h->pages[page_nr]) == TRANSITION)
         {
@@ -720,10 +778,13 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
                   else
                     {
                       ptr_to_new_data = h_alloc_raw(h, *array_of_found_ptrs[ptr_index]);
-                      //alloc_map_print_in_use(h->alloc_map);
-
-                      forward_internal_array_ptrs_with_offset(array_of_found_ptrs, ptr_index, num_active_ptrs,
-                                                              ptr_to_original_data, ptr_to_new_data);
+                      if(get_header_type(ptr_to_new_data) == STRUCT_REP)
+                        {
+                          forward_internal_array_ptrs_with_offset(array_of_found_ptrs, ptr_index, 
+                                                                  num_active_ptrs, 
+                                                                  ptr_to_original_data,
+                                                                  ptr_to_new_data);
+                        }
                     }
                   *array_of_found_ptrs[ptr_index] = ptr_to_new_data;
                 }
@@ -733,12 +794,8 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
         }
       set_unsafe_pages_to_active(h);
     }
- //alloc_map_print_in_use(h->alloc_map);
-
   size_t used_after_gc = h_used(h);
   size_t collected = used_before_gc - used_after_gc;
-  //printf("\n Before: %lu\n", used_before_gc);
-  //printf("\n After: %lu\n", used_after_gc);
   return collected;
 }
 
@@ -748,12 +805,11 @@ h_avail(heap_t *h)
 {
   size_t avail = 0;
   int number_of_pages = h->number_of_pages;
-  //printf("Number of pages: %d", number_of_pages);
-  for (int i = 0; i < number_of_pages; i++) {
-    //printf("\nAvil in page %d: %lu\n", i, page_get_avail(h->pages[i]) );
-    avail += page_get_avail(h->pages[i]);  
-  }
-return avail;
+  for (int i = 0; i < number_of_pages; i++) 
+    {
+      avail += page_get_avail(h->pages[i]);  
+    }
+  return avail;
 }
 
 
@@ -762,12 +818,11 @@ h_used(heap_t *h)
 {
   size_t used = 0;
   int number_of_pages = h->number_of_pages;
-  //printf("Number of pages: %d", number_of_pages);
-  for (int i = 0; i < number_of_pages; i++) {
-    //printf("\nUsed in page %d: %lu\n", i, page_get_used(h->pages[i]) );
-    used += page_get_used(h->pages[i]);  
-  }
-return used;
+  for (int i = 0; i < number_of_pages; i++) 
+    {
+      used += page_get_used(h->pages[i]);  
+    }
+  return used;
 }
 
 
