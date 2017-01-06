@@ -42,10 +42,12 @@ typedef struct alloc_map alloc_map_t;
  *  @return pointer to the newly created allocation map.
  *  
  */
-alloc_map_t *
-alloc_map_create(void *start_addr, size_t word_size, size_t block_size);
+void 
+alloc_map_create(alloc_map_t *alloc_map, void *start_addr, size_t word_size, size_t block_size);
 
 
+size_t
+alloc_map_mem_size_needed(size_t word_size, size_t block_size);
 
 /**
  *  @brief Looks up if a memory address is pointing to the start of an object
@@ -76,4 +78,5 @@ alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state);
 
 void
 alloc_map_print_in_use();
+
 #endif
