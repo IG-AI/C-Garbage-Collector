@@ -57,8 +57,6 @@ test_alloc_map_sets()
   alloc_map_set(alloc_map, (void *)&(start_addr[1]), true);
   CU_ASSERT_TRUE(alloc_map_ptr_used(alloc_map, (void *)&(start_addr[1])));
 
-  alloc_map_print_in_use(alloc_map);
-
   alloc_map_set(alloc_map, (void *)&(start_addr[1]), false);
   CU_ASSERT_FALSE(alloc_map_ptr_used(alloc_map, (void *)&(start_addr[1])));
 
