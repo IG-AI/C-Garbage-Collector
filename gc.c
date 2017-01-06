@@ -31,6 +31,8 @@
   if (setjmp(env)) abort();                     \
 */
 
+#define Get_stack_top(ptr) do {size_t dummy = 0xDEADBEEF; ptr = &dummy;} while(0);
+
 /*============================================================================
  *                             PAGE FUNCTIONS
  *===========================================================================*/
@@ -199,11 +201,14 @@ h_delete_dbg(heap_t *h, void *dbg_value)
 {
   assert(h != NULL);
   if(h==NULL) return;
-  void *stack_top = get_stack_top();
+  int dummy = 0;
+  void *stack_top = &dummy;
+  //  Get_stack_top(stack_top);
   size_t number_of_ptrs = get_number_of_ptrs_in_stack(h, stack_top);
   void **array[number_of_ptrs];
-  size_t actual_nr_of_ptrs = get_ptrs_from_stack(h, stack_top, array, number_of_ptrs);
-  for(size_t i= 0; i < actual_nr_of_ptrs; ++i)
+  size_t actual_nr_of_ptrs = 0;
+  actual_nr_of_ptrs = get_ptrs_from_stack(h, stack_top, array, number_of_ptrs);
+  for(size_t i = 0; i < actual_nr_of_ptrs; ++i)
     {
       *array[i] = dbg_value;
     }
@@ -744,22 +749,23 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
   if(h == NULL) return 0;
   //Dump_registers();
 
-  printf("\nNumber of pages: %lu\n", h->number_of_pages);
+  /*printf("\nNumber of pages: %lu\n", h->number_of_pages);
   size_t active_pages = 0;
   for(size_t i = 0; i < h->number_of_pages; ++i)
     {
       if(page_get_type(h->pages[i]) == ACTIVE) ++active_pages;
     }
-  printf("\nNumber of active pages: %lu\n", active_pages);
+    printf("\nNumber of active pages: %lu\n", active_pages);*/
 
   size_t used_before_gc = h_used(h);
   set_active_to_transition(h);
 
-  void *stack_top = get_stack_top();
+  int dummy = 0;
+  void *stack_top = &dummy;
+  //Get_stack_top(stack_top);
   size_t num_active_ptrs = get_number_of_active_ptrs(h, stack_top);
   void **array_of_found_ptrs[num_active_ptrs];
   size_t num_stack_ptrs = get_active_ptrs(h, stack_top,  array_of_found_ptrs, num_active_ptrs);
- 
   if(unsafe_stack == UNSAFE_STACK)
     {
       set_unsafe_pages(h, array_of_found_ptrs, num_stack_ptrs);
@@ -767,10 +773,10 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
 
   for(size_t page_nr = 0; page_nr < h->number_of_pages; ++page_nr)
     {
-      printf("\nWorking on page %lu \n", page_nr);
       if (page_get_type(h->pages[page_nr]) == TRANSITION)
         {
-          for(size_t ptr_index = 0; ptr_index < num_active_ptrs; ++ptr_index)
+          for(size_t ptr_index = 0; ptr_index < num_active_ptrs
+                && array_of_found_ptrs[ptr_index] != NULL; ++ptr_index)
             {
               void *ptr_to_original_data = *array_of_found_ptrs[ptr_index];
               if (get_ptr_page(h, ptr_to_original_data) == (int) page_nr) 

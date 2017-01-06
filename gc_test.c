@@ -840,27 +840,6 @@ test_get_number_of_ptrs_in_stack()
 
 }
 
-void
-test_ptrs_from_stack()
-{
-  int test_size = 2048*3;
-  heap_t *h = h_init(test_size, true, 1);
-
-  void *ptr1 = h_alloc_struct(h, "i");
-  write_int_to_heap(ptr1, 6);
-  void *ptr2 = h_alloc_struct(h, "i");
-  write_int_to_heap(ptr2, 9); 
-  
-  void *stack_top = get_stack_top();
-  size_t number_of_ptrs = get_number_of_ptrs_in_stack(h, stack_top);
-  void **collection[number_of_ptrs];
-
-  get_ptrs_from_stack(h, stack_top, collection, number_of_ptrs);
-  CU_ASSERT(*(int *) *collection[1] == 6); 
-  CU_ASSERT(*(int *) *collection[0] == 9); 
-  h_delete(h); 
-
-}
 
 void
 test_get_ptr_page()
@@ -1242,7 +1221,6 @@ main (void)
 
   if (
       (CU_add_test(suite1, "test_h_alloc_struct/data()", test_h_alloc) == NULL) ||
-      (CU_add_test(suite1, "test_ptrs_from_stack", test_ptrs_from_stack) == NULL) ||
       (CU_add_test(suite1, "test_number_of_ptrs_in_stack", test_get_number_of_ptrs_in_stack) == NULL) ||
       (CU_add_test(suite1, "test_h_alloc_threshold)", test_h_alloc_threshold) == NULL)||
       (CU_add_test(suite1, "test_get_ptr_page)", test_get_ptr_page) == NULL)
@@ -1252,7 +1230,7 @@ main (void)
       return CU_get_error();
     }
 
-  CU_basic_set_mode(CU_BRM_VERBOSE);
+  //CU_basic_set_mode(CU_BRM_VERBOSE);
   CU_basic_run_tests();
   
   CU_cleanup_registry();
