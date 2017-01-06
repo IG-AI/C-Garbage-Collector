@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 200809L
+//#define _POSIX_C_SOURCE 200809L
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -24,12 +24,12 @@
 #define PAGE_SIZE 2048
 #define SMALLEST_ALLOC_SIZE 16
 
-
+/*
 #include <setjmp.h>
-#define Dump_registers()                        \
+#define Dump_registers()                      \
   jmp_buf env;                                  \
   if (setjmp(env)) abort();                     \
-
+*/
 
 /*============================================================================
  *                             PAGE FUNCTIONS
@@ -137,32 +137,6 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   size_t number_of_pages = (bytes / PAGE_SIZE);
   
 
-  /*heap_t *heap = malloc( sizeof(void*)
-                         + sizeof(alloc_map_t *)
-                         + sizeof(size_t)
-                         + sizeof(bool) 
-                         + sizeof(float) 
-                         + sizeof(size_t) 
-                         + (sizeof(void *) * (number_of_pages) ) );
-
-  if(heap == NULL){
-    return NULL;
-  }
-
-  */
-  /*  void *memory; */
-
-  /* size_t mem_size = bytes + (sizeof(page_t) * number_of_pages); */
-
-  /* //mem_size = 1000*6144; */
-
-  /* int res = posix_memalign(&memory, 128, mem_size); */
-
-  /* //printf("ptr=%p ret=%d errno=%d ", memory, res, errno); */
-
-  /* //printf("\nRes %d", res); */
-
-  /* printf("\nmem %lu\n", *(unsigned long *)memory); */
   size_t heap_struct_size = sizeof(void*) + sizeof(alloc_map_t *) + sizeof(size_t)
                             + sizeof(bool)  + sizeof(float)  + sizeof(size_t) 
                             + (sizeof(void *) * (number_of_pages) );
@@ -171,7 +145,7 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   size_t pages_size = (sizeof(page_t) * number_of_pages);
   void *ptr_to_allocated_space = malloc(heap_struct_size + bytes + alloc_map_size + pages_size);
 
-  //printf("\nmem2 %lu\n", *(unsigned long *)memory2);
+  
   if(ptr_to_allocated_space == NULL)
     {
       return NULL;
