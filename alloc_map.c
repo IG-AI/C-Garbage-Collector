@@ -34,9 +34,10 @@ alloc_map_create(alloc_map_t *alloc_map, void *start_addr, size_t word_size, siz
   alloc_map->start_addr = start_addr;
   alloc_map->word_size = word_size;
   alloc_map->map_size = (block_size/word_size);
-  for(size_t i = 0; i <= (alloc_map->map_size); ++i){
-    alloc_map->bits[i] = 0;
-  }
+  for(size_t i = 0; i <= (alloc_map->map_size); ++i)
+    {
+      alloc_map->bits[i] = 0;
+    }
 }
 
 
@@ -60,10 +61,10 @@ bool
 alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr)
 {
   size_t mem_offset = alloc_map_check_offset(alloc_map, ptr);
-  if(mem_offset == (size_t)-1){
-    assert(false && "Memory address out of scope");
-    return false;
-  }
+  if(mem_offset == (size_t)-1)
+    {
+      return false;
+    }
   return alloc_map->bits[mem_offset / alloc_map->word_size] & On(mem_offset % alloc_map->word_size);
 }
 
@@ -72,10 +73,11 @@ bool
 alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state)
 {
   size_t mem_offset = alloc_map_check_offset(alloc_map, ptr);
-  if(mem_offset == (size_t)-1){
-    assert(false && "Memory address out of scope");
-    return false;
-  }
+  if(mem_offset == (size_t)-1)
+    {
+      assert(false && "Memory address out of scope (ALLOCMAPSET)");
+      return false;
+    }
   if(state)
     {
       alloc_map->bits[mem_offset / alloc_map->word_size] |= On(mem_offset % alloc_map->word_size);
@@ -87,8 +89,8 @@ alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state)
   return true;
 }
 
-
-void
+/*
+static void
 alloc_map_print_in_use(alloc_map_t *alloc_map)
 {
   printf("\nStart addr: %p\n", alloc_map->start_addr);
@@ -104,6 +106,6 @@ alloc_map_print_in_use(alloc_map_t *alloc_map)
 
       alloc_map_ptr_used(alloc_map, test_ptr) ?  printf("1") : printf("0");
     }
-
   printf("\n");
 }
+*/

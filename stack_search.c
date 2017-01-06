@@ -22,10 +22,10 @@ void **stack_find_next_ptr(void **stack_bottom, void *stack_top, void *heap_star
        */
       *stack_bottom = (void *)(((unsigned long)*stack_bottom) - sizeof(void *));
       void *result = *stack_bottom;
-      if( *(unsigned long *)result <= (unsigned long)heap_end 
+      if( *(unsigned long *)result <= (unsigned long)heap_end
           && *(unsigned long *)result >= (unsigned long)heap_start)
         {
-          return stack_bottom;
+          return result;
         }
     }
   return NULL;

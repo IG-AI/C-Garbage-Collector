@@ -8,7 +8,6 @@
 #include <CUnit/Basic.h>
 
 #include "alloc_map.h"
-//#include "alloc_map.c"
 
 struct alloc_map 
 {
@@ -46,7 +45,6 @@ test_alloc_map_create()
 void
 test_alloc_map_sets()
 {
-
   int type_size = sizeof(int);
   typedef int type_t;
   int block_size = 2048;

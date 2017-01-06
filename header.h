@@ -135,6 +135,16 @@ size_t get_data_size(size_t bytes);
 size_t get_existing_size(void *data);
 
 /**
+ *  @brief Get the size of data having a header
+ *
+ *  The size of the header itself is NOT included in the result
+ *
+ *  @param  data pointer to the data to get size of
+ *  @return size of data
+ */
+size_t get_existing_data_size(void *data);
+
+/**
  *  @brief Creates a copy of a header and saves the copy on the heap
  *
  *  

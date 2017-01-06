@@ -17,12 +17,13 @@
 #ifndef __gc__
 #define __gc__
 
+#define UNSAFE_STACK true
+#define SAFE_STACK false
 
 /**
  *  @brief The opaque data type holding all the heap data.
  */
 typedef struct heap heap_t;
-typedef struct page page_t;
 
 
 /**
@@ -36,17 +37,10 @@ typedef struct page page_t;
  *          considered unsafe pointers
  *  @param  gc_threshold the memory pressure at which gc should be triggered
  *          (1.0 = full memory)
- *  @return the new heap
+ *  @return the new heap or NULL if memory cannot be allocated
  */
 heap_t *
 h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
-
-void *
-get_page_start(page_t *page);
-
-
-void *
-get_memory(heap_t *h);
 
 
 /**
@@ -61,8 +55,11 @@ h_delete(heap_t *h);
 /**
  *  @brief Delete a heap and trace, killing off stack pointers.
  *
+ *  Only valid pointers will be replaced. A valid pointer is a pointer
+ *  with the address of an allocated space in @p h.
+ *
  *  @param h the heap
- *  @param dbg_value a value to be written into every pointer into @p h
+ *  @param dbg_value a value to be written into every valid pointer into @p h
  *         on the stack
  */
 void 
@@ -87,13 +84,6 @@ h_delete_dbg(heap_t *h, void *dbg_value);
  *  
  *  @note   the heap does *not* retain an alias to layout.
  */
-
-void 
-write_pointer_to_heap(void ** allocated_memory, void * ptr_to_write);
-
-void 
-write_int_to_heap(void * allocated_memory, int int_to_write);
-
 void *
 h_alloc_struct(heap_t *h, char *layout);
 
@@ -125,6 +115,7 @@ size_t
 h_gc(heap_t *h);
 
 
+
 /**
  *  @brief Manually trigger garbage collection with the ability to
  *         override the setting for how stack pointers are treated.
@@ -141,6 +132,7 @@ size_t
 h_gc_dbg(heap_t *h, bool unsafe_stack);
 
 
+
 /**
  *  @brief Returns the available free memory.
  *
@@ -151,12 +143,12 @@ size_t
 h_avail(heap_t *h);
 
 
+
 /**
- *  @brief Returns the bytes currently in use by user structures.
+ *  @brief Returns the bytes currently in use in a heap.
  *
- *  This should not include the collector's own meta data. Notably,
- *  this means that h_avail + h_used will not equal the size of
- *  the heap passed to h_init.
+ *  This includes any meta-data specific to user allocated structures
+ *  and any internal padding.
  *
  *  @param  h the heap
  *  @return the bytes currently in use by user structures.
@@ -164,13 +156,14 @@ h_avail(heap_t *h);
 size_t 
 h_used(heap_t *h);
 
+
+
 /**
- *  @brief Return the byte  size of the heap as an int.
+ *  @brief Return the byte  size of the heap.
  *  
  *  @param h the heap
  *  @return the byte size of the heap.
  */
-
 size_t 
 h_size(heap_t *h);
 
