@@ -1,66 +1,50 @@
 #Heapen
 
 ## Innehåll
-- [Konservativ kompaktering efter Bartlet](#konservativ-kompaktering-efter-bartlett)
-- [Höga adresser](#höga-adresser)
-- [Att skapa och riva ned en heap](#att-skapa-och-riva-ned-en-heap)
+- [Introduktion](#introduktion)  
+- [Heapen](#heapen)
+ - [Deleta heapen](#deleta-heapen)
+- [Allokering](#allokering)
+- [Skräpsamlare](#skräpsamlare)
+- [Debug versioner](#debug-versioner)
 - [Gränssnittet gc.h](#gränssnittet-gch)
 
-##Konservativ kompaktering efter Bartlett
-Bartlett skiljer mellan säkra och osäkra pekare. En säker pekare är en adress
-som vi säkert vet är en pekare. En osäker pekare är en vars data vi inte säkert
-vet är en pekare. Ett typiskt användande av Bartletts teknik är för skanning av
-stacken i ett C-liknande språk, där vi inte vet vad det är för data vi tittar på.
-Vi klassificerar alltså alla pekare vi hittar som säkra eller osäkra. Att vara
-konservativ innebär att vi måste utgå från att en osäker pekare faktiskt är en
-pekare i bemärkelsen att vi måste betrakta dess utpekade objekt som levande,
-och samtidigt att vi måste utgå från att den osäkra pekaren faktiskt inte är
-en pekare vilket innebär att vi inte kan flytta dess utpekade objekt i minnet
-eftersom det kräver att vi ändrar pekarvärdet till den nya adressen. Exempel,
-om vi hittar 0x39C5F6 (slutpriset på en lägenhet) på stacken måste det objekt
-som ligger på den adressen överleva och inte flyttas. Flyttade vi det till t.ex.
-adressen 0x1C0030 måste vi uppdatera värdet på stacken till 0x1C0030 (peka
-om ”pekaren”), vilket skulle betyda att vi ändrat slutpriset på lägenheten!
-För att använda Bartletts trick för att hantera osäkerhet delar vi in minnet
-som vi hanterar i ett antal diskreta ”sidor” 13 . Istället för att dela in hela heapen
-i två delar – passiv och aktiv – ger vi varje sida statusen passiv eller aktiv. En
-osäker pekare till en adress A medför nu att den omslutande sidan P inte får
-flyttas vid kompaktering.
+##Introduktion
+För att kunna skapa en egen skräpsamlare behöver vi skapa en "egen heap" på heapen. Vi behöver även en egen allokeringsfunktion för att spara data på vår heap, samt en skräpsamlare för att automatiskt frigöra och kompaktera vår heap.  
 
-##Höga adresser
-Detta är enkelt att implementera och brukar ge hög avkastning. Använd t.ex.
-posix_memalign för att allokera minnet till programmets egen heap och ange
-en mycket hög adress som alignment. Det medför att alla pekaradresser som
-skapas kommer att vara väldigt stora. Eftersom program sällan manipulerar
-väldigt stora tal minskar risken för att ett heltal i programmet skulle råka
-sammanfalla med en valid minnesadress.
+##Heapen
+När heapen skapas allokerar vi ett minnesblock på den riktiga heapen. Heapen delas upp i ett antal diskreta sidor, pages, med storlek 2048 bytes. Det måste minst finnas två sidor, vilket betyder att minsta storlek på heapen är 4096 bytes. Vid initiering av heapen skapas även en allokeringskarta. Vid skapande anges även en bool som anger om stacken är säker eller inte, samt ett tröskelvärde i procent för när skräpsamlingen ska aktiveras. 
 
-##Att skapa och riva ned en heap
-Funktionen h_init som ni skall implementera skapar en ny heap med en
-angiven storlek och returnerar en pekare till den. Utöver storlek skall det gå att
-ställa in två ytterligare parametrar:
-* Huruvida pekare på stacken skall anses som säkra eller osäkra
-* Vid vilket minnestryck skräpsamling skall köras
+Pages kan ha fyra olika värden, active, passive, transition och unsafe. Vid initering är alla pages passiva. Pekare till startadressen för varje sida läggs i en array i heap-strukten. Varje page har en page-bump som håller reda på var första lediga minnesplats börjar. 
 
-Eftersom det måste vara möjligt att resonera om minneskraven för en
-applikation skall allt metadata om heapen också rymmas i det angivna stor-
-leksutrymmet. Dvs., alla eventuella kopior av formatsträngar etc. skall lagras
-i “er heap”. Funktionen h_avail returnerar antalet tillgängliga bytes i en heap,
-dvs. så många bytes som kan allokeras innan minnet är fullt (dvs. minnestryc-
-ket är 100%).
-Det skall finnas två funktioner för att frigöra en heap och återställa allt
-minne:
-* h_delete som frigör allt minne som heapen använder.
-* h_delete_dbg som utöver ovanstående också ersätter alla variabler på
+###Deleta heapen
+När heapen ska tas bort, vid h_delete, frigör vi allokeringskartan, minnesblocket och hela heapstructen. 
 
-stacken som pekar in i heapens adressrymd med ett angivet värde, t.ex. NULL
-eller 0xDEADBEEF så att ”skjutna pekare” (eng. dangling pointers) lättare
-kan upptäckas.
+
+##Allokering
+Det finns två funktioner för allokering, en för struktar (h_alloc_struct) och en för rå data (h_alloc_data).
+
+Vid allokering söks första aktiva page upp. Det kollas om det finns tillräckligt ledigt minne för allokering på pagen genom att titta på page-bumpen. Om det finns ledigt minne allokeras datan/strukten på pagen och page-bumpen flyttas framåt. Annars letas nästa aktiva page upp. Om ingen aktiv page finns, sätts om möjligt den första passiva sidan till aktiv. Om det endast finns en passiv page kvar eller om vi går över tröskelvärdet för skräpsamling, körs skräpsamlaren och därefter testas igen om det det finns plats att allokera på. Om det fortfarande inte finns, returneras NULL. 
+
+När en allokering har skett, sätts platsen på allokeringskartan motsvarande adressen som allokerats till True. 
+
+
+##Skräpsamlare
+När h_gc kallas, antingen manuellt eller genom att tröskelvärdet har överskridits, körs skräpsamlingen igång. Vi plockar ur stackens top och bottom, vilka används för att rekursivt hitta alla valida pekare på stacken och i heapen. Dessa läggs i en array. 
+
+Alla aktiva pages sätts till transition. Den första passiva sidan sätts till active. Arrayen traverseras för varje transition-page, och alla objekt i den sidan som har pekare till sig, flyttas till en aktiv sida. När inga pekare längre pekar till sidan, sätts den till passiv och page-bumpen återställs.  
+
+h_gc returnerar hur många bytes som har städats borts under skräpsamlingen. 
+
+
+##Debug versioner
+h_delete_dbg skriver över alla aktiva stack-pekare med ett givet värde. 
+
+h_gc_dbg sätter stacken till unsafe, vilket innebär att alla pages som har en stack-pekare till sig sätts till unsafe. Dessa kan därmed inte ändras under skräpsamling. Efter skräpsamling sätts de tillbaka till active. 
+
 
 ##Gränssnittet gc.h
-Nedanstående headerfil sammanfattar det publika gränssnitt som skall imple-
-menteras. En doxygen-dokumenterad version finns också tillgänglig i kursens
-repo.
+
 ```c
 typedef struct heap heap_t;
 
