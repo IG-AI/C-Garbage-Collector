@@ -134,11 +134,10 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   assert(0 < gc_threshold && gc_threshold <= 1);
   if(!(0 < gc_threshold && gc_threshold <= 1)) return NULL;
 
-  size_t page_size = PAGE_SIZE;
-  size_t number_of_pages = (bytes / page_size);
+  size_t number_of_pages = (bytes / PAGE_SIZE);
   
 
-  heap_t *heap = malloc( sizeof(void*)
+  /*heap_t *heap = malloc( sizeof(void*)
                          + sizeof(alloc_map_t *)
                          + sizeof(size_t)
                          + sizeof(bool) 
@@ -150,7 +149,7 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
     return NULL;
   }
 
-
+  */
   /*  void *memory; */
 
   /* size_t mem_size = bytes + (sizeof(page_t) * number_of_pages); */
@@ -164,22 +163,32 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   /* //printf("\nRes %d", res); */
 
   /* printf("\nmem %lu\n", *(unsigned long *)memory); */
+  size_t heap_struct_size = sizeof(void*) + sizeof(alloc_map_t *) + sizeof(size_t)
+                            + sizeof(bool)  + sizeof(float)  + sizeof(size_t) 
+                            + (sizeof(void *) * (number_of_pages) );
   
-  void *memory = malloc(bytes + (sizeof(page_t) * number_of_pages) );
+  size_t alloc_map_size = alloc_map_mem_size_needed(WORD_SIZE, bytes);
+  size_t pages_size = (sizeof(page_t) * number_of_pages);
+  void *ptr_to_allocated_space = malloc(heap_struct_size + bytes + alloc_map_size + pages_size);
 
   //printf("\nmem2 %lu\n", *(unsigned long *)memory2);
+  if(ptr_to_allocated_space == NULL)
+    {
+      return NULL;
+    }
 
-  if(memory == NULL){
-    free(heap);
-    return NULL;
-  }
+  heap_t *heap = ptr_to_allocated_space;
+  heap->memory = (void *) ((size_t) ptr_to_allocated_space + heap_struct_size);
+  heap->alloc_map = (alloc_map_t *) ( (size_t) heap->memory + bytes);
+  heap->size = bytes;
+  heap->unsafe_stack = unsafe_stack;
+  heap->gc_threshold = gc_threshold;
+  heap->number_of_pages = number_of_pages;
 
-  alloc_map_t * alloc_map = alloc_map_create(memory, WORD_SIZE, bytes);
-  //alloc_map_print_in_use(alloc_map);
-  *heap = ( (heap_t) {memory, alloc_map, bytes, unsafe_stack, gc_threshold, number_of_pages} );
+  alloc_map_create(heap->alloc_map, heap->memory, WORD_SIZE, bytes);
   
-  void *start_of_pages = memory + bytes;
-  create_pages(memory, start_of_pages, number_of_pages, page_size, heap);
+  void *start_of_pages = (void *) ((size_t) heap->alloc_map + alloc_map_size);
+  create_pages(heap->memory, start_of_pages, number_of_pages, PAGE_SIZE, heap);
   return heap;
 }
 
@@ -207,8 +216,6 @@ h_delete(heap_t *h)
 {
   assert(h != NULL);
   if(h==NULL) return;
-  free(h->memory);
-  free(h->alloc_map);
   free(h);
 }
 

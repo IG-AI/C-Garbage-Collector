@@ -400,6 +400,7 @@ test_h_gc_empty_heap()
   heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
   size_t cleaned = h_gc(h);
   CU_ASSERT(cleaned == 0);
+  h_delete(h);
 }
 
 void
@@ -420,6 +421,7 @@ test_h_gc_no_garbage()
 
   CU_ASSERT(data_ptr != *original_ptr);
   free(original_ptr);
+  h_delete(h);
 }
 
 void
@@ -439,6 +441,7 @@ test_h_gc_only_garbage()
   CU_ASSERT(used_after == 0);
 
   CU_ASSERT(cleaned != 0);
+  h_delete(h);
 }
 
 void
@@ -460,6 +463,7 @@ test_h_gc_mix()
   CU_ASSERT(cleaned != 0);
   CU_ASSERT(struct_ptr != *original_ptr);
   free(original_ptr);
+  h_delete(h);
 }
 
 void
@@ -482,6 +486,7 @@ test_h_gc_ptr_inside_struct_no_garbage()
  
   free(original_ptr1);
   free(original_ptr2);
+  h_delete(h);
 }
 
 void
@@ -494,11 +499,10 @@ test_h_gc_ptr_inside_struct_garbage()
   *struct2_ptr = (test_struct_t){1, 'a', NULL, 2, 1.0};
   struct1_ptr = NULL;
   struct2_ptr = NULL;
-  printf("\nUsed: %lu\n", h_used(h));
   size_t cleaned = h_gc(h);
   CU_ASSERT(cleaned != 0);
   CU_ASSERT(h_used(h) == 0);
-  printf("\nStill used: %lu\n", h_used(h));
+  h_delete(h);
 }
 
 void
@@ -520,6 +524,7 @@ test_h_gc_dbg_no_garbage()
 
   CU_ASSERT(data_ptr == *original_ptr);
   free(original_ptr);
+  h_delete(h);
 }
 
 void
@@ -539,6 +544,7 @@ test_h_gc_dbg_only_garbage()
   CU_ASSERT(used_after == 0);
 
   CU_ASSERT(cleaned != 0);
+  h_delete(h);
 }
 
 void
@@ -558,6 +564,7 @@ test_h_gc_dbg_ptr_inside_struct_no_garbage()
 
   CU_ASSERT(struct1_ptr == *original_ptr1);
   free(original_ptr1);
+  h_delete(h);
 }
 
 void
@@ -579,6 +586,7 @@ test_h_gc_dbg_ptr_inside_struct_internal_garbage()
 
   CU_ASSERT(struct1_ptr == *original_ptr1);
   free(original_ptr1);
+  h_delete(h);
 }
 
 /*============================================================================
@@ -860,6 +868,7 @@ test_get_ptr_page()
   write_int_to_heap(ptr1, 6);
 
   CU_ASSERT(get_ptr_page(test_h_alloc_heap, ptr1) != -1);
+  h_delete(test_h_alloc_heap);
 }
 
 void
@@ -885,10 +894,15 @@ test_h_alloc_threshold ()
   CU_ASSERT(ptr4 != NULL);
   CU_ASSERT(ptr5 == NULL);
   
+  h_delete(test_h_alloc_heap_passive);
 }
 
 
 
+
+/*============================================================================
+ *                             Main Testing Function
+ *===========================================================================*/
 int
 main (void)
 {
@@ -1219,8 +1233,8 @@ main (void)
     }
 
   
-  // ********************* random  SUITE ******************  //
-  suite1 = CU_add_suite("Heap Test", NULL, NULL);
+  // ********************* Legacy  SUITE ******************  //
+  suite1 = CU_add_suite("Legacy Test", NULL, NULL);
 
   if (
       (CU_add_test(suite1, "test_h_alloc_struct/data()", test_h_alloc) == NULL) ||
