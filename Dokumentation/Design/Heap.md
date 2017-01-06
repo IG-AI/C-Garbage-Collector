@@ -1,10 +1,10 @@
 #Heapen
 
 ## Innehåll
-- [Konservativ kompaktering efter Bartlet](#konservativ-kompaktering-efter-Bartlett)
+- [Konservativ kompaktering efter Bartlet](#konservativ-kompaktering-efter-bartlett)
 - [Höga adresser](#höga-adresser)
 - [Att skapa och riva ned en heap](#att-skapa-och-riva-ned-en-heap)
-- [Gränssnittet gc.h](#gränssnittet-gc.h)
+- [Gränssnittet gc.h](#gränssnittet-gch)
 
 ##Konservativ kompaktering efter Bartlett
 Bartlett skiljer mellan säkra och osäkra pekare. En säker pekare är en adress
