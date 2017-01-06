@@ -1,5 +1,8 @@
 #Heapen
 
+## Innehåll
+- [Konservativ kompaktering efter Bartlet](#Konservativ kompaktering efter Bartlett)
+
 ###Konservativ kompaktering efter Bartlett
 Bartlett skiljer mellan säkra och osäkra pekare. En säker pekare är en adress
 som vi säkert vet är en pekare. En osäker pekare är en vars data vi inte säkert
