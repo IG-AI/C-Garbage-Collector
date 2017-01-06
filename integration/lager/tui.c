@@ -9,7 +9,7 @@
 
 #ifdef GC
 #include "../../gc.h"
-heap_t heap;
+heap_t *heap;
 #endif
 
 static inline void clear_screen()
@@ -430,10 +430,9 @@ int main(int argc, char *argv[])
 {
 #ifdef GC
   heap = h_init(102400, false, 0.5);
-#else
-  db *db = db_new();
 #endif
 
+  db *db = db_new();
   event_loop(db);
 
 #ifdef GC

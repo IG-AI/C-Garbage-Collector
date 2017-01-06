@@ -20,6 +20,7 @@
 #define UNSAFE_STACK true
 #define SAFE_STACK false
 
+
 /**
  *  @brief The opaque data type holding all the heap data.
  */
@@ -166,5 +167,16 @@ h_used(heap_t *h);
  */
 size_t 
 h_size(heap_t *h);
+
+/**
+ *  @brief Return a copy of a pointer, that is alloced on our heap.
+ * *
+ *  @param h the heap
+ *  @param str the pointer to the string
+ *  @return The copied pointer
+ */
+
+char *
+h_strdup(heap_t *h, char *str);
 
 #endif

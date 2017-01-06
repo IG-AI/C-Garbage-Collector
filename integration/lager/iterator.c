@@ -25,7 +25,7 @@ struct node
 iter *iterator_new(void *current)
 {
 #ifdef GC
-  iter *result = h_alloc_struct("*");
+  iter *result = h_alloc_struct(heap, "*");
 #else
   iter *result = malloc(sizeof(*result));
 #endif

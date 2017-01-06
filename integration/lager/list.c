@@ -53,7 +53,7 @@ void list_visit(list *l, list_visitor_func f, void *ptr)
 list *list_new()
 {
 #ifdef GC
-  return h_alloc_struct(h, "**i");
+  return h_alloc_struct(heap, "**i");
 #else
   return calloc(1, sizeof(struct list));
 #endif
@@ -62,7 +62,7 @@ list *list_new()
 static inline node *list_internal_node_new(void *elem, node *next)
 {
 #ifdef GC
-  node *result = h_alloc_struct(h, "**");
+  node *result = h_alloc_struct(heap, "**");
 #else
   node *result = malloc(sizeof(*result));
 #endif

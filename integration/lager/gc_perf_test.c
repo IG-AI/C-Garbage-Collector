@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 #ifdef GC
   /// An approximation of 2x memory, adjust if neeced
   const uint HEAP_MAX = 6 * Lists * M * sizeof(void *) + Lists * 6 * sizeof(void *);
-  heap = h_init(HEAP_MAX, true, 0.5);
+  heap = h_init(HEAP_MAX - HEAP_MAX % 2048 + 2048, true, 0.5);
 #endif
 
   list *lists[Lists];
@@ -93,11 +93,13 @@ int main(int argc, char *argv[])
   int_cell **cursor = ids;
   for (int i = 0; i < M; ++i)
     {
+      printf("M = %i\n", i);
       *cursor++ = populate_lists(lists, Lists, M * Lists);
     }
 
 #ifdef GC
-  h_gc(heap);
+  size_t cleaned = h_gc(heap);
+  printf("\nCleaned: %lu\n", cleaned);
 #endif
 
   /// What happens to performance if we do all searches in list 0
@@ -106,6 +108,7 @@ int main(int argc, char *argv[])
   uint hits = 0;
   for (int j = 0; j < N; ++j)
     {
+      printf("N = %i\n", j);
       if (do_search(lists[rand() % Lists], M * Lists))
         {
           ++hits;

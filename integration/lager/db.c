@@ -8,7 +8,7 @@
 
 #ifdef GC
 #include "../../gc.h"
-extern heap_t heap;
+extern heap_t *heap;
 #endif
 
 typedef struct good good;
@@ -261,10 +261,17 @@ void good_set_price(good *g, int price)
 
 good *good_deep_copy(good *good)
 {
-  return good_new(strdup(good->name),
+#ifdef GC
+  return good_new(h_strdup(heap, good->name),
+                  h_strdup(heap, good->desc),
+                  good->price_in_cents,
+                  good->amount);
+#else
+    return good_new(strdup(good->name),
                   strdup(good->desc),
                   good->price_in_cents,
                   good->amount);
+#endif
 }
 
 void good_deep_free(good *g)

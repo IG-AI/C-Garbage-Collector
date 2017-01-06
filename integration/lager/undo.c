@@ -5,7 +5,7 @@
 
 #ifdef GC
 #include "../../gc.h"
-extern heap_t heap;
+extern heap_t *heap;
 #endif 
 
 void undo_store_action(undo_t *undo, action_t *action)

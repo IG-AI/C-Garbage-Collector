@@ -405,7 +405,7 @@ get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_
         }
       pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
     } 
-  assert(i == array_size && "There are less ptrs in stack than we thought!"); 
+  //assert(i == array_size && "There are less ptrs in stack than we thought!"); 
   return i;  
 }
 
@@ -744,6 +744,14 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
   if(h == NULL) return 0;
   //Dump_registers();
 
+  printf("\nNumber of pages: %lu\n", h->number_of_pages);
+  size_t active_pages = 0;
+  for(size_t i = 0; i < h->number_of_pages; ++i)
+    {
+      if(page_get_type(h->pages[i]) == ACTIVE) ++active_pages;
+    }
+  printf("\nNumber of active pages: %lu\n", active_pages);
+
   size_t used_before_gc = h_used(h);
   set_active_to_transition(h);
 
@@ -759,6 +767,7 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
 
   for(size_t page_nr = 0; page_nr < h->number_of_pages; ++page_nr)
     {
+      printf("\nWorking on page %lu \n", page_nr);
       if (page_get_type(h->pages[page_nr]) == TRANSITION)
         {
           for(size_t ptr_index = 0; ptr_index < num_active_ptrs; ++ptr_index)
@@ -834,3 +843,19 @@ h_size(heap_t *h)
   return h->size; 
 }
 
+
+char *
+h_strdup(heap_t *h, char *str)
+{
+  if (str == NULL)
+    {
+      return NULL;
+    }
+  else
+    {
+      size_t str_len = strlen(str);
+      char *result = h_alloc_data(h, str_len * sizeof(char));
+      strncpy(result, str, str_len);
+      return result;
+    }
+}
