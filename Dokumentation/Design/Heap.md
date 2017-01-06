@@ -6,7 +6,7 @@
 - [Att skapa och riva ned en heap](#Att skapa och riva ned en heap)
 - [Gränssnittet gc.h](#Gränssnittet gc.h)
 
-###Konservativ kompaktering efter Bartlett
+##Konservativ kompaktering efter Bartlett
 Bartlett skiljer mellan säkra och osäkra pekare. En säker pekare är en adress
 som vi säkert vet är en pekare. En osäker pekare är en vars data vi inte säkert
 vet är en pekare. Ett typiskt användande av Bartletts teknik är för skanning av
@@ -27,7 +27,7 @@ i två delar – passiv och aktiv – ger vi varje sida statusen passiv eller ak
 osäker pekare till en adress A medför nu att den omslutande sidan P inte får
 flyttas vid kompaktering.
 
-###Höga adresser
+##Höga adresser
 Detta är enkelt att implementera och brukar ge hög avkastning. Använd t.ex.
 posix_memalign för att allokera minnet till programmets egen heap och ange
 en mycket hög adress som alignment. Det medför att alla pekaradresser som
@@ -35,7 +35,7 @@ skapas kommer att vara väldigt stora. Eftersom program sällan manipulerar
 väldigt stora tal minskar risken för att ett heltal i programmet skulle råka
 sammanfalla med en valid minnesadress.
 
-###Att skapa och riva ned en heap
+##Att skapa och riva ned en heap
 Funktionen h_init som ni skall implementera skapar en ny heap med en
 angiven storlek och returnerar en pekare till den. Utöver storlek skall det gå att
 ställa in två ytterligare parametrar:
@@ -57,7 +57,7 @@ stacken som pekar in i heapens adressrymd med ett angivet värde, t.ex. NULL
 eller 0xDEADBEEF så att ”skjutna pekare” (eng. dangling pointers) lättare
 kan upptäckas.
 
-###Gränssnittet gc.h
+##Gränssnittet gc.h
 Nedanstående headerfil sammanfattar det publika gränssnitt som skall imple-
 menteras. En doxygen-dokumenterad version finns också tillgänglig i kursens
 repo.
