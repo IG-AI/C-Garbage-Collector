@@ -89,7 +89,7 @@ alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state)
   return true;
 }
 
-
+/*
 static void
 alloc_map_print_in_use(alloc_map_t *alloc_map)
 {
@@ -108,3 +108,4 @@ alloc_map_print_in_use(alloc_map_t *alloc_map)
     }
   printf("\n");
 }
+*/

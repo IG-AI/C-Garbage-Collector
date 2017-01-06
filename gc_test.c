@@ -429,7 +429,9 @@ test_h_gc_only_garbage()
 {
   heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
   void *data_ptr = h_alloc_data(h, sizeof(int));
+  if(data_ptr){};//to silence gcc compiling whining....
   data_ptr = NULL;
+
 
   size_t avail_before = h_avail(h);
   size_t used_before = h_used(h);
@@ -451,6 +453,7 @@ test_h_gc_mix()
   void *struct_ptr = h_alloc_struct(h, TEST_STRUCT_FORMAT_STR);
   void **original_ptr = back_up_ptr(struct_ptr);
   void *data_ptr = h_alloc_data(h, sizeof(int));
+  if(data_ptr){};//to silence gcc compiling whining....
   data_ptr = NULL;
   size_t avail_before = h_avail(h);
   size_t used_before = h_used(h);
@@ -532,6 +535,7 @@ test_h_gc_dbg_only_garbage()
 {
   heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
   void *data_ptr = h_alloc_data(h, sizeof(int));
+  if(data_ptr){};//to silence gcc compiling whining....
   data_ptr = NULL;
 
   size_t avail_before = h_avail(h);
