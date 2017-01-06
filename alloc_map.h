@@ -29,8 +29,9 @@ typedef struct alloc_map alloc_map_t;
 /**
  *  @brief Creates allocation map.
  *
- *  This function creates an allocation map, and returns the pointer to
- *  its location.
+ *  This function creates an allocation map on the provided pointer.
+ *
+ *  @param alloc_map the adress where the allocation map is to be created.
  *  
  *  @param start_addr the starting address for the memory block the
  *         allocation map represents.
@@ -38,14 +39,22 @@ typedef struct alloc_map alloc_map_t;
  *         divided into.
  *  @param block_size the size in bytes of the memory block the map is
  *         going to represent
- *
- *  @return pointer to the newly created allocation map.
  *  
  */
 void 
 alloc_map_create(alloc_map_t *alloc_map, void *start_addr, size_t word_size, size_t block_size);
 
-
+/**
+ *  @brief Gets the size needed for an allocation map.
+ *
+ *  @param word_size the size of the words which the memory block is
+ *         divided into.
+ *
+ *  @param block_size the size in bytes of the memory block the map is
+ *         going to represent.
+ *         
+ *  @return the size in bytes needed to store the allocation map.
+ */
 size_t
 alloc_map_mem_size_needed(size_t word_size, size_t block_size);
 
@@ -74,9 +83,5 @@ alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr);
  */  
 bool 
 alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state);
-
-
-void
-alloc_map_print_in_use();
 
 #endif
