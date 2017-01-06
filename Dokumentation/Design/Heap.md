@@ -2,6 +2,9 @@
 
 ## Innehåll
 - [Konservativ kompaktering efter Bartlet](#Konservativ kompaktering efter Bartlett)
+- [Höga adresser](#Höga adresser)
+- [Att skapa och riva ned en heap](#Att skapa och riva ned en heap)
+- [Gränssnittet gc.h](#Gränssnittet gc.h)
 
 ###Konservativ kompaktering efter Bartlett
 Bartlett skiljer mellan säkra och osäkra pekare. En säker pekare är en adress
@@ -59,24 +62,35 @@ Nedanstående headerfil sammanfattar det publika gränssnitt som skall imple-
 menteras. En doxygen-dokumenterad version finns också tillgänglig i kursens
 repo.
 ```c
-#include <stddef.h>
-#include <stdbool.h>
-
-#ifndef __gc__
-#define __gc__
-
 typedef struct heap heap_t;
 
-heap_t *h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
-void h_delete(heap_t *h);
-void h_delete_dbg(heap_t *h, void *dbg_value);
+heap_t *
+h_init(size_t bytes, bool unsafe_stack, float gc_threshold);
 
-void *h_alloc_struct(heap_t *h, char *layout);
-void *h_alloc_raw(heap_t *h, size_t bytes);
+void 
+h_delete(heap_t *h);
 
-size_t h_avail(heap_t *h);
-size_t h_used(heap_t *h);
-size_t h_gc(heap_t *h);
-size_t h_gc_dbg(heap_t *h, bool unsafe_stack);
-#endif
+void 
+h_delete_dbg(heap_t *h, void *dbg_value);
+
+void *
+h_alloc_struct(heap_t *h, char *layout);
+
+void *
+h_alloc_data(heap_t *h, size_t bytes);
+
+size_t 
+h_gc(heap_t *h);
+
+size_t 
+h_gc_dbg(heap_t *h, bool unsafe_stack);
+
+size_t 
+h_avail(heap_t *h);
+
+size_t 
+h_used(heap_t *h);
+
+size_t 
+h_size(heap_t *h);
 ```
