@@ -1,0 +1,13 @@
+{
+   <suppress_cond_jump>
+   Memcheck:Cond
+   ...
+   fun:*
+}
+
+{
+   <suppress_uninitialized_values>
+   Memcheck:Value8
+   ...
+   fun:*
+}
