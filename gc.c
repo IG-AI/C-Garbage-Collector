@@ -657,11 +657,6 @@ h_alloc_raw(heap_t *h, void *ptr_to_data)
 }
 
 
-void * get_stack_top(){
-  return __builtin_frame_address(0);
-}
-
-
 void
 set_active_to_transition(heap_t *h)
 {
