@@ -746,7 +746,7 @@ set_unsafe_pages_to_active(heap_t *h)
 size_t 
 h_gc_dbg(heap_t *h, bool unsafe_stack)
 {
-  Dump_registers();
+  //Dump_registers();
 
   size_t used_before_gc = h_used(h);
   set_active_to_transition(h);

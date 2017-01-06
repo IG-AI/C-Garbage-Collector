@@ -523,6 +523,25 @@ test_h_gc_dbg_no_garbage()
 }
 
 void
+test_h_gc_dbg_only_garbage()
+{
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
+  void *data_ptr = h_alloc_data(h, sizeof(int));
+  data_ptr = NULL;
+
+  size_t avail_before = h_avail(h);
+  size_t used_before = h_used(h);
+  size_t cleaned = h_gc_dbg(h, UNSAFE_STACK);
+  size_t avail_after = h_avail(h);
+  size_t used_after = h_used(h);
+  CU_ASSERT(avail_before < avail_after);
+  CU_ASSERT(used_before > used_after);
+  CU_ASSERT(used_after == 0);
+
+  CU_ASSERT(cleaned != 0);
+}
+
+void
 test_h_gc_dbg_ptr_inside_struct_no_garbage()
 {
   heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
@@ -1081,7 +1100,10 @@ main (void)
                                , test_h_gc_ptr_inside_struct_garbage) ) ||
         (NULL == CU_add_test(suite_h_gc
                                , "dbg: no garbage"
-                               , test_h_gc_dbg_no_garbage) ) /*||
+                               , test_h_gc_dbg_no_garbage) ) ||
+        (NULL == CU_add_test(suite_h_gc
+                               , "dbg: only garbage in heap"
+                               , test_h_gc_dbg_only_garbage) ) /*||
        (NULL == CU_add_test(suite_h_gc
                                , "dgb: null heap ptr"
                                , test_h_gc_dbg_null_heap_ptr) )*/
