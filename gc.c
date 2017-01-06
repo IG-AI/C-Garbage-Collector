@@ -205,6 +205,8 @@ heap_get_number_of_pages(heap_t *h)
 void
 h_delete(heap_t *h)
 {
+  assert(h != NULL);
+  if(h==NULL) return;
   free(h->memory);
   free(h->alloc_map);
   free(h);
@@ -214,6 +216,8 @@ h_delete(heap_t *h)
 void 
 h_delete_dbg(heap_t *h, void *dbg_value)
 {
+  assert(h != NULL);
+  if(h==NULL) return;
   void *stack_top = get_stack_top();
   size_t number_of_ptrs = get_number_of_ptrs_in_stack(h, stack_top);
   void **array[number_of_ptrs];
@@ -572,10 +576,15 @@ h_alloc(heap_t * h, size_t bytes)
 void *
 h_alloc_struct(heap_t * h, char * layout)
 {
-  assert(*layout != '\0');
+  assert(h != NULL);
   assert(layout != NULL);
+  assert(*layout != '\0');
+  if(h == NULL || layout == NULL || *layout == '\0') return NULL;
+  
   size_t size = get_struct_size(layout);
+  assert(size <= PAGE_SIZE);
   assert(size > 0);
+  if(size > PAGE_SIZE || size == 0) return NULL;
  
   void * ptr = h_alloc(h, size);
   if (ptr == NULL) return NULL;
@@ -590,9 +599,13 @@ void *
 h_alloc_data(heap_t * h, size_t bytes)
 {
   assert(bytes > 0);
+  assert(h != NULL);
+  if(h == NULL || bytes == 0) return NULL;
+  
   size_t size = get_data_size(bytes);
   assert(size <= PAGE_SIZE);
- 
+  assert(size > 0);
+  if(size > PAGE_SIZE || size == 0) return NULL;
   void * ptr = h_alloc(h, size);
   if (ptr == NULL) return NULL;
   
@@ -746,6 +759,8 @@ set_unsafe_pages_to_active(heap_t *h)
 size_t 
 h_gc_dbg(heap_t *h, bool unsafe_stack)
 {
+  assert(h != NULL);
+  if(h == NULL) return 0;
   //Dump_registers();
 
   size_t used_before_gc = h_used(h);
@@ -803,6 +818,8 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
 size_t 
 h_avail(heap_t *h)
 {
+  assert(h != NULL);
+  if(h == NULL) return 0;
   size_t avail = 0;
   int number_of_pages = h->number_of_pages;
   for (int i = 0; i < number_of_pages; i++) 
@@ -816,6 +833,8 @@ h_avail(heap_t *h)
 size_t 
 h_used(heap_t *h)
 {
+  assert(h != NULL);
+  if(h == NULL) return 0;
   size_t used = 0;
   int number_of_pages = h->number_of_pages;
   for (int i = 0; i < number_of_pages; i++) 
@@ -829,6 +848,8 @@ h_used(heap_t *h)
 size_t
 h_size(heap_t *h)
 {
+  assert(h != NULL);
+  if(h == NULL) return 0;
   return h->size; 
 }
 

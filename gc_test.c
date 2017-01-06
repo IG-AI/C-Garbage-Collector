@@ -975,12 +975,12 @@ main (void)
     return CU_get_error();
   }
 
-  if ( /*(NULL == CU_add_test(suite_h_delete
+  if ( (NULL == CU_add_test(suite_h_delete
                             , "null heap ptr"
                             , test_h_delete_null_ptr) ) ||
        (NULL == CU_add_test(suite_h_delete
                                , "dbg null heap ptr"
-                               , test_h_delete_dbg_null_ptr) ) || */
+                               , test_h_delete_dbg_null_ptr) ) ||
        (NULL == CU_add_test(suite_h_delete
                                , "null dbg value"
                                , test_h_delete_dbg_null_value) )
@@ -1014,7 +1014,7 @@ main (void)
     return CU_get_error();
   }
 
-  if ( /*(NULL == CU_add_test(suite_h_alloc_struct
+  if ( (NULL == CU_add_test(suite_h_alloc_struct
                                , "null heap"
                                , test_h_alloc_struct_null_heap) ) ||
        (NULL == CU_add_test(suite_h_alloc_struct
@@ -1025,13 +1025,13 @@ main (void)
                                , test_h_alloc_struct_empty_str) ) ||
         (NULL == CU_add_test(suite_h_alloc_struct
                                , "invalid format string"
-                               , test_h_alloc_struct_invalid_str) ) ||*/
+                               , test_h_alloc_struct_invalid_str) ) ||
         (NULL == CU_add_test(suite_h_alloc_struct
                                , "valid str"
-                               , test_h_alloc_struct_valid_str) ) /*||
+                               , test_h_alloc_struct_valid_str) ) ||
         (NULL == CU_add_test(suite_h_alloc_struct
                                , "stuct too big for page"
-                               , test_h_alloc_struct_too_big_for_page) )*/
+                               , test_h_alloc_struct_too_big_for_page) )
     )
     {
       CU_cleanup_registry();
@@ -1047,21 +1047,21 @@ main (void)
     return CU_get_error();
   }
 
-  if ( /*(NULL == CU_add_test(suite_h_alloc_data
+  if ( (NULL == CU_add_test(suite_h_alloc_data
                                , "null heap"
                                , test_h_alloc_data_null_heap) ) ||
        (NULL == CU_add_test(suite_h_alloc_data
                                , "zero bytes"
-                               , test_h_alloc_data_zero_bytes) ) ||*/
+                               , test_h_alloc_data_zero_bytes) ) ||
        (NULL == CU_add_test(suite_h_alloc_data
                                , "one byte"
                                , test_h_alloc_data_one_byte) ) ||
         (NULL == CU_add_test(suite_h_alloc_data
                                , "100 bytes"
-                               , test_h_alloc_data_100_bytes) ) /*||
+                               , test_h_alloc_data_100_bytes) ) ||
         (NULL == CU_add_test(suite_h_alloc_data
                                , "too big for a page"
-                               , test_h_alloc_data_too_big_for_page) )*/
+                               , test_h_alloc_data_too_big_for_page) )
     )
     {
       CU_cleanup_registry();
@@ -1077,9 +1077,9 @@ main (void)
     return CU_get_error();
   }
 
-  if ( /*(NULL == CU_add_test(suite_h_gc
+  if ( (NULL == CU_add_test(suite_h_gc
                                , "null heap ptr"
-                               , test_h_gc_null_heap_ptr) ) ||*/
+                               , test_h_gc_null_heap_ptr) ) ||
        (NULL == CU_add_test(suite_h_gc
                                , "empty heap"
                                , test_h_gc_empty_heap) ) ||
@@ -1103,10 +1103,10 @@ main (void)
                                , test_h_gc_dbg_no_garbage) ) ||
         (NULL == CU_add_test(suite_h_gc
                                , "dbg: only garbage in heap"
-                               , test_h_gc_dbg_only_garbage) ) /*||
+                               , test_h_gc_dbg_only_garbage) ) ||
        (NULL == CU_add_test(suite_h_gc
                                , "dgb: null heap ptr"
-                               , test_h_gc_dbg_null_heap_ptr) )*/
+                               , test_h_gc_dbg_null_heap_ptr) )
     )
     {
       CU_cleanup_registry();
@@ -1121,9 +1121,9 @@ main (void)
     return CU_get_error();
   }
 
-  if ( /*(NULL == CU_add_test(suite_h_avail
+  if ( (NULL == CU_add_test(suite_h_avail
                             , "null heap"
-                            , test_h_avail_null_heap) ) ||     //OBS
+                            , test_h_avail_null_heap) ) ||
        (NULL == CU_add_test(suite_h_avail
                             , "zero allocated"
                             , test_h_avail_zero_alloced) ) || 
@@ -1135,7 +1135,7 @@ main (void)
                             , test_h_avail_invalid_str) ) || 
        (NULL == CU_add_test(suite_h_avail
                             , "empty string"
-                            , test_h_avail_emty_str) ) ||  */
+                            , test_h_avail_emty_str) ) ||
        (NULL == CU_add_test(suite_h_avail
                             , "valid struct"
                             , test_h_avail_valid_struct) ) ||
@@ -1165,9 +1165,9 @@ main (void)
     return CU_get_error();
   }
 
-  if ( /*(NULL == CU_add_test(suite_h_used
+  if ( (NULL == CU_add_test(suite_h_used
                             , "null heap"
-                            , test_h_used_null_heap) ) ||     //OBS
+                            , test_h_used_null_heap) ) ||
        (NULL == CU_add_test(suite_h_used
                             , "zero allocated"
                             , test_h_used_zero_alloced) ) || 
@@ -1179,7 +1179,7 @@ main (void)
                             , test_h_used_invalid_str) ) || 
        (NULL == CU_add_test(suite_h_used
                             , "empty string"
-                            , test_h_used_emty_str) ) ||  */
+                            , test_h_used_emty_str) ) ||
        (NULL == CU_add_test(suite_h_used
                             , "valid struct"
                             , test_h_used_valid_struct) ) ||
