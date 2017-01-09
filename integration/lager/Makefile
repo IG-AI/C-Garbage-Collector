@@ -1,27 +1,45 @@
 GC_FILES =  ../../gc.o ../../header.o ../../alloc_map.o ../../stack_search.o
 
+ifeq ($(PLATFORM), sparc)
+  CC =cc
+  STD =-std=c11
+  LINKFLAGS =$(STD) -g -xmemalign=1i
+  COMPFLAGS =$(STD) -g -c -m64 -xmemalign=1i -ggdb
+  TESTFLAGS =$(STD) -g -m64 -lcunit -xmemalign=1i -DNDEBUG
+  COVERAGEFLAGS =$(STD) -Wall -g -m64 -lcunit -xmemalign=1i -DNDEBUG -fprofile-arcs -ftest-coverage -coverage
+else
+  CC =gcc
+  STD =-std=gnu11
+  LINKFLAGS =$(STD) -Wall -g -o
+  COMPFLAGS =$(STD) -Wall -g -c -m64 -ggdb
+  TESTFLAGS =$(STD) -Wall -g -m64 -lcunit -DNDEBUG
+  COVERAGEFLAGS =$(STD) -Wall -g -m64 -lcunit -DNDEBUG -fprofile-arcs -ftest-coverage -coverage
+endif
+
 
 tree.o: tree.c
-	gcc -Wall -std=gnu11 -ggdb -c tree.c
+	$(CC) $(COMPFLAGS) tree.c
 
 %.o: %.c
-	gcc -Wall -std=gnu11 -pedantic -ggdb -c $<
+	$(CC) $(COMPFLAGS) $<
 
 db: db.o tui.o tree.o list.o iterator.o undo.o
-	gcc -Wall -std=gnu11 -pedantic -ggdb -o db db.o tui.o tree.o list.o iterator.o undo.o
+	$(CC) $(LINKFLAGS) -o db db.o tui.o tree.o list.o iterator.o undo.o
 
 dbgc: db.c tui.c tree.c list.c iterator.c undo.c
+	$(CC) $(TESTFLAGS) -DGC -o db $^ $(GC_FILES)
 
-	gcc -Wall -std=gnu11 -pedantic -ggdb -DGC -o db $^ $(GC_FILES)
+dbgc_sparc:
+	@$(MAKE) --no-print-directory dbgc PLATFORM=sparc
 
 testgc: dbgc
 	cat ./start.txt - | valgrind --leak-check=full ./db
 
 gc_perf_test:
-	gcc -Wall -std=gnu11 -pedantic -O1 gc_perf_test.c list.c iterator.c -o gc_perf_test -DGC $(GC_FILES)
+	$(CC) $(TESTFLAGS) -O1 gc_perf_test.c list.c iterator.c -o gc_perf_test -DGC $(GC_FILES)
 
 tree_test: tree.o tree_test.o
-	gcc -Wall -std=gnu11 -o tree_test tree_test.o tree.o
+	$(CC) $(LINKFLAGS) -o tree_test tree_test.o tree.o
 
 test: tree_test db
 	#valgrind --leak-check=full ./db

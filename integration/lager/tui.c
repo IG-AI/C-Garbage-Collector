@@ -14,7 +14,7 @@ heap_t *heap;
 
 static inline void clear_screen()
 {
-  printf("\e[1;1H\e[2J");
+  //  printf("\e[1;1H\e[2J");
 }
 
 static inline void tui_getline(char **buf, size_t *len)
