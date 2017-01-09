@@ -748,14 +748,6 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
   if(h == NULL) return 0;
   //Dump_registers();
 
-  /*printf("\nNumber of pages: %lu\n", h->number_of_pages);
-  size_t active_pages = 0;
-  for(size_t i = 0; i < h->number_of_pages; ++i)
-    {
-      if(page_get_type(h->pages[i]) == ACTIVE) ++active_pages;
-    }
-    printf("\nNumber of active pages: %lu\n", active_pages);*/
-
   size_t used_before_gc = h_used(h);
   set_active_to_transition(h);
 
@@ -835,7 +827,6 @@ h_used(heap_t *h)
   int number_of_pages = h->number_of_pages;
   for (int i = 0; i < number_of_pages; i++) 
     {
-      //      printf("Page %i:%lu used\n", i, page_get_used(h->pages[i]));
       used += page_get_used(h->pages[i]);  
     }
   return used;
