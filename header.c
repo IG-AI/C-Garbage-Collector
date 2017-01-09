@@ -267,7 +267,7 @@ create_data_header(size_t bytes, void *ptr)
 
 
 void *
-create_struct_header(char *form_str, void *ptr)
+create_struct_header(heap_t *h, char *form_str, void *ptr)
 {
   if(form_str == NULL || ptr == NULL) return NULL;
   if(get_struct_size(form_str) == INVALID) return NULL;
@@ -289,7 +289,9 @@ create_struct_header(char *form_str, void *ptr)
         }
       else
         {
-          *ptr_to_header = str_duplicate(form_str);
+          if(h == NULL) return NULL;
+          *ptr_to_header = h_strdup(h, form_str);
+          if(*ptr_to_header == NULL) return NULL;
           set_type_bits(ptr_to_header, I_HT_FORMAT_STR);
         }
       return data_from_header(ptr);

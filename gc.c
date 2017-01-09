@@ -579,7 +579,7 @@ h_alloc_struct(heap_t * h, char * layout)
   void * ptr = h_alloc(h, size);
   if (ptr == NULL) return NULL;
   
-  void * return_ptr = create_struct_header(layout, ptr);
+  void * return_ptr = create_struct_header(h, layout, ptr);
   alloc_map_set(h->alloc_map, return_ptr, true); 
   return return_ptr;
 }
@@ -851,8 +851,8 @@ h_strdup(heap_t *h, char *str)
     }
   else
     {
-      size_t str_len = strlen(str);
-      char *result = h_alloc_data(h, str_len * sizeof(char));
+      size_t str_len = strlen(str) + 1;
+      char *result = h_alloc_data(h, (str_len) * sizeof(char));
       strncpy(result, str, str_len);
       return result;
     }
