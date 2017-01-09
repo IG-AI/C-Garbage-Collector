@@ -16,7 +16,8 @@ else
   COVERAGEFLAGS =$(STD) -Wall -g -m64 -lcunit -DNDEBUG -fprofile-arcs -ftest-coverage -coverage
 endif
 
-
+test_all: gc.o stack_search.o header.o alloc_map.o
+	ld -r gc.o stack_search.o header.o alloc_map.o -o all.o
 
 
 all:	gc.o stack_search.o header.o alloc_map.o 

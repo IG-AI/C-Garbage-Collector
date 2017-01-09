@@ -14,11 +14,11 @@
 /// #define IOOPM_GC
 
 #ifdef BOEHM_GC
-#include <gc/gc.h>
+#include <gc.h>
 #endif
 
 #ifdef IOOPM_GC
-#include "gc.h"
+#include "../../gc.h"
 
 heap_t *h;
 #endif
@@ -139,11 +139,13 @@ int lookup_elements(list_t lists[], int no_lists, int elements, int max)
 int main(int argc, char *argv[])
 {
   int no_lists = 4;
-  int elements = 1024 * 128;
+  int elements = 1024 * 32;
   int max = no_lists * elements * 2;
 
 #ifdef IOOPM_GC
-  h = h_init(max * sizeof(struct link) * 2.4, true, 0.5);
+  int cake = (max * sizeof(struct link) * 2.4) ;
+  cake = cake + 2048-(cake % 2048);
+  h = h_init(cake, true, 0.5);
 #endif
   
   if (argc > 1)
