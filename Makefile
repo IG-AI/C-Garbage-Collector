@@ -11,24 +11,22 @@ else
   CC =gcc
   STD =-std=c11
   LINKFLAGS =$(STD) -Wall -g -o
-  COMPFLAGS =$(STD) -Wall -g -c -m64
-  TESTFLAGS =$(STD) -Wall -g -m64 -lcunit -DNDEBUG
+  COMPFLAGS =$(STD) -Wall -g -c -m64 -pg
+  TESTFLAGS =$(STD) -Wall -g -m64 -lcunit -DNDEBUG -pg
   COVERAGEFLAGS =$(STD) -Wall -g -m64 -lcunit -DNDEBUG -fprofile-arcs -ftest-coverage -coverage
 endif
 
 
 
 
-all: gc
+all:	gc.o stack_search.o header.o alloc_map.o 
+	@echo "Compiled"
 
-gc: gc.o stack_search.o header.o alloc_map.o
-	@$(CC) $(LINKFLAGS) $@ $^
-
-gc.o: gc.c gc.h
-	@$(CC) $(COMPFLAGS) -c $^
+gc.o: gc.c gc.h #header.o stack_search.o alloc_map.o
+	@$(CC) $(COMPFLAGS) gc.c -o $@
 
 header.o: header.c header.h
-	@$(CC) $(COMPFLAGS) header.c
+	@$(CC) $(COMPFLAGS) header.c -o $@
 
 stack_search.o: stack_search.c stack_search.h
 	@$(CC) $(COMPFLAGS) stack_search.c -o $@

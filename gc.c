@@ -421,8 +421,9 @@ get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_
 int
 get_ptr_page(heap_t *h, void * ptr)
 {
-  int number_of_pages = h->number_of_pages;
-  for (int i = 0; i < number_of_pages; ++i) 
+  //int number_of_pages = h->number_of_pages;
+  return (int) ((size_t) ptr - (size_t) h->memory) / PAGE_SIZE;
+  /*for (int i = 0; i < number_of_pages; ++i) 
     {
       page_t *current = h->pages[i];
       if(ptr >= page_get_start(current) && ptr < page_get_end(current))
@@ -430,7 +431,7 @@ get_ptr_page(heap_t *h, void * ptr)
           return i;
         }
     }
-  return -1;
+    return -1;*/
 }
 
 
