@@ -64,6 +64,9 @@ get_page_start(page_t *page);
 int
 get_ptr_page(heap_t *h, void * ptr);
 
+size_t
+page_get_used(page_t *p);
+
 void *
 get_memory(heap_t *h);
 

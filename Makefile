@@ -1,12 +1,23 @@
-SOURCES= stack_search.c
-OBJECTS=$(SOURCES:.c=.o)
+PLATFORM ?=x86
 
-CC =gcc
-STD =-std=c11
-LINKFLAGS =$(STD) -g -o
-COMPFLAGS =$(STD) -Wall -g -c -m64
-TESTFLAGS =$(STD) -Wall -g -m64 -lcunit  -DNDEBUG
-COVERAGEFLAGS =$(STD) -Wall -g -m64 -lcunit  -DNDEBUG -fprofile-arcs -ftest-coverage -coverage
+ifeq ($(PLATFORM), sparc)
+  CC =cc
+  STD =-std=c11
+  LINKFLAGS =$(STD) -g -o -xmemalign=1i
+  COMPFLAGS =$(STD) -g -c -m64 -xmemalign=1i
+  TESTFLAGS =$(STD) -g -m64 -lcunit -xmemalign=1i -DNDEBUG
+  COVERAGEFLAGS =$(STD) -Wall -g -m64 -lcunit -xmemalign=1i -DNDEBUG -fprofile-arcs -ftest-coverage -coverage
+else
+  CC =gcc
+  STD =-std=c11
+  LINKFLAGS =$(STD) -Wall -g -o
+  COMPFLAGS =$(STD) -Wall -g -c -m64
+  TESTFLAGS =$(STD) -Wall -g -m64 -lcunit -DNDEBUG
+  COVERAGEFLAGS =$(STD) -Wall -g -m64 -lcunit -DNDEBUG -fprofile-arcs -ftest-coverage -coverage
+endif
+
+
+
 
 all: gc
 
@@ -75,6 +86,9 @@ coverage: header_coverage stack_search_coverage alloc_map_coverage #gc_coverage
 	@gcov alloc_map.c
 	@echo ""
 	@echo "*************************************************************"
+
+test_sparc:
+	@$(MAKE) --no-print-directory PLATFORM=sparc test
 
 # GC
 test_gc: gc_test

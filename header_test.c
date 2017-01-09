@@ -599,14 +599,15 @@ test_get_pointers_struct_one_ptr()
 {
   void *ptr = calloc(1, get_struct_size("*"));
   void *data = create_struct_header("*", ptr);
-  *(void **)data = (void *) 1UL;
-  int size = get_number_of_pointers_in_struct(data);
+  void *ptr_to_ptr = data;
+  size_t size = get_number_of_pointers_in_struct(data);
+  CU_ASSERT(size == 1);
   void **array[size];
-  for(int i = 0; i < size; ++i) array[i] = NULL;
+  array[0] = NULL;
   
   bool result = get_pointers_in_struct(data, array);
   CU_ASSERT_TRUE(result);
-  CU_ASSERT(*(unsigned long*)array[size - 1] == 1UL);
+  CU_ASSERT(*array[0] == *(void **)ptr_to_ptr);
   free(ptr);
 }
 
@@ -663,7 +664,7 @@ test_get_pointers_struct_mixed_ptr()
   int size = get_number_of_pointers_in_struct(data);
   void **array[size];
   for(int i = 0; i < size; ++i) array[i] = NULL;
-  
+
   bool result = get_pointers_in_struct(data, array);
   CU_ASSERT_TRUE(result);
   for(int i = 0; i < size; ++i)
@@ -688,6 +689,22 @@ test_get_pointers_struct_big_format_str()
     {
       CU_ASSERT(array[i] != NULL);
     }
+  free(ptr);
+}
+
+void
+test_get_pointers_struct_mem_align()
+{
+  void *ptr = calloc(1, get_struct_size("c*"));
+  void *data = create_struct_header("c*", ptr);
+  void *ptr_to_ptr = (void *) ((unsigned long) data + sizeof(char));
+  int size = get_number_of_pointers_in_struct(data);
+  void **array[size];
+  array[0] = NULL;
+  
+  bool result = get_pointers_in_struct(data, array);
+  CU_ASSERT_TRUE(result);
+  CU_ASSERT(*array[0] == *(void **)ptr_to_ptr);
   free(ptr);
 }
 
@@ -1487,6 +1504,9 @@ main(void)
        || (NULL == CU_add_test(suite_get_ptrs
                                , "Big format string"
                                , test_get_pointers_struct_big_format_str) )
+       || (NULL == CU_add_test(suite_get_ptrs
+                               , "Mem-aligned char"
+                               , test_get_pointers_struct_mem_align) )
        )
     {
       CU_cleanup_registry();

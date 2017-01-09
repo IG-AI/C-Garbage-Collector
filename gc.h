@@ -20,6 +20,7 @@
 #define UNSAFE_STACK true
 #define SAFE_STACK false
 
+#pragma pack(1)
 
 /**
  *  @brief The opaque data type holding all the heap data.
