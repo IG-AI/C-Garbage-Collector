@@ -142,6 +142,10 @@ h_init(size_t bytes, bool unsafe_stack, float gc_threshold)
   size_t heap_struct_size = sizeof(void*) + sizeof(alloc_map_t *) + sizeof(size_t)
                             + sizeof(bool)  + sizeof(float)  + sizeof(size_t) 
                             + (sizeof(void *) * (number_of_pages) );
+  if(heap_struct_size % WORD_SIZE != 0)
+    {
+      heap_struct_size += (WORD_SIZE - heap_struct_size % WORD_SIZE);
+    }
   
   size_t alloc_map_size = alloc_map_mem_size_needed(WORD_SIZE, bytes);
   size_t pages_size = (sizeof(page_t) * number_of_pages);
@@ -690,14 +694,14 @@ forward_internal_array_ptrs_with_offset(void **array[],
                                         void *ptr_to_new_data)
 {
   long offset = (long) ptr_to_new_data - (long) ptr_to_original_data;
-  void *lower_range = ptr_to_original_data;
-  void *upper_range = (void *) ((unsigned long) lower_range + get_existing_data_size(ptr_to_new_data));
+  void **lower_range = ptr_to_original_data;
+  void **upper_range = (void *) ((unsigned long) lower_range + get_existing_data_size(ptr_to_new_data));
   
   for(size_t index = start_index; index < array_size; ++index)
     {
       if(lower_range <= array[index] && array[index] < upper_range)
         {
-          array[index] = array[index] + offset;
+          array[index] = (void *)((long) array[index] + offset);
         }
     }
 }
@@ -786,7 +790,8 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
                       ptr_to_new_data = h_alloc_raw(h, *array_of_found_ptrs[ptr_index]);
                       if(get_header_type(ptr_to_new_data) == STRUCT_REP)
                         {
-                          forward_internal_array_ptrs_with_offset(array_of_found_ptrs, ptr_index, 
+                          forward_internal_array_ptrs_with_offset(array_of_found_ptrs,
+                                                                  ptr_index, 
                                                                   num_active_ptrs, 
                                                                   ptr_to_original_data,
                                                                   ptr_to_new_data);

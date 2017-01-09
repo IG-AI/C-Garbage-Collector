@@ -498,7 +498,8 @@ test_h_gc_ptr_inside_struct_no_garbage()
   heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
   test_link_t *struct1_ptr = h_alloc_struct(h, TEST_LINK_FORMAT_STR);
   test_link_t *struct2_ptr = h_alloc_struct(h, TEST_LINK_FORMAT_STR);
-  *struct1_ptr = (test_link_t){struct2_ptr, 1};
+  printf("\nLink 2 address: %p\n", struct2_ptr);
+  *struct1_ptr = (test_link_t){struct2_ptr, 5};
   *struct2_ptr = (test_link_t){NULL, 2};
 
   void **original_ptr1 = back_up_ptr(struct1_ptr);
@@ -509,7 +510,10 @@ test_h_gc_ptr_inside_struct_no_garbage()
 
   CU_ASSERT(struct1_ptr != *original_ptr1);
   CU_ASSERT(struct2_ptr != *original_ptr2);
-  CU_ASSERT(test_link_equal(*struct1_ptr, (test_link_t) {struct2_ptr, 1}));
+  printf("\nLink 2 address: %p\n", struct2_ptr);
+  printf("\nLink1: %p, %i\n", struct1_ptr->next, struct1_ptr->value);
+  printf("Link2: %p, %i\n", struct2_ptr->next, struct2_ptr->value);
+  CU_ASSERT(test_link_equal(*struct1_ptr, (test_link_t) {struct2_ptr, 5}));
 
   free(original_ptr1);
   free(original_ptr2);
@@ -517,7 +521,7 @@ test_h_gc_ptr_inside_struct_no_garbage()
 }
 
 
-#define LINKED_DEPTH (2048)/(12+4+8) + 3// + 1
+#define LINKED_DEPTH (2048)/(12+4+8) + 10
 #define LINKED_H_SIZE 10*2048
 void
 test_h_gc_deep_linked_no_garbage()
@@ -535,19 +539,10 @@ test_h_gc_deep_linked_no_garbage()
   void **original_ptr = back_up_ptr(current);
 
   printf("\nUsed: %lu\n", h_used(h));
-  int number_of_pages = h->number_of_pages;
-  for (int i = 0; i < number_of_pages; i++) 
-    {
-      printf("Page %i:%lu used\n", i, page_get_used(h->pages[i]));
-    }
 
   size_t cleaned = h_gc(h);
   printf("\nCleaned: %lu\n", cleaned);
   printf("\nUsed: %lu\n", h_used(h));
-  for (int i = 0; i < number_of_pages; i++) 
-    {
-      printf("Page %i:%lu used\n", i, page_get_used(h->pages[i]));
-    }
 
   CU_ASSERT(cleaned == 0);
 
