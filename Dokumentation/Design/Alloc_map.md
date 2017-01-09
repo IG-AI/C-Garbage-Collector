@@ -38,4 +38,4 @@ __Get value of bit in allocation map__
 alloc_map_ptr_used(alloc_map, &(start_addr[n]));
 ```
 ##Reflektion
-Vi upptänkte efter tester att även om vår allokeringskarta fungerade någorlunda korrekt så verkar det inte vara en bit-karta utan snarare en byte-karta. Detta gör att allokeringskartan använder betydligt mer plats (åtta gånger så mycket) än vad den hade behövt göra. Exakt varför detta uppstått och hur vi ska rätta till det har vi inte hunnit undersöka närmre, för tillfället finner vi det viktigare att vi har en fungerande allokeringskarta än att den använder mindre minne.
+Vi upptänkte efter tester att även om vi kunde få vår allokeringskarta att fungera korrekt så verkar det inte vara en bit-karta utan snarare en byte-karta. Detta gör att den använder betydligt mer plats (åtta gånger så mycket) än vad den hade behövt göra för att spara värden för adresser. Exakt varför detta uppstått och hur vi ska rätta till det har vi inte hunnit undersöka närmre, för tillfället finner vi det viktigare att vi har en fungerande allokeringskarta än att den använder mindre minne, och andra delar av projektet har fått högre prioritet.
