@@ -695,9 +695,9 @@ forward_internal_array_ptrs_with_offset(void **array[],
   
   for(size_t index = start_index; index < array_size; ++index)
     {
-      if(lower_range < *array[index] && *array[index] < upper_range)
+      if(lower_range <= array[index] && array[index] < upper_range)
         {
-          *array[index] = *array[index] + offset;
+          array[index] = array[index] + offset;
         }
     }
 }
@@ -830,6 +830,7 @@ h_used(heap_t *h)
   int number_of_pages = h->number_of_pages;
   for (int i = 0; i < number_of_pages; i++) 
     {
+      //      printf("Page %i:%lu used\n", i, page_get_used(h->pages[i]));
       used += page_get_used(h->pages[i]);  
     }
   return used;

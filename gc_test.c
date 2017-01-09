@@ -27,6 +27,25 @@ typedef struct test_struct test_struct_t;
 #define TEST_STRUCT_FORMAT_STR "ic*ld"
 
 
+struct test_link
+{
+  struct test_link *next;
+  int value;
+};
+
+typedef struct test_link test_link_t;
+
+#define TEST_LINK_FORMAT_STR "*i"
+
+
+bool
+test_link_equal(test_link_t a, test_link_t b)
+{
+  if(a.next == NULL || b.next == NULL) return a.value == b.value
+                                         && a.next == b.next;
+  return a.value == b.value && test_link_equal(*(a.next), *(b.next));
+}
+
 void 
 write_pointer_to_heap(void ** allocated_memory, void * ptr_to_write)
 {
@@ -407,8 +426,9 @@ void
 test_h_gc_no_garbage()
 {
   heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
-  void *data_ptr = h_alloc_data(h, sizeof(int));
+  int *data_ptr = h_alloc_data(h, sizeof(int));
   void **original_ptr = back_up_ptr(data_ptr);
+  write_int_to_heap(data_ptr, 1);
 
   size_t avail_before = h_avail(h);
   size_t used_before = h_used(h);
@@ -420,6 +440,7 @@ test_h_gc_no_garbage()
   CU_ASSERT(cleaned == 0);
 
   CU_ASSERT(data_ptr != *original_ptr);
+  CU_ASSERT(*data_ptr == 1);
   free(original_ptr);
   h_delete(h);
 }
@@ -450,7 +471,8 @@ void
 test_h_gc_mix()
 {
   heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
-  void *struct_ptr = h_alloc_struct(h, TEST_STRUCT_FORMAT_STR);
+  test_link_t *struct_ptr = h_alloc_struct(h, TEST_LINK_FORMAT_STR);
+  *struct_ptr = (test_link_t) {NULL, 1};
   void **original_ptr = back_up_ptr(struct_ptr);
   void *data_ptr = h_alloc_data(h, sizeof(int));
   if(data_ptr){};//to silence gcc compiling whining....
@@ -465,6 +487,7 @@ test_h_gc_mix()
   CU_ASSERT(used_after != 0);
   CU_ASSERT(cleaned != 0);
   CU_ASSERT(struct_ptr != *original_ptr);
+  CU_ASSERT(test_link_equal(*struct_ptr, (test_link_t) {NULL, 1}));
   free(original_ptr);
   h_delete(h);
 }
@@ -473,22 +496,71 @@ void
 test_h_gc_ptr_inside_struct_no_garbage()
 {
   heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
-  test_struct_t *struct1_ptr = h_alloc_struct(h, TEST_STRUCT_FORMAT_STR);
-  test_struct_t *struct2_ptr = h_alloc_struct(h, TEST_STRUCT_FORMAT_STR);
-  *struct1_ptr = (test_struct_t){1, 'a', struct2_ptr, 2, 1.0};
-  *struct2_ptr = (test_struct_t){1, 'a', NULL, 2, 1.0};
+  test_link_t *struct1_ptr = h_alloc_struct(h, TEST_LINK_FORMAT_STR);
+  test_link_t *struct2_ptr = h_alloc_struct(h, TEST_LINK_FORMAT_STR);
+  *struct1_ptr = (test_link_t){struct2_ptr, 1};
+  *struct2_ptr = (test_link_t){NULL, 2};
 
   void **original_ptr1 = back_up_ptr(struct1_ptr);
   void **original_ptr2 = back_up_ptr(struct2_ptr);
-  
+
   size_t cleaned = h_gc(h);
   CU_ASSERT(cleaned == 0);
 
   CU_ASSERT(struct1_ptr != *original_ptr1);
   CU_ASSERT(struct2_ptr != *original_ptr2);
- 
+  CU_ASSERT(test_link_equal(*struct1_ptr, (test_link_t) {struct2_ptr, 1}));
+
   free(original_ptr1);
   free(original_ptr2);
+  h_delete(h);
+}
+
+
+#define LINKED_DEPTH (2048)/(12+4+8) + 3// + 1
+#define LINKED_H_SIZE 10*2048
+void
+test_h_gc_deep_linked_no_garbage()
+{
+  heap_t *h = h_init(LINKED_H_SIZE, SAFE_STACK, 0.75);
+  test_link_t *prev = NULL;
+  test_link_t *current = NULL;
+  for(int i = 0; i < LINKED_DEPTH; ++i)
+    {
+      current = h_alloc_struct(h, TEST_LINK_FORMAT_STR);
+      *current = (test_link_t){prev, i};
+      prev = current;
+    }
+  prev = NULL;
+  void **original_ptr = back_up_ptr(current);
+
+  printf("\nUsed: %lu\n", h_used(h));
+  int number_of_pages = h->number_of_pages;
+  for (int i = 0; i < number_of_pages; i++) 
+    {
+      printf("Page %i:%lu used\n", i, page_get_used(h->pages[i]));
+    }
+
+  size_t cleaned = h_gc(h);
+  printf("\nCleaned: %lu\n", cleaned);
+  printf("\nUsed: %lu\n", h_used(h));
+  for (int i = 0; i < number_of_pages; i++) 
+    {
+      printf("Page %i:%lu used\n", i, page_get_used(h->pages[i]));
+    }
+
+  CU_ASSERT(cleaned == 0);
+
+  CU_ASSERT(current != *original_ptr);
+  
+  for(int i = LINKED_DEPTH - 1; i >= 0; --i)
+    {
+      CU_ASSERT(current->value == i);
+      if(current->value != i) printf("\ni = %i, value = %i\n", i, current->value);
+      current = current->next;
+    }
+  
+  free(original_ptr);
   h_delete(h);
 }
 
@@ -1072,6 +1144,9 @@ main (void)
         (NULL == CU_add_test(suite_h_gc
                                , "ptr inside struct no garbage"
                                , test_h_gc_ptr_inside_struct_no_garbage) ) ||
+        (NULL == CU_add_test(suite_h_gc
+                               , "deeply linked struct no garbage"
+                               , test_h_gc_deep_linked_no_garbage) ) ||
         (NULL == CU_add_test(suite_h_gc
                                , "ptr inside struct garbage"
                                , test_h_gc_ptr_inside_struct_garbage) ) ||
