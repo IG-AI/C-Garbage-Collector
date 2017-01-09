@@ -4,7 +4,7 @@
 #include "header_hidden.h"
 
 
-
+#define SMALLEST_HEAP_SIZE 4096
 
 /*============================================================================
  *                             TESTS FOR get_data_size
@@ -324,71 +324,85 @@ test_create_data_header_null_ptr()
 void
 test_create_struct_header_null_str()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, HEADER_SIZE);
-  void *result = create_struct_header(NULL, ptr);
+  void *result = create_struct_header(h, NULL, ptr);
   CU_ASSERT(result == NULL);
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_create_struct_header_empty_str()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, HEADER_SIZE);
-  void *result = create_struct_header("", ptr);
+  void *result = create_struct_header(h, "", ptr);
   CU_ASSERT(result == NULL);
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_create_struct_header_null_ptr()
 {
-  void *result = create_struct_header("*", NULL);
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
+  void *result = create_struct_header(h, "*", NULL);
   CU_ASSERT(result == NULL);
+  h_delete(h);
 }
 
 void
 test_create_struct_header_single_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*"));
-  void *result = create_struct_header("*", ptr);
+  void *result = create_struct_header(h, "*", ptr);
   CU_ASSERT(result != NULL);
   CU_ASSERT((size_t) result - (size_t) ptr == HEADER_SIZE);
   CU_ASSERT(STRUCT_REP == get_header_type(result));
   CU_ASSERT(get_existing_size(result) == get_struct_size("*"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_create_struct_header_complex()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("3*2i3l"));
-  void *result = create_struct_header("3*2i3l", ptr);
+  void *result = create_struct_header(h, "3*2i3l", ptr);
   CU_ASSERT(result != NULL);
   CU_ASSERT((size_t) result - (size_t) ptr == HEADER_SIZE);
   CU_ASSERT(STRUCT_REP == get_header_type(result));
   CU_ASSERT(get_existing_size(result) == get_struct_size("3*2i3l"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_create_struct_header_no_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("32i3l"));
-  void *result = create_struct_header("32i3l", ptr);
+  void *result = create_struct_header(h, "32i3l", ptr);
   CU_ASSERT(result != NULL);
   CU_ASSERT((size_t) result - (size_t) ptr == HEADER_SIZE);
   CU_ASSERT(RAW_DATA == get_header_type(result));
   CU_ASSERT(get_existing_size(result) == get_struct_size("32i3l"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_create_struct_header_too_big_size()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, HEADER_SIZE);
-  void *result = create_struct_header("5000000000000000000000000000001*", ptr);
+  void *result = create_struct_header(h, "5000000000000000000000000000001*", ptr);
   CU_ASSERT(result == NULL);
   free(ptr);
+  h_delete(h);
 }
 
 /*============================================================================
@@ -413,41 +427,49 @@ test_get_header_type_data()
 void
 test_get_header_type_struct_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*") );
-  void *result = create_struct_header("*", ptr);
+  void *result = create_struct_header(h, "*", ptr);
   CU_ASSERT(STRUCT_REP == get_header_type(result));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_header_type_struct_no_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("i") );
-  void *result = create_struct_header("i", ptr);
+  void *result = create_struct_header(h, "i", ptr);
   CU_ASSERT(RAW_DATA == get_header_type(result));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_header_type_format_str()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("244*2i") );
-  void *result = create_struct_header("244*2i", ptr);
+  void *result = create_struct_header(h, "244*2i", ptr);
   CU_ASSERT(STRUCT_REP == get_header_type(result));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_header_type_forward()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*") );
-  void *result = create_struct_header("*", ptr);
+  void *result = create_struct_header(h, "*", ptr);
   void *new_ptr = calloc(1, get_struct_size("*") );
 
   forward_header(result, new_ptr);
   CU_ASSERT(FORWARDING_ADDR == get_header_type(result));
   free(ptr);
   free(new_ptr);
+  h_delete(h);
 }
 
 
@@ -487,52 +509,62 @@ test_get_number_pointers_forwarding_data()
 void
 test_get_number_pointers_struct_no_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("i"));
-  void *data = create_struct_header("i", ptr);
+  void *data = create_struct_header(h, "i", ptr);
   int result = get_number_of_pointers_in_struct(data);
   CU_ASSERT(result == 0);
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_number_pointers_struct_one_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*"));
-  void *data = create_struct_header("*", ptr);
+  void *data = create_struct_header(h, "*", ptr);
   int result = get_number_of_pointers_in_struct(data);
   CU_ASSERT(result == 1 + additional_if_format_str(data));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_number_pointers_struct_multi_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("***"));
-  void *data = create_struct_header("***", ptr);
+  void *data = create_struct_header(h, "***", ptr);
   int result = get_number_of_pointers_in_struct(data);
   CU_ASSERT(result == 3 + additional_if_format_str(data));
   free(ptr);
+  h_delete(h);
 }
 
 
 void
 test_get_number_pointers_struct_multi_ptr_nr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("3*"));
-  void *data = create_struct_header("3*", ptr);
+  void *data = create_struct_header(h, "3*", ptr);
   int result = get_number_of_pointers_in_struct(data);
   CU_ASSERT(result == 3 + additional_if_format_str(data));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_number_pointers_struct_mixed_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*300*i3*"));
-  void *data = create_struct_header("*300*i3*", ptr);
+  void *data = create_struct_header(h, "*300*i3*", ptr);
   int result = get_number_of_pointers_in_struct(data);
   CU_ASSERT(result == 304 + additional_if_format_str(data));
   free(ptr);
+  h_delete(h);
 }
 
 
@@ -550,11 +582,13 @@ test_get_pointers_null_ptr()
 void
 test_get_pointers_null_array()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*"));
-  void *data = create_struct_header("*", ptr);
+  void *data = create_struct_header(h, "*", ptr);
   bool result = get_pointers_in_struct(data, NULL);
   CU_ASSERT_FALSE(result);
   free(ptr);
+  h_delete(h);
 }
 
 void
@@ -586,19 +620,22 @@ test_get_pointers_forwarding_data()
 void
 test_get_pointers_struct_no_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void **array[1];
   void *ptr = calloc(1, get_struct_size("i"));
-  void *data = create_struct_header("i", ptr);
+  void *data = create_struct_header(h, "i", ptr);
   bool result = get_pointers_in_struct(data, array);
   CU_ASSERT_FALSE(result);
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_pointers_struct_one_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*"));
-  void *data = create_struct_header("*", ptr);
+  void *data = create_struct_header(h, "*", ptr);
   void *ptr_to_ptr = data;
   size_t size = get_number_of_pointers_in_struct(data);
   CU_ASSERT(size == 1);
@@ -609,13 +646,15 @@ test_get_pointers_struct_one_ptr()
   CU_ASSERT_TRUE(result);
   CU_ASSERT(*array[0] == *(void **)ptr_to_ptr);
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_pointers_struct_multi_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("***"));
-  void *data = create_struct_header("***", ptr);
+  void *data = create_struct_header(h, "***", ptr);
   for(unsigned long i = 0; i < 3; ++i)
     {
       ((unsigned long *)data)[i] = i+1;
@@ -631,14 +670,16 @@ test_get_pointers_struct_multi_ptr()
       CU_ASSERT(*(unsigned long *)array[i-1] == i);
     }
   free(ptr);
+  h_delete(h);
 }
 
 
 void
 test_get_pointers_struct_multi_ptr_nr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("3*"));
-  void *data = create_struct_header("3*", ptr);
+  void *data = create_struct_header(h, "3*", ptr);
   for(unsigned long i = 0; i < 3; ++i)
     {
       ((unsigned long *)data)[i] = i+1;
@@ -654,13 +695,15 @@ test_get_pointers_struct_multi_ptr_nr()
       CU_ASSERT(*(unsigned long *)array[i-1] == i);
     }
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_pointers_struct_mixed_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*i3*"));
-  void *data = create_struct_header("*i3*", ptr);
+  void *data = create_struct_header(h, "*i3*", ptr);
   int size = get_number_of_pointers_in_struct(data);
   void **array[size];
   for(int i = 0; i < size; ++i) array[i] = NULL;
@@ -672,13 +715,15 @@ test_get_pointers_struct_mixed_ptr()
       CU_ASSERT(array[i] != NULL);
     }
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_pointers_struct_big_format_str()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*320i3*"));
-  void *data = create_struct_header("*320i3*", ptr);
+  void *data = create_struct_header(h, "*320i3*", ptr);
   int size = get_number_of_pointers_in_struct(data);
   void **array[size];
   for(int i = 0; i < size; ++i) array[i] = NULL;
@@ -690,13 +735,15 @@ test_get_pointers_struct_big_format_str()
       CU_ASSERT(array[i] != NULL);
     }
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_pointers_struct_mem_align()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("c*"));
-  void *data = create_struct_header("c*", ptr);
+  void *data = create_struct_header(h, "c*", ptr);
   void *ptr_to_ptr = (void *) ((unsigned long) data + sizeof(char));
   int size = get_number_of_pointers_in_struct(data);
   void **array[size];
@@ -706,6 +753,7 @@ test_get_pointers_struct_mem_align()
   CU_ASSERT_TRUE(result);
   CU_ASSERT(*array[0] == *(void **)ptr_to_ptr);
   free(ptr);
+  h_delete(h);
 }
 
 
@@ -723,8 +771,9 @@ test_get_existing_size_null_ptr()
 void
 test_get_existing_size_forwarding()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*"));
-  void *data = create_struct_header("*", ptr);
+  void *data = create_struct_header(h, "*", ptr);
   void *new_ptr = calloc(1, get_struct_size("*") );
   forward_header(data, new_ptr);
 
@@ -732,6 +781,7 @@ test_get_existing_size_forwarding()
   CU_ASSERT(result == INVALID);
   free(ptr);
   free(new_ptr);
+  h_delete(h);
 }
 
 void
@@ -758,92 +808,110 @@ test_get_existing_size_raw_data_one()
 void
 test_get_existing_size_struct_rep_one_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*"));
-  void *data = create_struct_header("*", ptr);
+  void *data = create_struct_header(h, "*", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("*"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_struct_rep_char()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("c"));
-  void *data = create_struct_header("c", ptr);
+  void *data = create_struct_header(h, "c", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("c"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_struct_rep_int()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("i"));
-  void *data = create_struct_header("i", ptr);
+  void *data = create_struct_header(h, "i", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("i"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_struct_rep_long()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("l"));
-  void *data = create_struct_header("l", ptr);
+  void *data = create_struct_header(h, "l", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("l"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_struct_rep_float()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("f"));
-  void *data = create_struct_header("f", ptr);
+  void *data = create_struct_header(h, "f", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("f"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_struct_rep_double()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("d"));
-  void *data = create_struct_header("d", ptr);
+  void *data = create_struct_header(h, "d", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("d"));
   free(ptr);
+  h_delete(h);
 }
 
 // ********************* Combinations ******************  //
 void
 test_get_existing_size_ptr_int()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*i"));
-  void *data = create_struct_header("*i", ptr);
+  void *data = create_struct_header(h, "*i", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("*i"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_ptr_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("**"));
-  void *data = create_struct_header("**", ptr);
+  void *data = create_struct_header(h, "**", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("**"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_ptr_char_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("*c*"));
-  void *data = create_struct_header("*c*", ptr);
+  void *data = create_struct_header(h, "*c*", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("*c*"));
   free(ptr);
+  h_delete(h);
 }
 
 
@@ -851,51 +919,61 @@ test_get_existing_size_ptr_char_ptr()
 void
 test_get_existing_size_one_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("1*"));
-  void *data = create_struct_header("1*", ptr);
+  void *data = create_struct_header(h, "1*", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("1*"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_one()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("1"));
-  void *data = create_struct_header("1", ptr);
+  void *data = create_struct_header(h, "1", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("1"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_twelve_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("12*"));
-  void *data = create_struct_header("12*", ptr);
+  void *data = create_struct_header(h, "12*", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("12*"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_hundred_twelve_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("112*"));
-  void *data = create_struct_header("112*", ptr);
+  void *data = create_struct_header(h, "112*", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("112*"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_hundred_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("100*"));
-  void *data = create_struct_header("100*", ptr);
+  void *data = create_struct_header(h, "100*", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("100*"));
   free(ptr);
+  h_delete(h);
 }
 
 // ********************* Numerical Combinations ******************  //
@@ -903,31 +981,37 @@ test_get_existing_size_hundred_ptr()
 void
 test_get_existing_size_two_ptr_three_int()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("2*3i"));
-  void *data = create_struct_header("2*3i", ptr);
+  void *data = create_struct_header(h, "2*3i", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("2*3i"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_two_ptr_ptr()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("2**"));
-  void *data = create_struct_header("2**", ptr);
+  void *data = create_struct_header(h, "2**", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("2**"));
   free(ptr);
+  h_delete(h);
 }
 
 void
 test_get_existing_size_num_after_letter()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *ptr = calloc(1, get_struct_size("d2"));
-  void *data = create_struct_header("d2", ptr);
+  void *data = create_struct_header(h, "d2", ptr);
   size_t result = get_existing_size(data);
   CU_ASSERT(result == get_struct_size("d2"));
   free(ptr);
+  h_delete(h);
 }
 
 
@@ -949,19 +1033,22 @@ test_copy_header_data_null()
 void
 test_copy_header_heap_ptr_null()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *old_ptr = calloc(1, get_struct_size("d2"));
-  void *data = create_struct_header("d2", old_ptr);
+  void *data = create_struct_header(h, "d2", old_ptr);
   void *new_ptr = NULL;
   void *result = copy_header(data, new_ptr);
   CU_ASSERT(result == NULL);
   free(old_ptr);
+  h_delete(h);
 }
 
 void
 test_copy_header_struct()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *old_ptr = calloc(1, get_struct_size("d2"));
-  void *data = create_struct_header("d2", old_ptr);
+  void *data = create_struct_header(h, "d2", old_ptr);
   void *new_ptr = calloc(1, get_struct_size("d2"));
   void *new_data = copy_header(data, new_ptr);
   CU_ASSERT(get_header_type(new_data) == get_header_type(data));
@@ -970,6 +1057,7 @@ test_copy_header_struct()
             == get_number_of_pointers_in_struct(data));
   free(old_ptr);
   free(new_ptr);
+  h_delete(h);
 }
 
 void
@@ -1002,6 +1090,7 @@ test_copy_header_forward()
   CU_ASSERT(get_existing_size(new_data) == get_existing_size(data));
   free(old_ptr);
   free(new_ptr);
+  free(forward_ptr);
 }
 
 
@@ -1047,8 +1136,9 @@ test_forward_header_same_pointer()
 void
 test_forward_header_struct()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *old_ptr = calloc(1, get_struct_size("d2"));
-  void *data = create_struct_header("d2", old_ptr);
+  void *data = create_struct_header(h, "d2", old_ptr);
   void *new_ptr = calloc(1, get_struct_size("d2"));
   void *new_data = (void *)((unsigned long) new_ptr + 1);
 
@@ -1057,13 +1147,15 @@ test_forward_header_struct()
   CU_ASSERT(get_header_type(data) == FORWARDING_ADDR);
   free(old_ptr);
   free(new_ptr);
+  h_delete(h);
 }
 
 void
 test_forward_header_struct_format_str()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *old_ptr = calloc(1, get_struct_size("258*d2"));
-  void *data = create_struct_header("258*d2", old_ptr);
+  void *data = create_struct_header(h, "258*d2", old_ptr);
   void *new_ptr = calloc(1, get_struct_size("258*d2"));
   void *new_data = (void *)((unsigned long) new_ptr + 1);
 
@@ -1072,6 +1164,7 @@ test_forward_header_struct_format_str()
   CU_ASSERT(get_header_type(data) == FORWARDING_ADDR);
   free(old_ptr);
   free(new_ptr);
+  h_delete(h);
 }
 
 
@@ -1127,12 +1220,14 @@ test_get_forwarding_address_data_null()
 void
 test_get_forwarding_address_struct()
 {
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.75);
   void *old_ptr = calloc(1, get_struct_size("*"));
-  void *data = create_struct_header("*", old_ptr);
+  void *data = create_struct_header(h, "*", old_ptr);
 
   bool result = get_forwarding_address(data);
   CU_ASSERT_FALSE(result);
   free(old_ptr);
+  h_delete(h);
 }
 
 void

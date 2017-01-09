@@ -16,6 +16,8 @@
 #ifndef __header__
 #define __header__
 
+#include "gc.h"
+
 /**
  *  @brief The enumeration of different types a header can have.
  *
@@ -40,13 +42,14 @@ typedef enum header_type header_type;
  *  
  *  The @p format_string will be copied and doesn't need to be placed
  *  on the heap before hand.
- *  
+ *
+ *  @param  h the heap to allocate @p format_string in if it is too big
  *  @param  format_string the string representation of the structure to
  *          create a header for
  *  @param  heap_ptr the place on the heap where the header will be saved
  *  @return pointer to where the data should be placed
  */
-void *create_struct_header(char *format_string, void *heap_ptr);
+void *create_struct_header(heap_t *h, char *format_string, void *heap_ptr);
 
 /**
  *  @brief Creates a header and saves it on the heap

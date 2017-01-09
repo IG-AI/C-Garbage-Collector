@@ -108,11 +108,11 @@ memtest_gc: gc_test
 test_header: header_test
 	@./header_test
 
-header_test: header.o header_test.c
+header_test: header.o gc.o stack_search.o alloc_map.o header_test.c
 	@$(CC)  $^ -o $@ $(TESTFLAGS)
 
-header_coverage: header.c header_test.c
-	@$(CC)  $^ -o $@ $(COVERAGEFLAGS)
+header_coverage: header.c gc.o stack_search.o alloc_map.o header_test.c
+	@$(CC)  $^ -o $@ $(COVERAGEFLAGS) -lgcov
 
 # Stack search
 test_stack_search: stack_search_test
