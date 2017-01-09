@@ -1,0 +1,603 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls   s/call   s/call  name    
+ 72.77      3.76     3.76    20004     0.00     0.00  forward_internal_array_ptrs_with_offset
+  7.93      4.17     0.41    40006     0.00     0.00  h_used
+  5.61      4.46     0.29    20000     0.00     0.00  list_contains
+  2.71      4.60     0.14        1     0.14     4.13  h_gc_dbg
+  1.94      4.70     0.10 15691488     0.00     0.00  find_next_active_page
+  1.84      4.80     0.10 75051256     0.00     0.00  page_get_used
+  1.74      4.89     0.09 96985237     0.00     0.00  int_cell_comparator
+  1.55      4.97     0.08 19647249     0.00     0.00  get_ptr_page
+  0.77      5.01     0.04    40004     0.00     0.00  h_alloc
+  0.58      5.04     0.03                             frame_dummy
+  0.48      5.06     0.03 15690702     0.00     0.00  page_get_avail
+  0.39      5.08     0.02   659901     0.00     0.00  get_internal_ht
+  0.39      5.10     0.02    40004     0.00     0.00  h_alloc_raw
+  0.19      5.11     0.01   120012     0.00     0.00  alloc_map_set
+  0.19      5.12     0.01    60012     0.00     0.00  get_bit_vector_size
+  0.19      5.13     0.01    54984     0.00     0.00  get_pointers_from_bit_vector
+  0.19      5.14     0.01    40004     0.00     0.00  run_gc_if_above_threshold
+  0.19      5.15     0.01       10     0.00     0.00  get_number_of_active_heap_ptrs_rec
+  0.19      5.16     0.01        1     0.01     0.01  get_ptrs_from_stack
+  0.19      5.17     0.01                             page_get_size
+  0.00      5.17     0.00  1004881     0.00     0.00  header_from_data
+  0.00      5.17     0.00   354937     0.00     0.00  get_header_type
+  0.00      5.17     0.00   345011     0.00     0.00  get_size_of_bit_type
+  0.00      5.17     0.00   229999     0.00     0.00  alloc_map_check_offset
+  0.00      5.17     0.00   164963     0.00     0.00  move_ptr_forward
+  0.00      5.17     0.00   109987     0.00     0.00  alloc_map_ptr_used
+  0.00      5.17     0.00   109968     0.00     0.00  get_number_of_pointers_in_bit_vector
+  0.00      5.17     0.00   109968     0.00     0.00  get_number_of_pointers_in_struct
+  0.00      5.17     0.00   100012     0.00     0.00  get_existing_size
+  0.00      5.17     0.00    80024     0.00     0.00  size_for
+  0.00      5.17     0.00    80016     0.00     0.00  clear_type_bits
+  0.00      5.17     0.00    80008     0.00     0.00  data_from_header
+  0.00      5.17     0.00    80008     0.00     0.00  page_get_bump
+  0.00      5.17     0.00    80008     0.00     0.00  page_move_bump
+  0.00      5.17     0.00    80008     0.00     0.00  set_type_bits
+  0.00      5.17     0.00    60008     0.00     0.00  get_existing_data_size
+  0.00      5.17     0.00    60000     0.00     0.00  get_data_size
+  0.00      5.17     0.00    54984     0.00     0.00  get_pointers_in_struct
+  0.00      5.17     0.00    40012     0.00     0.00  get_bit_mask
+  0.00      5.17     0.00    40012     0.00     0.00  get_bits_needed
+  0.00      5.17     0.00    40008     0.00     0.00  get_struct_size
+  0.00      5.17     0.00    40004     0.00     0.00  copy_header
+  0.00      5.17     0.00    40004     0.00     0.00  forward_header
+  0.00      5.17     0.00    40000     0.00     0.00  get_raw_data_size
+  0.00      5.17     0.00    20004     0.00     0.00  bit_vector_create
+  0.00      5.17     0.00    20004     0.00     0.00  create_struct_header
+  0.00      5.17     0.00    20004     0.00     0.00  format_str_contains_ptrs
+  0.00      5.17     0.00    20004     0.00     0.00  h_alloc_struct
+  0.00      5.17     0.00    20000     0.00     0.00  create_data_header
+  0.00      5.17     0.00    20000     0.00     0.00  h_alloc_data
+  0.00      5.17     0.00    20000     0.00     0.00  list_append
+  0.00      5.17     0.00     1876     0.00     0.00  page_get_type
+  0.00      5.17     0.00      786     0.00     0.00  find_first_passive_page
+  0.00      5.17     0.00      393     0.00     0.00  number_of_passive_pages
+  0.00      5.17     0.00      393     0.00     0.00  page_reset
+  0.00      5.17     0.00      393     0.00     0.00  page_set_type
+  0.00      5.17     0.00       21     0.00     0.00  stack_find_next_ptr
+  0.00      5.17     0.00        9     0.00     0.00  get_active_heap_ptrs_rec
+  0.00      5.17     0.00        8     0.00     0.00  get_forwarding_address
+  0.00      5.17     0.00        4     0.00     0.00  list_new
+  0.00      5.17     0.00        1     0.00     0.00  alloc_map_create
+  0.00      5.17     0.00        1     0.00     0.00  alloc_map_mem_size_needed
+  0.00      5.17     0.00        1     0.00     0.00  create_pages
+  0.00      5.17     0.00        1     0.00     0.02  get_active_ptrs
+  0.00      5.17     0.00        1     0.00     0.02  get_number_of_active_ptrs
+  0.00      5.17     0.00        1     0.00     0.00  h_delete
+  0.00      5.17     0.00        1     0.00     4.13  h_gc
+  0.00      5.17     0.00        1     0.00     0.00  h_init
+  0.00      5.17     0.00        1     0.00     0.00  set_active_to_transition
+  0.00      5.17     0.00        1     0.00     0.00  set_unsafe_pages_to_active
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+ 
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this 
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 2 byte(s) for 0.19% of 5.17 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     99.2    0.00    5.13                 main [1]
+                0.00    4.13       1/1           h_gc [2]
+                0.29    0.09   20000/20000       list_contains [8]
+                0.00    0.31   20000/20000       list_append [10]
+                0.00    0.31   20000/20000       h_alloc_data [11]
+                0.00    0.00       4/4           list_new [35]
+                0.00    0.00       1/1           h_init [69]
+                0.00    0.00       1/1           h_delete [68]
+-----------------------------------------------
+                0.00    4.13       1/1           main [1]
+[2]     79.9    0.00    4.13       1         h_gc [2]
+                0.14    3.99       1/1           h_gc_dbg [3]
+-----------------------------------------------
+                0.14    3.99       1/1           h_gc [2]
+[3]     79.9    0.14    3.99       1         h_gc_dbg [3]
+                3.76    0.00   20004/20004       forward_internal_array_ptrs_with_offset [4]
+                0.02    0.08   40004/40004       h_alloc_raw [12]
+                0.08    0.00 19647249/19647249     get_ptr_page [16]
+                0.00    0.02       1/1           get_number_of_active_ptrs [20]
+                0.00    0.02       1/1           get_active_ptrs [21]
+                0.00    0.00   80016/354937      get_header_type [25]
+                0.00    0.00       2/40006       h_used [7]
+                0.00    0.00       8/8           get_forwarding_address [36]
+                0.00    0.00    1876/1876        page_get_type [59]
+                0.00    0.00     393/393         page_set_type [63]
+                0.00    0.00     393/393         page_reset [62]
+                0.00    0.00       1/1           set_active_to_transition [70]
+                0.00    0.00       1/1           set_unsafe_pages_to_active [71]
+-----------------------------------------------
+                3.76    0.00   20004/20004       h_gc_dbg [3]
+[4]     72.8    3.76    0.00   20004         forward_internal_array_ptrs_with_offset [4]
+                0.00    0.00   20004/60008       get_existing_data_size [32]
+-----------------------------------------------
+                0.02    0.29   20000/40004       h_alloc_data [11]
+                0.02    0.29   20004/40004       h_alloc_struct [9]
+[5]     11.9    0.04    0.58   40004         h_alloc [5]
+                0.01    0.51   40004/40004       run_gc_if_above_threshold [6]
+                0.05    0.00 7865500/15691488     find_next_active_page [13]
+                0.01    0.00 7865107/15690702     page_get_avail [18]
+                0.00    0.00   40004/80008       page_get_bump [46]
+                0.00    0.00   40004/80008       page_move_bump [47]
+                0.00    0.00     393/393         number_of_passive_pages [61]
+                0.00    0.00     393/786         find_first_passive_page [60]
+-----------------------------------------------
+                0.01    0.51   40004/40004       h_alloc [5]
+[6]     10.0    0.01    0.51   40004         run_gc_if_above_threshold [6]
+                0.41    0.10   40004/40006       h_used [7]
+-----------------------------------------------
+                0.00    0.00       2/40006       h_gc_dbg [3]
+                0.41    0.10   40004/40006       run_gc_if_above_threshold [6]
+[7]      9.8    0.41    0.10   40006         h_used [7]
+                0.10    0.00 75051256/75051256     page_get_used [14]
+-----------------------------------------------
+                0.29    0.09   20000/20000       main [1]
+[8]      7.4    0.29    0.09   20000         list_contains [8]
+                0.09    0.00 96985237/96985237     int_cell_comparator [15]
+-----------------------------------------------
+                0.00    0.00       4/20004       list_new [35]
+                0.00    0.31   20000/20004       list_append [10]
+[9]      6.0    0.00    0.31   20004         h_alloc_struct [9]
+                0.02    0.29   20004/40004       h_alloc [5]
+                0.00    0.00   20004/120012      alloc_map_set [27]
+                0.00    0.00   20004/40008       get_struct_size [52]
+                0.00    0.00   20004/20004       create_struct_header [56]
+-----------------------------------------------
+                0.00    0.31   20000/20000       main [1]
+[10]     6.0    0.00    0.31   20000         list_append [10]
+                0.00    0.31   20000/20004       h_alloc_struct [9]
+-----------------------------------------------
+                0.00    0.31   20000/20000       main [1]
+[11]     6.0    0.00    0.31   20000         h_alloc_data [11]
+                0.02    0.29   20000/40004       h_alloc [5]
+                0.00    0.00   20000/120012      alloc_map_set [27]
+                0.00    0.00   20000/60000       get_data_size [49]
+                0.00    0.00   20000/20000       create_data_header [58]
+-----------------------------------------------
+                0.02    0.08   40004/40004       h_gc_dbg [3]
+[12]     1.9    0.02    0.08   40004         h_alloc_raw [12]
+                0.05    0.00 7825988/15691488     find_next_active_page [13]
+                0.01    0.00 7825595/15690702     page_get_avail [18]
+                0.01    0.00   80008/120012      alloc_map_set [27]
+                0.00    0.01   40004/60008       get_existing_data_size [32]
+                0.00    0.01   40004/100012      get_existing_size [24]
+                0.00    0.00   40004/80008       page_get_bump [46]
+                0.00    0.00   40004/80008       page_move_bump [47]
+                0.00    0.00   40004/40004       copy_header [53]
+                0.00    0.00   40004/40004       forward_header [54]
+                0.00    0.00     393/786         find_first_passive_page [60]
+-----------------------------------------------
+                0.05    0.00 7825988/15691488     h_alloc_raw [12]
+                0.05    0.00 7865500/15691488     h_alloc [5]
+[13]     1.9    0.10    0.00 15691488         find_next_active_page [13]
+-----------------------------------------------
+                0.10    0.00 75051256/75051256     h_used [7]
+[14]     1.8    0.10    0.00 75051256         page_get_used [14]
+-----------------------------------------------
+                0.09    0.00 96985237/96985237     list_contains [8]
+[15]     1.7    0.09    0.00 96985237         int_cell_comparator [15]
+-----------------------------------------------
+                0.08    0.00 19647249/19647249     h_gc_dbg [3]
+[16]     1.5    0.08    0.00 19647249         get_ptr_page [16]
+-----------------------------------------------
+                                                 <spontaneous>
+[17]     0.6    0.03    0.00                 frame_dummy [17]
+-----------------------------------------------
+                0.01    0.00 7825595/15690702     h_alloc_raw [12]
+                0.01    0.00 7865107/15690702     h_alloc [5]
+[18]     0.5    0.03    0.00 15690702         page_get_avail [18]
+-----------------------------------------------
+                               59958             get_number_of_active_heap_ptrs_rec [19]
+                0.01    0.01      10/10          get_number_of_active_ptrs [20]
+[19]     0.4    0.01    0.01      10+59958   get_number_of_active_heap_ptrs_rec [19]
+                0.00    0.01   29986/54984       get_pointers_in_struct [23]
+                0.00    0.00   29986/109968      get_number_of_pointers_in_struct [33]
+                0.00    0.00   59968/354937      get_header_type [25]
+                0.00    0.00   59972/109987      alloc_map_ptr_used [41]
+                               59958             get_number_of_active_heap_ptrs_rec [19]
+-----------------------------------------------
+                0.00    0.02       1/1           h_gc_dbg [3]
+[20]     0.4    0.00    0.02       1         get_number_of_active_ptrs [20]
+                0.01    0.01      10/10          get_number_of_active_heap_ptrs_rec [19]
+                0.00    0.00      11/21          stack_find_next_ptr [64]
+                0.00    0.00      10/109987      alloc_map_ptr_used [41]
+-----------------------------------------------
+                0.00    0.02       1/1           h_gc_dbg [3]
+[21]     0.4    0.00    0.02       1         get_active_ptrs [21]
+                0.00    0.01       9/9           get_active_heap_ptrs_rec [26]
+                0.01    0.00       1/1           get_ptrs_from_stack [30]
+-----------------------------------------------
+                0.00    0.00   40000/659901      get_raw_data_size [34]
+                0.00    0.00   54984/659901      get_pointers_in_struct [23]
+                0.00    0.00  100012/659901      get_existing_size [24]
+                0.00    0.00  109968/659901      get_number_of_pointers_in_struct [33]
+                0.01    0.00  354937/659901      get_header_type [25]
+[22]     0.4    0.02    0.00  659901         get_internal_ht [22]
+                0.00    0.00  659901/1004881     header_from_data [37]
+-----------------------------------------------
+                0.00    0.01   24998/54984       get_active_heap_ptrs_rec [26]
+                0.00    0.01   29986/54984       get_number_of_active_heap_ptrs_rec [19]
+[23]     0.3    0.00    0.02   54984         get_pointers_in_struct [23]
+                0.01    0.00   54984/54984       get_pointers_from_bit_vector [29]
+                0.00    0.00   54984/109968      get_number_of_pointers_in_struct [33]
+                0.00    0.00   54984/354937      get_header_type [25]
+                0.00    0.00   54984/659901      get_internal_ht [22]
+-----------------------------------------------
+                0.00    0.01   40004/100012      h_alloc_raw [12]
+                0.00    0.01   60008/100012      get_existing_data_size [32]
+[24]     0.3    0.00    0.01  100012         get_existing_size [24]
+                0.01    0.00   60012/60012       get_bit_vector_size [28]
+                0.00    0.00  100012/659901      get_internal_ht [22]
+                0.00    0.00   40000/40000       get_raw_data_size [34]
+-----------------------------------------------
+                0.00    0.00       8/354937      get_forwarding_address [36]
+                0.00    0.00   49993/354937      get_active_heap_ptrs_rec [26]
+                0.00    0.00   54984/354937      get_pointers_in_struct [23]
+                0.00    0.00   59968/354937      get_number_of_active_heap_ptrs_rec [19]
+                0.00    0.00   80016/354937      h_gc_dbg [3]
+                0.00    0.00  109968/354937      get_number_of_pointers_in_struct [33]
+[25]     0.2    0.00    0.01  354937         get_header_type [25]
+                0.01    0.00  354937/659901      get_internal_ht [22]
+-----------------------------------------------
+                               49984             get_active_heap_ptrs_rec [26]
+                0.00    0.01       9/9           get_active_ptrs [21]
+[26]     0.2    0.00    0.01       9+49984   get_active_heap_ptrs_rec [26]
+                0.00    0.01   24998/54984       get_pointers_in_struct [23]
+                0.00    0.00   24998/109968      get_number_of_pointers_in_struct [33]
+                0.00    0.00   49993/354937      get_header_type [25]
+                0.00    0.00   49996/109987      alloc_map_ptr_used [41]
+                               49984             get_active_heap_ptrs_rec [26]
+-----------------------------------------------
+                0.00    0.00   20000/120012      h_alloc_data [11]
+                0.00    0.00   20004/120012      h_alloc_struct [9]
+                0.01    0.00   80008/120012      h_alloc_raw [12]
+[27]     0.2    0.01    0.00  120012         alloc_map_set [27]
+                0.00    0.00  120012/229999      alloc_map_check_offset [39]
+-----------------------------------------------
+                0.01    0.00   60012/60012       get_existing_size [24]
+[28]     0.2    0.01    0.00   60012         get_bit_vector_size [28]
+                0.00    0.00  180048/345011      get_size_of_bit_type [38]
+                0.00    0.00   60012/1004881     header_from_data [37]
+-----------------------------------------------
+                0.01    0.00   54984/54984       get_pointers_in_struct [23]
+[29]     0.2    0.01    0.00   54984         get_pointers_from_bit_vector [29]
+                0.00    0.00  164963/345011      get_size_of_bit_type [38]
+                0.00    0.00  164963/164963      move_ptr_forward [40]
+                0.00    0.00   54984/1004881     header_from_data [37]
+-----------------------------------------------
+                0.01    0.00       1/1           get_active_ptrs [21]
+[30]     0.2    0.01    0.00       1         get_ptrs_from_stack [30]
+                0.00    0.00      10/21          stack_find_next_ptr [64]
+                0.00    0.00       9/109987      alloc_map_ptr_used [41]
+-----------------------------------------------
+                                                 <spontaneous>
+[31]     0.2    0.01    0.00                 page_get_size [31]
+-----------------------------------------------
+                0.00    0.00   20004/60008       forward_internal_array_ptrs_with_offset [4]
+                0.00    0.01   40004/60008       h_alloc_raw [12]
+[32]     0.2    0.00    0.01   60008         get_existing_data_size [32]
+                0.00    0.01   60008/100012      get_existing_size [24]
+-----------------------------------------------
+                0.00    0.00   24998/109968      get_active_heap_ptrs_rec [26]
+                0.00    0.00   29986/109968      get_number_of_active_heap_ptrs_rec [19]
+                0.00    0.00   54984/109968      get_pointers_in_struct [23]
+[33]     0.1    0.00    0.01  109968         get_number_of_pointers_in_struct [33]
+                0.00    0.00  109968/354937      get_header_type [25]
+                0.00    0.00  109968/659901      get_internal_ht [22]
+                0.00    0.00  109968/1004881     header_from_data [37]
+                0.00    0.00  109968/109968      get_number_of_pointers_in_bit_vector [42]
+-----------------------------------------------
+                0.00    0.00   40000/40000       get_existing_size [24]
+[34]     0.0    0.00    0.00   40000         get_raw_data_size [34]
+                0.00    0.00   40000/659901      get_internal_ht [22]
+                0.00    0.00   40000/1004881     header_from_data [37]
+                0.00    0.00   40000/60000       get_data_size [49]
+-----------------------------------------------
+                0.00    0.00       4/4           main [1]
+[35]     0.0    0.00    0.00       4         list_new [35]
+                0.00    0.00       4/20004       h_alloc_struct [9]
+-----------------------------------------------
+                0.00    0.00       8/8           h_gc_dbg [3]
+[36]     0.0    0.00    0.00       8         get_forwarding_address [36]
+                0.00    0.00       8/354937      get_header_type [25]
+                0.00    0.00       8/1004881     header_from_data [37]
+                0.00    0.00       8/80016       clear_type_bits [44]
+-----------------------------------------------
+                0.00    0.00       8/1004881     get_forwarding_address [36]
+                0.00    0.00   40000/1004881     get_raw_data_size [34]
+                0.00    0.00   40004/1004881     copy_header [53]
+                0.00    0.00   40004/1004881     forward_header [54]
+                0.00    0.00   54984/1004881     get_pointers_from_bit_vector [29]
+                0.00    0.00   60012/1004881     get_bit_vector_size [28]
+                0.00    0.00  109968/1004881     get_number_of_pointers_in_struct [33]
+                0.00    0.00  659901/1004881     get_internal_ht [22]
+[37]     0.0    0.00    0.00 1004881         header_from_data [37]
+-----------------------------------------------
+                0.00    0.00  164963/345011      get_pointers_from_bit_vector [29]
+                0.00    0.00  180048/345011      get_bit_vector_size [28]
+[38]     0.0    0.00    0.00  345011         get_size_of_bit_type [38]
+-----------------------------------------------
+                0.00    0.00  109987/229999      alloc_map_ptr_used [41]
+                0.00    0.00  120012/229999      alloc_map_set [27]
+[39]     0.0    0.00    0.00  229999         alloc_map_check_offset [39]
+-----------------------------------------------
+                0.00    0.00  164963/164963      get_pointers_from_bit_vector [29]
+[40]     0.0    0.00    0.00  164963         move_ptr_forward [40]
+-----------------------------------------------
+                0.00    0.00       9/109987      get_ptrs_from_stack [30]
+                0.00    0.00      10/109987      get_number_of_active_ptrs [20]
+                0.00    0.00   49996/109987      get_active_heap_ptrs_rec [26]
+                0.00    0.00   59972/109987      get_number_of_active_heap_ptrs_rec [19]
+[41]     0.0    0.00    0.00  109987         alloc_map_ptr_used [41]
+                0.00    0.00  109987/229999      alloc_map_check_offset [39]
+-----------------------------------------------
+                0.00    0.00  109968/109968      get_number_of_pointers_in_struct [33]
+[42]     0.0    0.00    0.00  109968         get_number_of_pointers_in_bit_vector [42]
+-----------------------------------------------
+                0.00    0.00   80024/80024       get_struct_size [52]
+[43]     0.0    0.00    0.00   80024         size_for [43]
+-----------------------------------------------
+                0.00    0.00       8/80016       get_forwarding_address [36]
+                0.00    0.00   80008/80016       set_type_bits [48]
+[44]     0.0    0.00    0.00   80016         clear_type_bits [44]
+-----------------------------------------------
+                0.00    0.00   20000/80008       create_data_header [58]
+                0.00    0.00   20004/80008       create_struct_header [56]
+                0.00    0.00   40004/80008       copy_header [53]
+[45]     0.0    0.00    0.00   80008         data_from_header [45]
+-----------------------------------------------
+                0.00    0.00   40004/80008       h_alloc [5]
+                0.00    0.00   40004/80008       h_alloc_raw [12]
+[46]     0.0    0.00    0.00   80008         page_get_bump [46]
+-----------------------------------------------
+                0.00    0.00   40004/80008       h_alloc [5]
+                0.00    0.00   40004/80008       h_alloc_raw [12]
+[47]     0.0    0.00    0.00   80008         page_move_bump [47]
+-----------------------------------------------
+                0.00    0.00   20000/80008       create_data_header [58]
+                0.00    0.00   20004/80008       create_struct_header [56]
+                0.00    0.00   40004/80008       forward_header [54]
+[48]     0.0    0.00    0.00   80008         set_type_bits [48]
+                0.00    0.00   80008/80016       clear_type_bits [44]
+-----------------------------------------------
+                0.00    0.00   20000/60000       h_alloc_data [11]
+                0.00    0.00   40000/60000       get_raw_data_size [34]
+[49]     0.0    0.00    0.00   60000         get_data_size [49]
+-----------------------------------------------
+                0.00    0.00   40012/40012       bit_vector_create [55]
+[50]     0.0    0.00    0.00   40012         get_bit_mask [50]
+-----------------------------------------------
+                0.00    0.00   40012/40012       bit_vector_create [55]
+[51]     0.0    0.00    0.00   40012         get_bits_needed [51]
+-----------------------------------------------
+                0.00    0.00   20004/40008       h_alloc_struct [9]
+                0.00    0.00   20004/40008       create_struct_header [56]
+[52]     0.0    0.00    0.00   40008         get_struct_size [52]
+                0.00    0.00   80024/80024       size_for [43]
+-----------------------------------------------
+                0.00    0.00   40004/40004       h_alloc_raw [12]
+[53]     0.0    0.00    0.00   40004         copy_header [53]
+                0.00    0.00   40004/1004881     header_from_data [37]
+                0.00    0.00   40004/80008       data_from_header [45]
+-----------------------------------------------
+                0.00    0.00   40004/40004       h_alloc_raw [12]
+[54]     0.0    0.00    0.00   40004         forward_header [54]
+                0.00    0.00   40004/1004881     header_from_data [37]
+                0.00    0.00   40004/80008       set_type_bits [48]
+-----------------------------------------------
+                0.00    0.00   20004/20004       create_struct_header [56]
+[55]     0.0    0.00    0.00   20004         bit_vector_create [55]
+                0.00    0.00   40012/40012       get_bit_mask [50]
+                0.00    0.00   40012/40012       get_bits_needed [51]
+-----------------------------------------------
+                0.00    0.00   20004/20004       h_alloc_struct [9]
+[56]     0.0    0.00    0.00   20004         create_struct_header [56]
+                0.00    0.00   20004/40008       get_struct_size [52]
+                0.00    0.00   20004/20004       format_str_contains_ptrs [57]
+                0.00    0.00   20004/20004       bit_vector_create [55]
+                0.00    0.00   20004/80008       set_type_bits [48]
+                0.00    0.00   20004/80008       data_from_header [45]
+-----------------------------------------------
+                0.00    0.00   20004/20004       create_struct_header [56]
+[57]     0.0    0.00    0.00   20004         format_str_contains_ptrs [57]
+-----------------------------------------------
+                0.00    0.00   20000/20000       h_alloc_data [11]
+[58]     0.0    0.00    0.00   20000         create_data_header [58]
+                0.00    0.00   20000/80008       set_type_bits [48]
+                0.00    0.00   20000/80008       data_from_header [45]
+-----------------------------------------------
+                0.00    0.00    1876/1876        h_gc_dbg [3]
+[59]     0.0    0.00    0.00    1876         page_get_type [59]
+-----------------------------------------------
+                0.00    0.00     393/786         h_alloc [5]
+                0.00    0.00     393/786         h_alloc_raw [12]
+[60]     0.0    0.00    0.00     786         find_first_passive_page [60]
+-----------------------------------------------
+                0.00    0.00     393/393         h_alloc [5]
+[61]     0.0    0.00    0.00     393         number_of_passive_pages [61]
+-----------------------------------------------
+                0.00    0.00     393/393         h_gc_dbg [3]
+[62]     0.0    0.00    0.00     393         page_reset [62]
+-----------------------------------------------
+                0.00    0.00     393/393         h_gc_dbg [3]
+[63]     0.0    0.00    0.00     393         page_set_type [63]
+-----------------------------------------------
+                0.00    0.00      10/21          get_ptrs_from_stack [30]
+                0.00    0.00      11/21          get_number_of_active_ptrs [20]
+[64]     0.0    0.00    0.00      21         stack_find_next_ptr [64]
+-----------------------------------------------
+                0.00    0.00       1/1           h_init [69]
+[65]     0.0    0.00    0.00       1         alloc_map_create [65]
+-----------------------------------------------
+                0.00    0.00       1/1           h_init [69]
+[66]     0.0    0.00    0.00       1         alloc_map_mem_size_needed [66]
+-----------------------------------------------
+                0.00    0.00       1/1           h_init [69]
+[67]     0.0    0.00    0.00       1         create_pages [67]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[68]     0.0    0.00    0.00       1         h_delete [68]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[69]     0.0    0.00    0.00       1         h_init [69]
+                0.00    0.00       1/1           alloc_map_mem_size_needed [66]
+                0.00    0.00       1/1           alloc_map_create [65]
+                0.00    0.00       1/1           create_pages [67]
+-----------------------------------------------
+                0.00    0.00       1/1           h_gc_dbg [3]
+[70]     0.0    0.00    0.00       1         set_active_to_transition [70]
+-----------------------------------------------
+                0.00    0.00       1/1           h_gc_dbg [3]
+[71]     0.0    0.00    0.00       1         set_unsafe_pages_to_active [71]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+  [39] alloc_map_check_offset (alloc_map.c) [32] get_existing_data_size [7] h_used
+  [65] alloc_map_create       [24] get_existing_size      [37] header_from_data
+  [66] alloc_map_mem_size_needed [36] get_forwarding_address [15] int_cell_comparator
+  [41] alloc_map_ptr_used     [25] get_header_type        [10] list_append
+  [27] alloc_map_set          [22] get_internal_ht         [8] list_contains
+  [55] bit_vector_create      [19] get_number_of_active_heap_ptrs_rec [35] list_new
+  [44] clear_type_bits        [20] get_number_of_active_ptrs [40] move_ptr_forward
+  [53] copy_header            [42] get_number_of_pointers_in_bit_vector [61] number_of_passive_pages
+  [58] create_data_header     [33] get_number_of_pointers_in_struct [18] page_get_avail
+  [67] create_pages           [29] get_pointers_from_bit_vector [46] page_get_bump
+  [56] create_struct_header   [23] get_pointers_in_struct [31] page_get_size
+  [45] data_from_header       [16] get_ptr_page           [59] page_get_type
+  [60] find_first_passive_page [30] get_ptrs_from_stack   [14] page_get_used
+  [13] find_next_active_page  [34] get_raw_data_size      [47] page_move_bump
+  [57] format_str_contains_ptrs [38] get_size_of_bit_type [62] page_reset
+  [54] forward_header         [52] get_struct_size        [63] page_set_type
+   [4] forward_internal_array_ptrs_with_offset [5] h_alloc [6] run_gc_if_above_threshold
+  [17] frame_dummy            [11] h_alloc_data           [70] set_active_to_transition
+  [26] get_active_heap_ptrs_rec [12] h_alloc_raw          [48] set_type_bits
+  [21] get_active_ptrs         [9] h_alloc_struct         [71] set_unsafe_pages_to_active
+  [50] get_bit_mask           [68] h_delete               [43] size_for
+  [28] get_bit_vector_size     [2] h_gc                   [64] stack_find_next_ptr
+  [51] get_bits_needed         [3] h_gc_dbg
+  [49] get_data_size          [69] h_init
