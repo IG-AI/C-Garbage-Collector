@@ -20,7 +20,8 @@ __Create new allocation map__
 int *start_addr = malloc(256*sizeof(int));
 alloc_map_t *alloc_map = alloc_map_create(start_addr, sizeof(int), 256*sizeof(int));
 ```
-När vi vill markera att en adress används sätter vi dess värde till true.
+När vi vill markera att en adress används sätter vi dess värde till antingen true eller false.
+
 __Set a bit in the allocation map__
 ```c
 // Set the n:th bit in the allocation map to true
@@ -30,6 +31,7 @@ alloc_map_set(alloc_map, &start_addr[n], true);
 alloc_map_set(alloc_map, &start_addr[m], false);
 ```
 För att se om en adress används anropar vi modulen med addressen vi är intresserade av. 
+
 __Get value of bit in allocation map__
 ```c
 // Find out the value of the n:th bit
