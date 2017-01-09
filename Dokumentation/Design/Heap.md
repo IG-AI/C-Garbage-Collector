@@ -7,10 +7,14 @@
 - [Allokering](#allokering)
 - [Skräpsamlare](#skräpsamlare)
 - [Debug versioner](#debug-versioner)
+- [Reflektion](#reflektion)
+ - [Höga adresser](#höga-adresser)
+ - [SPARC](#sparc)
+ - [Dump registers](#dump-registers)
 - [Gränssnittet gc.h](#gränssnittet-gch)
 
 ##Introduktion
-För att kunna skapa en egen skräpsamlare behöver vi skapa en "egen heap" på heapen. Vi behöver även en egen allokeringsfunktion för att spara data på vår heap, samt en skräpsamlare för att automatiskt frigöra och kompaktera vår heap.  
+För att kunna skapa en egen skräpsamlare behöver vi skapa en "egen heap" på heapen. Vi behöver även en egen allokeringsfunktion för att spara data på vår heap, samt en skräpsamlare för att automatiskt frigöra och kompaktera vår heap. Värt att notera är att det endast görs en enda allokering, när heapen initieras.   
 
 ##Heapen
 När heapen skapas allokerar vi ett minnesblock på den riktiga heapen. Heapen delas upp i ett antal diskreta sidor, pages, med storlek 2048 bytes. Det måste minst finnas två sidor, vilket betyder att minsta storlek på heapen är 4096 bytes. Vid initiering av heapen skapas även en allokeringskarta. Vid skapande anges även en bool som anger om stacken är säker eller inte, samt ett tröskelvärde i procent för när skräpsamlingen ska aktiveras. 
@@ -42,6 +46,15 @@ h_delete_dbg skriver över alla aktiva stack-pekare med ett givet värde.
 
 h_gc_dbg sätter stacken till unsafe, vilket innebär att alla pages som har en stack-pekare till sig sätts till unsafe. Dessa kan därmed inte ändras under skräpsamling. Efter skräpsamling sätts de tillbaka till active. 
 
+##Reflektion
+###Höga adresser
+Vi har testat några olika implementationer för höga andresser, men det är inget som används i det slutgiltliga programmet, då vi inte fick det att fungera helt. Dock fungerar skräpsamlingen ändå, men att använda höga adresser minskar risken för att hitta falska pekare på stacken, eftersom man sällan använder så pass höga tal. 
+
+###SPARC
+Några av testerna går inte igenom när vi kör dem i SPARC. 
+
+###Dump registers
+Vi använder inte av "dump registers" i vårat slutgiltliga program. 
 
 ##Gränssnittet gc.h
 
