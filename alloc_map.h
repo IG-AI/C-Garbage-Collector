@@ -4,6 +4,10 @@
  *  Heavily based on bitmap provided by T. Wrigstad at:
  *  https://github.com/IOOPM-UU/ioopm16/blob/master/forelasningar/fas1/f12/f12.pdf
  *
+ *  We have discovered that this implementation of allocation map require more
+ *  memory than what should be needed. Instead of using one bit for each address
+ *  it need one byte.
+ *
  *  @author Daniel Agstrand
  *  @author Henrik Bergendal
  *  @author Adam Inersjo
