@@ -23,9 +23,6 @@ endif
 all: gc.o header.o stack_search.o alloc_map.o
 	ld -r gc.o header.o stack_search.o alloc_map.o -o garbage_collector.o
 
-gc: gc.o stack_search.o header.o alloc_map.o
-	@$(CC) $(LINKFLAGS) $@ $^
-
 gc.o: gc.c gc.h
 	@$(CC) $(COMPFLAGS) $^
 
