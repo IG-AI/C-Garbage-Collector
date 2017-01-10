@@ -1,0 +1,6 @@
+Function 'stack_find_next_ptr'
+Lines executed:100.00% of 10
+
+File 'stack_search.c'
+Lines executed:100.00% of 10
+Creating 'stack_search.c.gcov'
