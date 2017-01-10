@@ -100,14 +100,14 @@ page_get_size(page_t *page)
 size_t
 page_get_avail(page_t *page)
 {
-  return ( (page->start + page->size) - page->bump);
+  return ( ((size_t)page->start + (size_t)page->size) - (size_t)page->bump);
 }
 
 
 size_t 
 page_get_used(page_t *page)
 {
-  return  page->bump - page->start;
+  return  (size_t)page->bump - (size_t)page->start;
 }
 
 page_type_t
@@ -268,7 +268,7 @@ get_number_of_active_ptrs(heap_t *h, void *original_top)
   void *stack_top = original_top;
   void *stack_bottom = (void *)*environ;
   void *heap_start = h->memory;
-  void *heap_end = (h->memory + h->size);
+  void *heap_end = (void *)((size_t)h->memory + (size_t)h->size);
   void **pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
 
   size_t i = 0;
@@ -366,7 +366,7 @@ get_number_of_ptrs_in_stack(heap_t *h, void *original_top)
   void *stack_top = original_top;
   void *stack_bottom = (void *)*environ;
   void *heap_start = h->memory;
-  void *heap_end = (h->memory + h->size);
+  void *heap_end = (void *)((size_t)h->memory + (size_t)h->size);
   void **pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
 
   size_t i = 0;
@@ -398,7 +398,7 @@ get_ptrs_from_stack(heap_t *h, void *original_top, void **array[], size_t array_
   void *stack_top = original_top;
   void *stack_bottom = (void *)*environ;
   void *heap_start = h->memory;
-  void *heap_end = (h->memory + h->size);
+  void *heap_end = (void *)((size_t)h->memory + (size_t)h->size);
 
   void **pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
 
