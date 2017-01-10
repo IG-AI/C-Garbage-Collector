@@ -14,6 +14,8 @@
 - [Testning](Dokumentation/Enhetstestning.md)
 - [Individuella reflektioner](Dokumentation/Sjalvreflektioner.pdf)
 - [Gemensam reflektion](Dokumentation/Gemensam-reflektion.pdf)
+- [Profileringsdata utan skräpsamling](Dokumentation/prof_test_malloc.txt)
+- [Profileringsdata med skräpsamling](Dokumentation/prof_test_gc.txt)
 
 ###Design
 - [Övergripande design](Dokumentation/Design/Övergripande%20design%20och%20uppdelning.md)
