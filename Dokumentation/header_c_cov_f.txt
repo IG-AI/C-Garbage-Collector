@@ -1,0 +1,118 @@
+Function 'additional_if_format_str'
+Lines executed:100.00% of 3
+
+Function 'header_ptr_already_found'
+Lines executed:0.00% of 4
+
+Function 'header_set_ptr_to_not_found'
+Lines executed:100.00% of 5
+
+Function 'header_set_ptr_to_found'
+Lines executed:0.00% of 5
+
+Function 'header_get_found_status'
+Lines executed:0.00% of 2
+
+Function 'get_forwarding_address'
+Lines executed:100.00% of 5
+
+Function 'forward_header'
+Lines executed:100.00% of 8
+
+Function 'copy_header'
+Lines executed:100.00% of 5
+
+Function 'get_pointers_in_struct'
+Lines executed:100.00% of 7
+
+Function 'get_pointers_from_bit_vector'
+Lines executed:100.00% of 15
+
+Function 'get_pointers_from_format_string'
+Lines executed:100.00% of 16
+
+Function 'get_pointers_from_num'
+Lines executed:100.00% of 14
+
+Function 'move_ptr_forward'
+Lines executed:100.00% of 3
+
+Function 'get_number_of_pointers_in_struct'
+Lines executed:100.00% of 7
+
+Function 'get_number_of_pointers_in_bit_vector'
+Lines executed:100.00% of 8
+
+Function 'get_number_of_pointers_in_format_str'
+Lines executed:100.00% of 14
+
+Function 'get_existing_data_size'
+Lines executed:0.00% of 4
+
+Function 'get_existing_size'
+Lines executed:87.50% of 8
+
+Function 'get_bit_vector_size'
+Lines executed:100.00% of 8
+
+Function 'get_format_str_size'
+Lines executed:100.00% of 4
+
+Function 'get_raw_data_size'
+Lines executed:100.00% of 5
+
+Function 'get_struct_size'
+Lines executed:100.00% of 21
+
+Function 'get_data_size'
+Lines executed:100.00% of 4
+
+Function 'get_header_type'
+Lines executed:100.00% of 6
+
+Function 'get_internal_ht'
+Lines executed:100.00% of 9
+
+Function 'create_struct_header'
+Lines executed:100.00% of 16
+
+Function 'create_data_header'
+Lines executed:100.00% of 6
+
+Function 'bit_vector_create'
+Lines executed:92.00% of 25
+
+Function 'get_bit_mask'
+Lines executed:83.33% of 6
+
+Function 'get_bits_needed'
+Lines executed:100.00% of 3
+
+Function 'get_size_of_bit_type'
+Lines executed:83.33% of 6
+
+Function 'format_str_contains_ptrs'
+Lines executed:100.00% of 2
+
+Function 'set_type_bits'
+Lines executed:100.00% of 8
+
+Function 'clear_type_bits'
+Lines executed:100.00% of 3
+
+Function 'format_str_ptr_from_data'
+Lines executed:100.00% of 3
+
+Function 'data_from_header'
+Lines executed:100.00% of 2
+
+Function 'header_from_data'
+Lines executed:100.00% of 2
+
+Function 'size_for'
+Lines executed:100.00% of 8
+
+File 'header.c'
+Lines executed:92.86% of 280
+Creating 'header.c.gcov'
+
