@@ -38,6 +38,10 @@ alloc_map.o: alloc_map.c alloc_map.h
 	@$(CC) $(COMPFLAGS) alloc_map.c -o $@
 
 
+# DOXYGEN
+doxygen:
+	doxygen Doxyfile
+
 
 # TESTS
 test: gc_test header_test stack_search_test alloc_map_test
