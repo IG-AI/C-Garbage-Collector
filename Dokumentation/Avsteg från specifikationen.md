@@ -1,5 +1,5 @@
 
-Programmet fungerar inte bra på SPARC. Några tester misslyckas i SPARC och vi har försökt fixa det, utan framgång. Det går att köra programmet i SPARC, men vi misstänker, på grund av testerna som misslyckas, att skräpsamlingen inte kommer att genomföras på ett korrekt sätt. Sen så fungerar inte valgrind inte heller i SPARC så det är väldigt svårt att testa om skräpsamlingen sker korrekt eller inte.
+Programmet fungerar inte bra på SPARC. Några tester misslyckas i SPARC och vi har försökt fixa det, utan framgång. Det går att köra programmet i SPARC, men vi misstänker, på grund av testerna som misslyckas, att skräpsamlingen inte kommer att genomföras på ett korrekt sätt. Sen så fungerar inte valgrind heller i SPARC så det är väldigt svårt att testa om skräpsamlingen sker korrekt eller inte.
 
 Vi dumpar inte registren på stacken. Detta på grund av att när vi implementerar funktionen som dumpar registren så fungerar inte våran kod. Dessutom så fungerar vårat program alldels utmärkt utan den funktionen.
 
