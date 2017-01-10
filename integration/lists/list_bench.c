@@ -18,7 +18,7 @@
 #endif
 
 #ifdef IOOPM_GC
-#include "gc.h"
+#include "../../gc.h"
 
 heap_t *h;
 #endif
@@ -143,7 +143,8 @@ int main(int argc, char *argv[])
   int max = no_lists * elements * 2;
 
 #ifdef IOOPM_GC
-  h = h_init(max * sizeof(struct link) * 2.4, true, 0.5);
+  size_t size = max * sizeof(struct link) * 2.4;
+  h = h_init(size + 2048 - size % 2048, true, 0.5);
 #endif
   
   if (argc > 1)

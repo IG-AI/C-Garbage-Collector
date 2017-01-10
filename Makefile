@@ -53,6 +53,13 @@ gc_prof: gc.c header.c stack_search.c alloc_map.c
 	cd integration/lager/ && make run_perf
 	cd integration/lager/ && gprof gc_perf_test gmon.out > prof_data.txt
 
+# BENCH
+gc_bench: gc.o header.o stack_search.o alloc_map.o
+	make clean
+	cd integration/lists/ && make clean
+	make all
+	cd integration/lists/ && make bench
+
 
 # TESTS
 test: gc_test header_test stack_search_test alloc_map_test
