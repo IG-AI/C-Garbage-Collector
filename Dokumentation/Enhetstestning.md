@@ -16,7 +16,7 @@ På solaris SPARC används "make test_sparc" och 3 test fallerar.
 ###Coverage
 För att se code coverage används "make coverage". Detta testar coverage för våra moduler när deras test-filer körs. Vi kunde dock bara få det att fungera för stack-search och alloc-map modulerna. Vi lyckades som sagt inte få det att fungera för header.c och gc.c på terminalerna i 1515, däremot kunde Tobias få resultat på sin egen dator.
 
-Coverage för gc.c: Ej känt
+Coverage för gc.c: Lines executed:93.68% of 364
 
 Coverage för header.c: Lines executed:92.86% of 280
 
