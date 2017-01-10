@@ -10,3 +10,5 @@
 * Vi har valt att inte implementera höga adresser. Detta eftersom det inte var ett krav och för att vi aldrig fick den att fungera. Vi gjorde försök med posix_memalign som ska kunna användas för att be om högre adresser men vi lyckades bara få den att ge hos marginellt större adresser ibland och ibland fick vi även mindre adresser.
 
 * Vi kan inte få ut någon code coverage för vissa moduler. Vi har försökt fixa detta väldigt länge utan framgång. Mer information finns i dokumentet för enhetstestning. 
+
+* Vi fick aldrig BDW GC att fungera så våra performance tests saknar jämförelse med denna. Punkt 2 av Specens Performance jämförelser blev inte heller klar då programmet gav Segfault när data fylldes andra gången.
