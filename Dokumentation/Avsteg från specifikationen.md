@@ -5,8 +5,8 @@
 
 * h_used räknar nu även med padding och headers. Detta eftersom vi anser att det är mera logiskt att ha med padding och headers i uträkningen.
 
-* Allokeringskartan är en bytemap snarare än en bitmap. Men den fungerar som den ska, enda nackdelen är att den är att den tar större plats på minnet. Och det känns inte som något stort problem. 
+* Allokeringskartan är en bytemap snarare än en bitmap. Men den fungerar som den ska, enda nackdelen är att den är att den tar större plats på minnet vilket inte känns som ettt stort problem. 
 
-* Vi har valt att inte implementera höga adresser. Eftersom det inte var ett krav och för att vi aldrig fick den att fungera. Vi gjorde försök med posix_memalign som ska kunna användas för att be om högre adresser. Men vi lyckades bara få den att ge hos marginellt större adresser ibland och ibland fick vi även mindre adresser.
+* Vi har valt att inte implementera höga adresser. Detta eftersom det inte var ett krav och för att vi aldrig fick den att fungera. Vi gjorde försök med posix_memalign som ska kunna användas för att be om högre adresser men vi lyckades bara få den att ge hos marginellt större adresser ibland och ibland fick vi även mindre adresser.
 
 * Vi kan inte få ut någon code coverage. När vi försöker använda gcov så får vi ett fel i gc modulen. Vi har försökt fixa detta väldigt länge utan framgång.  
