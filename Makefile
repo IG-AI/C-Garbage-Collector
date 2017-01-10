@@ -20,7 +20,7 @@ endif
 
 
 
-all: gc.o header.o stack_search.o alloc_map.o
+all: clean gc.o header.o stack_search.o alloc_map.o
 	ld -r gc.o header.o stack_search.o alloc_map.o -o garbage_collector.o
 
 gc.o: gc.c gc.h
