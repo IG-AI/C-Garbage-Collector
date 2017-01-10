@@ -176,8 +176,20 @@ så att headern växer och krymper utan att program som använder skräpsamlaren
 måste modiferas.
 
 
-## Funktionalitet som inte implementerats än
-- Om en formatsträng inte innehåller pekare ska det skapas en header av typ RAW_DATA
+## Hittade struktar
+Varje header till en strukt har en bit dedikerad (den tredje minst signifikanta)
+som säger om strukten har hittats tidigare i en genomgång av heapen.
+Detta är till för att hantera struktar som tillsammans gör en loop, t.ex. 
+dubbel-länkade listor.
+
+Denna bit var lätt att integrera med Bit-vektorer, men de fungerar också för
+headers som är pekare till formatsträngar då dessa allokeras på vår heap som
+är alignad till 8 bytes. Detta innebär att det är tre bitar i en pekare som
+inte används: två till header typen och en till hittad-status.
+
+__En felkälla med detta är dock fall där loopande struktar använder formatsträngar, 
+detta på grund av att uppdatering av hittad-biten påverkar var pekaren till formatsträngen
+går. Detta problem borde inte uppkomma vid andra fall.__
 
 ## Exempel
 __Creation of Data Header__
