@@ -7,3 +7,11 @@
 * Maria Lindqvist
 * Henrik Bergendal
 * Simon Pellgård
+
+###Dokumentation
+- [Avsteg från specifikationen](Dokumentation/Avsteg från specifikationen.md)
+- [Dokumentationsstandard](Dokumentation/Dokumentationsstandard.md)
+- [Enhetstestning](Dokumentation/Enhetstestning.md)
+- [Individuella reflektioner](Dokumentation/Sjalvreflektioner.pdf)
+- [Gemensam reflektion](Dokumentation/Gemensam-reflektion.pdf)
+
