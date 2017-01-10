@@ -567,6 +567,20 @@ test_h_gc_ptr_inside_struct_garbage()
 }
 
 void
+test_h_gc_ptr_loop()
+{
+  heap_t *h = h_init(SMALLEST_HEAP_SIZE, SAFE_STACK, 0.5);
+  test_link_t *link1 = h_alloc_struct(h, TEST_LINK_FORMAT_STR);
+  test_link_t *link2 = h_alloc_struct(h, TEST_LINK_FORMAT_STR);
+  *link1 = (test_link_t) {link2, 1};
+  *link2 = (test_link_t) {link1, 1};
+  size_t cleaned = h_gc(h);
+  CU_ASSERT(cleaned == 0);
+  CU_ASSERT(h_used(h) != 0);
+  h_delete(h);
+}
+
+void
 test_h_gc_dbg_null_heap_ptr()
 {
   size_t cleaned = h_gc_dbg(NULL, SAFE_STACK);
@@ -1137,9 +1151,12 @@ main (void)
                                , "ptr inside struct garbage"
                                , test_h_gc_ptr_inside_struct_garbage) ) ||
         (NULL == CU_add_test(suite_h_gc
+                               , "loop of ptrs"
+                               , test_h_gc_ptr_loop) ) ||
+        (NULL == CU_add_test(suite_h_gc
                                , "dbg: no garbage"
                                , test_h_gc_dbg_no_garbage) ) ||
-        (NULL == CU_add_test(suite_h_gc
+       (NULL == CU_add_test(suite_h_gc
                                , "dbg: only garbage in heap"
                                , test_h_gc_dbg_only_garbage) ) ||
        (NULL == CU_add_test(suite_h_gc

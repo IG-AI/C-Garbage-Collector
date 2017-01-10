@@ -61,25 +61,6 @@ size_for(char c)
 }
 
 /**
- *  @brief Duplicate a string
- *
- *  The duplicate is currently allocated on the regular heap but will be changed
- *  to be allocated on our own heap in gc.c
- *
- *  @param  str the string to duplicate
- *  @return a copy of @p str allocated on the heap
- */
-char *
-str_duplicate(char *str)
-{
-  /*
-    Should allocate on our heap, waiting on completed h_alloc_data.
-    How to get the heap here...?
-  */
-  return strdup(str);
-}
-
-/**
  *  @brief Extract pointer to a header from a pointer to data.
  *
  *  @param  data pointer to the data to get the header from
@@ -101,6 +82,15 @@ void *
 data_from_header(void *header)
 {
   return (char *) header + HEADER_SIZE;
+}
+
+#define Get_format_str_ptr_from_header(header) (void *)( ((header) >> 3UL) << 3UL);
+
+void *
+format_str_ptr_from_data(void *structure)
+{
+  size_t *header_ptr = header_from_data(structure);
+  return Get_format_str_ptr_from_header(*header_ptr);
 }
 
 /**
@@ -153,7 +143,7 @@ format_str_contains_ptrs(char *form_str)
 #define BV_PTR    3UL
 #define BV_DOUBLE 10UL
 
-#define BV_MAX_BITS 60
+#define BV_MAX_BITS 58
 
 #define BV_SMALL 2
 #define BV_LARGE 4
@@ -191,7 +181,7 @@ bit_vector_create(char *format_str)
 {
   if(format_str == NULL) return NULL;
 
-  size_t available_bits = BV_MAX_BITS;
+  int available_bits = BV_MAX_BITS;
   unsigned long bit_vector = 0UL;
   unsigned long bit_mask = 0UL;
   char *current_ptr = format_str;
@@ -231,7 +221,7 @@ bit_vector_create(char *format_str)
     }
 
   bit_vector = bit_vector << (2 + available_bits);
-  return (void *) (bit_vector << 2);
+  return (void *) (bit_vector << 4);
 }
 
 /*============================================================================
@@ -316,8 +306,8 @@ get_internal_ht(void *data)
 {
   if (data == NULL) return I_HT_NOTHING;
   void *header_ptr = header_from_data(data);
-  unsigned long header = *(unsigned long *) header_ptr; // CROSS_PLATFORM
-  unsigned long type_bits = header & 3UL; // CROSS_PLATFORM
+  unsigned long header = *(unsigned long *) header_ptr;
+  unsigned long type_bits = header & 3UL;
   
   if(type_bits == B_FORMAT_STR) return I_HT_FORMAT_STR;
   else if(type_bits == B_BIT_VECTOR) return I_HT_BIT_VECTOR;
@@ -409,8 +399,8 @@ get_format_str_size(void *structure)
 {
   if(get_internal_ht(structure) != I_HT_FORMAT_STR) return INVALID;
 
-  char **header = header_from_data(structure);
-  return get_struct_size(*header);
+  char *format_str = format_str_ptr_from_data(structure);
+  return get_struct_size(format_str);
 }
 
 size_t
@@ -513,7 +503,7 @@ get_number_of_pointers_in_struct(void *structure)
     }
   else
     {
-      char *format_str = *((char **) header_ptr);
+      char *format_str = format_str_ptr_from_data(structure);
       return 1 + get_number_of_pointers_in_format_str(format_str);
     }
 }
@@ -560,7 +550,8 @@ get_pointers_from_num(char **ptr_to_str
 bool
 get_pointers_from_format_string(void *structure, void **array[])
 {
-  array[0] = header_from_data(structure); 
+  header_set_ptr_to_not_found(structure);
+  array[0] = header_from_data(structure);
   char *current_ptr = *array[0];
   size_t array_index = 1;
   void *current_data = structure;
@@ -671,6 +662,61 @@ get_forwarding_address(void *data)
   void **header_ptr = header_from_data(data);
   return clear_type_bits(*header_ptr);
 }
+
+
+/*============================================================================
+ *                             Struct Found functions
+ *===========================================================================*/
+#define STRUCT_FOUND 4UL
+#define STRUCT_NOT_FOUND 0UL
+#define FOUND_MASK 4UL
+
+
+size_t
+header_get_found_status(void **header_ptr)
+{
+  return *(size_t *) header_ptr & FOUND_MASK;
+}
+
+/**
+ *  @brief Sets the found status of a header
+ *
+ *  The status is in the third to last bit. This is possible because all
+ *  addresses in the heap are aligned with 8 bytes. This makes the third to last
+ *  bit 0 all the time and not used.
+ *
+ *  @param  header_ptr pointer to the header to change status of
+ *  @param  status the status to set to @p header_ptr
+ */
+bool
+header_set_ptr_to_found(void *structure)
+{
+  if(structure == NULL || get_header_type(structure) != STRUCT_REP) return false;
+
+  void **header = header_from_data(structure);
+  *header = (void *) (*(size_t *) header | STRUCT_FOUND);
+  return true;
+}
+
+bool
+header_set_ptr_to_not_found(void *structure)
+{
+  if(structure == NULL || get_header_type(structure) != STRUCT_REP) return false;
+
+  void **header = header_from_data(structure);
+  *header = (void *) (*(size_t *) header & ~(STRUCT_FOUND));
+  return true;
+}
+
+bool
+header_ptr_already_found(void *structure)
+{
+  if(structure == NULL || get_header_type(structure) != STRUCT_REP) return false;
+
+  void *header = header_from_data(structure);
+  return header_get_found_status(header) == STRUCT_FOUND;
+  }
+
 
 /*============================================================================
  *                             TEST HELPING FUNCTIONS
