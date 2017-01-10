@@ -1,0 +1,18 @@
+Function 'alloc_map_set'
+Lines executed:100.00% of 8
+
+Function 'alloc_map_ptr_used'
+Lines executed:100.00% of 5
+
+Function 'alloc_map_check_offset'
+Lines executed:100.00% of 7
+
+Function 'alloc_map_create'
+Lines executed:100.00% of 7
+
+Function 'alloc_map_mem_size_needed'
+Lines executed:100.00% of 2
+
+File 'alloc_map.c'
+Lines executed:100.00% of 29
+Creating 'alloc_map.c.gcov'
