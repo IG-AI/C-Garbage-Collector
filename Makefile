@@ -11,6 +11,7 @@ else
   CC =gcc
   STD =-std=c11
   LINKFLAGS =$(STD) -Wall -g -o
+  PROFFLAGS =$(STD) -Wall -g -c -m64 -pg
   COMPFLAGS =$(STD) -Wall -g -c -m64
   TESTFLAGS =$(STD) -Wall -g -m64 -lcunit -DNDEBUG
   COVERAGEFLAGS =$(STD) -Wall -g -m64 -lcunit -DNDEBUG -fprofile-arcs -ftest-coverage -coverage
@@ -41,6 +42,16 @@ alloc_map.o: alloc_map.c alloc_map.h
 # DOXYGEN
 doxygen:
 	doxygen Doxyfile
+
+
+# PROFILING
+gc_prof: gc.c header.c stack_search.c alloc_map.c
+	make clean
+	cd integration/lager/ && make clean
+	$(CC)  $^  $(PROFFLAGS)
+	make all
+	cd integration/lager/ && make run_perf
+	cd integration/lager/ && gprof gc_perf_test gmon.out > prof_data.txt
 
 
 # TESTS
@@ -121,7 +132,7 @@ header_coverage: header.c gc.o stack_search.o alloc_map.o header_test.c
 
 # Stack search
 test_stack_search: stack_search_test
-	@./stack_search_test
+	@./stack_search_test1
 
 stack_search_test: stack_search.o stack_search_test.c 
 	@$(CC)  $^ -o $@ $(TESTFLAGS)
