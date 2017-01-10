@@ -11,7 +11,7 @@
 ###Dokumentation
 - [Avsteg från specifikationen](Dokumentation/Avsteg från specifikationen.md)
 - [Dokumentationsstandard](Dokumentation/Dokumentationsstandard.md)
-- [Enhetstestning](Dokumentation/Enhetstestning.md)
+- [Testning](Dokumentation/Enhetstestning.md)
 - [Individuella reflektioner](Dokumentation/Sjalvreflektioner.pdf)
 - [Gemensam reflektion](Dokumentation/Gemensam-reflektion.pdf)
 
