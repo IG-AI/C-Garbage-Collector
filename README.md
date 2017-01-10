@@ -15,6 +15,7 @@
 - [Testning](Dokumentation/Enhetstestning.md) (Y69)
 - [Individuella reflektioner](Dokumentation/Sjalvreflektioner.pdf) (Y67)
 - [Gemensam reflektion](Dokumentation/Gemensam-reflektion.pdf) (Y64-Y67, Y69)
+- [Performance jämförelser](Dokumentation/perf_tests.md)
 - [Profileringsdata utan skräpsamling](Dokumentation/prof_test_malloc.txt)
 - [Profileringsdata med skräpsamling](Dokumentation/prof_test_gc.txt)
 
