@@ -9,7 +9,7 @@
 * Simon Pellgård
 
 ###Dokumentation
-- [Avsteg från specifikationen](Dokumentation/Avsteg från specifikationen.md)
+- [Avvikelser från specifikationen](Dokumentation/Avsteg från specifikationen.md)
 - [Dokumentationsstandard](Dokumentation/Dokumentationsstandard.md) (Y65)
 - [Testning](Dokumentation/Enhetstestning.md) (Y69)
 - [Individuella reflektioner](Dokumentation/Sjalvreflektioner.pdf) (Y67)
