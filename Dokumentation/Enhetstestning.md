@@ -1,8 +1,8 @@
 För att köra alla enhetstester på linux x86 och solaris x86 används "make test". 
-Vi har totalt 181 tester vilka alla passerar.  
+Vi har totalt 182 tester vilka alla passerar.  
 
 För att köra de 109 header testerna används "make test_header" 
-För att köra de 67 gc testerna används "make test_gc"
+För att köra de 68 gc testerna används "make test_gc"
 För att köra de 3 alloc map testerna används "make test_allocmap" 
 För att köra de 2 stack search testerna används "make test_stack_search" 
 
