@@ -8,4 +8,4 @@ För att köra de 2 stack search testerna används "make test_stack_search"
 
 På solaris SPARC används "make test_sparc" och 3 test fallerar.
 
-För att se code covarage används "make covarage". Detta fungerar dock bara för stack search och alloc map modulerna, vilka båda har hundra procent covarage.
+För att se code covarage används "make coverage". Detta fungerar dock bara för stack search och alloc map modulerna, vilka båda har hundra procent coverage.
