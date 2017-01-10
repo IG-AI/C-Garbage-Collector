@@ -177,5 +177,28 @@ bool forward_header(void *data, void *new_data);
  */
 void *get_forwarding_address(void *data);
 
+/**
+ *  @brief Sets the struct header to found
+ *
+ *  @param  struct pointer to the struct
+ *  @return true if successfully changed header
+ */
+bool header_set_ptr_to_found(void *structure);
+
+/**
+ *  @brief Sets the struct header to not found
+ *
+ *  @param  struct pointer to the struct
+ *  @return true if successfully changed header
+ */
+bool header_set_ptr_to_not_found(void *structure);
+
+/**
+ *  @brief Checks if the struct is set to found
+ *
+ *  @param  struct pointer to the struct
+ *  @return true if @p struct is set to found, false otherwise
+ */
+bool header_ptr_already_found(void *structure);
 
 #endif
