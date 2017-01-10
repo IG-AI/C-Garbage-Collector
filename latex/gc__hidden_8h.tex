@@ -1,0 +1,199 @@
+\hypertarget{gc__hidden_8h}{}\section{gc\+\_\+hidden.\+h File Reference}
+\label{gc__hidden_8h}\index{gc\+\_\+hidden.\+h@{gc\+\_\+hidden.\+h}}
+
+
+Hidden library for gc.  
+
+
+{\ttfamily \#include $<$stdbool.\+h$>$}\\*
+{\ttfamily \#include $<$stdint.\+h$>$}\\*
+{\ttfamily \#include $<$stdlib.\+h$>$}\\*
+{\ttfamily \#include \char`\"{}gc.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}alloc\+\_\+map.\+h\char`\"{}}\\*
+Include dependency graph for gc\+\_\+hidden.\+h\+:
+% FIG 0
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structpage}{page}
+\item 
+struct \hyperlink{structheap}{heap}
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{gc__hidden_8h_ade89166d54350940b6a08604d1119f4e}{}typedef struct \hyperlink{structpage}{page} {\bfseries page\+\_\+t}\label{gc__hidden_8h_ade89166d54350940b6a08604d1119f4e}
+
+\item 
+\hypertarget{gc__hidden_8h_a8c49f07bc20bf69652f53495851b4742}{}typedef enum page\+\_\+type {\bfseries page\+\_\+type\+\_\+t}\label{gc__hidden_8h_a8c49f07bc20bf69652f53495851b4742}
+
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{gc__hidden_8h_a90e73eae5c0a8b798ffb3be5a2df08c6}{}enum {\bfseries page\+\_\+type} \{ {\bfseries P\+A\+S\+S\+I\+V\+E}, 
+{\bfseries A\+C\+T\+I\+V\+E}, 
+{\bfseries T\+R\+A\+N\+S\+I\+T\+I\+O\+N}, 
+{\bfseries U\+N\+S\+A\+F\+E}
+ \}\label{gc__hidden_8h_a90e73eae5c0a8b798ffb3be5a2df08c6}
+
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{gc__hidden_8h_a781abd7be7d7a5323f646dad56732c8b}{}void $\ast$ {\bfseries get\+\_\+page\+\_\+start} (\hyperlink{structpage}{page\+\_\+t} $\ast$\hyperlink{structpage}{page})\label{gc__hidden_8h_a781abd7be7d7a5323f646dad56732c8b}
+
+\item 
+\hypertarget{gc__hidden_8h_aa8e5e7bdea00913e5dc5cb4e45c3e4d5}{}int {\bfseries get\+\_\+ptr\+\_\+page} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, void $\ast$ptr)\label{gc__hidden_8h_aa8e5e7bdea00913e5dc5cb4e45c3e4d5}
+
+\item 
+\hypertarget{gc__hidden_8h_afabf58bea4d81eb1806f0106c38d72ca}{}size\+\_\+t {\bfseries page\+\_\+get\+\_\+used} (\hyperlink{structpage}{page\+\_\+t} $\ast$p)\label{gc__hidden_8h_afabf58bea4d81eb1806f0106c38d72ca}
+
+\item 
+\hypertarget{gc__hidden_8h_a1d142dc8aa5e1041d387ac2923c02685}{}void $\ast$ {\bfseries get\+\_\+memory} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h)\label{gc__hidden_8h_a1d142dc8aa5e1041d387ac2923c02685}
+
+\item 
+\hypertarget{gc__hidden_8h_ac6ceee057a341916a64ee5ba0c0d0cbe}{}size\+\_\+t {\bfseries heap\+\_\+get\+\_\+size} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h)\label{gc__hidden_8h_ac6ceee057a341916a64ee5ba0c0d0cbe}
+
+\item 
+\hypertarget{gc__hidden_8h_a3721ce5ae94312990e1af97c560d1509}{}size\+\_\+t {\bfseries heap\+\_\+get\+\_\+number\+\_\+of\+\_\+pages} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h)\label{gc__hidden_8h_a3721ce5ae94312990e1af97c560d1509}
+
+\item 
+\hypertarget{gc__hidden_8h_a9897047994747c4a4aa6583223f98813}{}void $\ast$ {\bfseries get\+\_\+stack\+\_\+top} ()\label{gc__hidden_8h_a9897047994747c4a4aa6583223f98813}
+
+\item 
+size\+\_\+t \hyperlink{gc__hidden_8h_a925ef1d5efea33785f11faddf4ee187e}{get\+\_\+number\+\_\+of\+\_\+ptrs\+\_\+in\+\_\+stack} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, void $\ast$original\+\_\+top)
+\begin{DoxyCompactList}\small\item\em Gets the number of pointer found on stack. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{gc__hidden_8h_a460644011187cc598465fd8ad68c38a2}{get\+\_\+ptrs\+\_\+from\+\_\+stack} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, void $\ast$original\+\_\+top, void $\ast$$\ast$array\mbox{[}$\,$\mbox{]}, size\+\_\+t array\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Puts the pointers found on the stack in an array. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{gc__hidden_8h_a54614e4098b51e0cd63ecd469647081e}{get\+\_\+number\+\_\+of\+\_\+active\+\_\+ptrs} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, void $\ast$original\+\_\+top)
+\begin{DoxyCompactList}\small\item\em Gets the number of active pointers on the stack and in the heap. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{gc__hidden_8h_ab1a84d360233bebc46f6a269973e524e}{get\+\_\+active\+\_\+ptrs} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, void $\ast$original\+\_\+top, void $\ast$$\ast$array\mbox{[}$\,$\mbox{]}, size\+\_\+t array\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Gets all the active pointers on the stack and in the heap and puts them into an array. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{gc__hidden_8h_aa006daaf11f1e2e45a6ababaf463212b}{}char $\ast$$\ast$ {\bfseries environ}\label{gc__hidden_8h_aa006daaf11f1e2e45a6ababaf463212b}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Hidden library for gc. 
+
+\begin{DoxyAuthor}{Author}
+Daniel Agstrand 
+
+Henrik Bergendal 
+
+Adam Inersjo 
+
+Maria Lindqvist 
+
+Simon Pellgard 
+
+Robert Rosborg 
+\end{DoxyAuthor}
+
+
+\subsection{Function Documentation}
+\hypertarget{gc__hidden_8h_ab1a84d360233bebc46f6a269973e524e}{}\index{gc\+\_\+hidden.\+h@{gc\+\_\+hidden.\+h}!get\+\_\+active\+\_\+ptrs@{get\+\_\+active\+\_\+ptrs}}
+\index{get\+\_\+active\+\_\+ptrs@{get\+\_\+active\+\_\+ptrs}!gc\+\_\+hidden.\+h@{gc\+\_\+hidden.\+h}}
+\subsubsection[{get\+\_\+active\+\_\+ptrs}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t get\+\_\+active\+\_\+ptrs (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h, }
+\item[{void $\ast$}]{original\+\_\+top, }
+\item[{void $\ast$$\ast$}]{array\mbox{[}$\,$\mbox{]}, }
+\item[{size\+\_\+t}]{array\+\_\+size}
+\end{DoxyParamCaption}
+)}\label{gc__hidden_8h_ab1a84d360233bebc46f6a269973e524e}
+
+
+Gets all the active pointers on the stack and in the heap and puts them into an array. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & a pointer to the heap \\
+\hline
+{\em original\+\_\+top} & the top of the stack to search \\
+\hline
+{\em array} & an array of double pointers \\
+\hline
+{\em array\+\_\+size} & the size of the array\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the number of pointer found on stack and the heap 
+\end{DoxyReturn}
+\hypertarget{gc__hidden_8h_a54614e4098b51e0cd63ecd469647081e}{}\index{gc\+\_\+hidden.\+h@{gc\+\_\+hidden.\+h}!get\+\_\+number\+\_\+of\+\_\+active\+\_\+ptrs@{get\+\_\+number\+\_\+of\+\_\+active\+\_\+ptrs}}
+\index{get\+\_\+number\+\_\+of\+\_\+active\+\_\+ptrs@{get\+\_\+number\+\_\+of\+\_\+active\+\_\+ptrs}!gc\+\_\+hidden.\+h@{gc\+\_\+hidden.\+h}}
+\subsubsection[{get\+\_\+number\+\_\+of\+\_\+active\+\_\+ptrs}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t get\+\_\+number\+\_\+of\+\_\+active\+\_\+ptrs (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h, }
+\item[{void $\ast$}]{original\+\_\+top}
+\end{DoxyParamCaption}
+)}\label{gc__hidden_8h_a54614e4098b51e0cd63ecd469647081e}
+
+
+Gets the number of active pointers on the stack and in the heap. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & a pointer to the heap \\
+\hline
+{\em original\+\_\+top} & the top of the stack to search\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the number of pointer found on stack and the heap 
+\end{DoxyReturn}
+\hypertarget{gc__hidden_8h_a925ef1d5efea33785f11faddf4ee187e}{}\index{gc\+\_\+hidden.\+h@{gc\+\_\+hidden.\+h}!get\+\_\+number\+\_\+of\+\_\+ptrs\+\_\+in\+\_\+stack@{get\+\_\+number\+\_\+of\+\_\+ptrs\+\_\+in\+\_\+stack}}
+\index{get\+\_\+number\+\_\+of\+\_\+ptrs\+\_\+in\+\_\+stack@{get\+\_\+number\+\_\+of\+\_\+ptrs\+\_\+in\+\_\+stack}!gc\+\_\+hidden.\+h@{gc\+\_\+hidden.\+h}}
+\subsubsection[{get\+\_\+number\+\_\+of\+\_\+ptrs\+\_\+in\+\_\+stack}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t get\+\_\+number\+\_\+of\+\_\+ptrs\+\_\+in\+\_\+stack (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h, }
+\item[{void $\ast$}]{original\+\_\+top}
+\end{DoxyParamCaption}
+)}\label{gc__hidden_8h_a925ef1d5efea33785f11faddf4ee187e}
+
+
+Gets the number of pointer found on stack. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & a pointer to the heap \\
+\hline
+{\em original\+\_\+top} & the top of the stack to search\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the number of pointer found on stack 
+\end{DoxyReturn}
+\hypertarget{gc__hidden_8h_a460644011187cc598465fd8ad68c38a2}{}\index{gc\+\_\+hidden.\+h@{gc\+\_\+hidden.\+h}!get\+\_\+ptrs\+\_\+from\+\_\+stack@{get\+\_\+ptrs\+\_\+from\+\_\+stack}}
+\index{get\+\_\+ptrs\+\_\+from\+\_\+stack@{get\+\_\+ptrs\+\_\+from\+\_\+stack}!gc\+\_\+hidden.\+h@{gc\+\_\+hidden.\+h}}
+\subsubsection[{get\+\_\+ptrs\+\_\+from\+\_\+stack}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t get\+\_\+ptrs\+\_\+from\+\_\+stack (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h, }
+\item[{void $\ast$}]{original\+\_\+top, }
+\item[{void $\ast$$\ast$}]{array\mbox{[}$\,$\mbox{]}, }
+\item[{size\+\_\+t}]{array\+\_\+size}
+\end{DoxyParamCaption}
+)}\label{gc__hidden_8h_a460644011187cc598465fd8ad68c38a2}
+
+
+Puts the pointers found on the stack in an array. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & a pointer to the heap \\
+\hline
+{\em original\+\_\+top} & the top of the stack to search \\
+\hline
+{\em array} & an empty array of double pointers \\
+\hline
+{\em array\+\_\+size} & the size of the array\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the number of pointer found on stack 
+\end{DoxyReturn}

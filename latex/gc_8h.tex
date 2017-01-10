@@ -1,0 +1,325 @@
+\hypertarget{gc_8h}{}\section{gc.\+h File Reference}
+\label{gc_8h}\index{gc.\+h@{gc.\+h}}
+
+
+A library for heap allocation with automatic garbage collection.  
+
+
+{\ttfamily \#include $<$stdbool.\+h$>$}\\*
+{\ttfamily \#include $<$stdint.\+h$>$}\\*
+{\ttfamily \#include $<$stdlib.\+h$>$}\\*
+Include dependency graph for gc.\+h\+:
+% FIG 0
+This graph shows which files directly or indirectly include this file\+:
+% FIG 1
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{gc_8h_a0f4834f5dfa7df354e5bfd36528ee4d6}{}\#define {\bfseries U\+N\+S\+A\+F\+E\+\_\+\+S\+T\+A\+C\+K}~true\label{gc_8h_a0f4834f5dfa7df354e5bfd36528ee4d6}
+
+\item 
+\hypertarget{gc_8h_a2582f8409ae69733c2471793710c23ea}{}\#define {\bfseries S\+A\+F\+E\+\_\+\+S\+T\+A\+C\+K}~false\label{gc_8h_a2582f8409ae69733c2471793710c23ea}
+
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{}typedef struct \hyperlink{structheap}{heap} \hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t}\label{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}
+
+\begin{DoxyCompactList}\small\item\em The opaque data type holding all the heap data. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$ \hyperlink{gc_8h_ab63ddbc8bdc711c2879417b0faafe530}{h\+\_\+init} (size\+\_\+t bytes, bool unsafe\+\_\+stack, float gc\+\_\+threshold)
+\begin{DoxyCompactList}\small\item\em Create a new heap with {\ttfamily bytes} total size. \end{DoxyCompactList}\item 
+void \hyperlink{gc_8h_a2a33b69784524edff57993a64c1c6616}{h\+\_\+delete} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h)
+\begin{DoxyCompactList}\small\item\em Delete a heap. \end{DoxyCompactList}\item 
+void \hyperlink{gc_8h_aee911cf9474117bcbb06c53aed4f9288}{h\+\_\+delete\+\_\+dbg} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, void $\ast$dbg\+\_\+value)
+\begin{DoxyCompactList}\small\item\em Delete a heap and trace, killing off stack pointers. \end{DoxyCompactList}\item 
+void $\ast$ \hyperlink{gc_8h_afc09bd012e52f4e533e798077e2bfd6d}{h\+\_\+alloc\+\_\+struct} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, char $\ast$layout)
+\begin{DoxyCompactList}\small\item\em Allocate a new object on a heap with a given format string. \end{DoxyCompactList}\item 
+void $\ast$ \hyperlink{gc_8h_a7135f8d1dfd9ce92bec0db717334c0ee}{h\+\_\+alloc\+\_\+data} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, size\+\_\+t bytes)
+\begin{DoxyCompactList}\small\item\em Allocate a new object on a heap with a given size. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{gc_8h_ad7dc4368eb1d50f161d20c18d83d5610}{h\+\_\+gc} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h)
+\begin{DoxyCompactList}\small\item\em Manually trigger garbage collection. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{gc_8h_a348b1f7af1f7cbe8ba83820fe503a0b4}{h\+\_\+gc\+\_\+dbg} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, bool unsafe\+\_\+stack)
+\begin{DoxyCompactList}\small\item\em Manually trigger garbage collection with the ability to override the setting for how stack pointers are treated. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{gc_8h_ae5a02e78fb87061975e8b509375d7eb8}{h\+\_\+avail} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h)
+\begin{DoxyCompactList}\small\item\em Returns the available free memory. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{gc_8h_adf4518289fe36bdd40c5e80362063fd4}{h\+\_\+used} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h)
+\begin{DoxyCompactList}\small\item\em Returns the bytes currently in use in a heap. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{gc_8h_ab6dea3c2f2058c8dd2d172a109634fec}{h\+\_\+size} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h)
+\begin{DoxyCompactList}\small\item\em Return the byte size of the heap. \end{DoxyCompactList}\item 
+char $\ast$ \hyperlink{gc_8h_abf464a743697b9f7c3e913be239e9f9d}{h\+\_\+strdup} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, char $\ast$str)
+\begin{DoxyCompactList}\small\item\em Return a copy of a pointer, that is alloced on our heap. $\ast$. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A library for heap allocation with automatic garbage collection. 
+
+\begin{DoxyAuthor}{Author}
+Daniel Agstrand 
+
+Henrik Bergendal 
+
+Adam Inersjo 
+
+Maria Lindqvist 
+
+Simon Pellgard 
+
+Robert Rosborg 
+\end{DoxyAuthor}
+
+
+\subsection{Function Documentation}
+\hypertarget{gc_8h_a7135f8d1dfd9ce92bec0db717334c0ee}{}\index{gc.\+h@{gc.\+h}!h\+\_\+alloc\+\_\+data@{h\+\_\+alloc\+\_\+data}}
+\index{h\+\_\+alloc\+\_\+data@{h\+\_\+alloc\+\_\+data}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+alloc\+\_\+data}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ h\+\_\+alloc\+\_\+data (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h, }
+\item[{size\+\_\+t}]{bytes}
+\end{DoxyParamCaption}
+)}\label{gc_8h_a7135f8d1dfd9ce92bec0db717334c0ee}
+
+
+Allocate a new object on a heap with a given size. 
+
+Objects allocated with this function will {\itshape not} be further traced for pointers.
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap \\
+\hline
+{\em bytes} & the size in bytes \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the newly allocated object 
+\end{DoxyReturn}
+\hypertarget{gc_8h_afc09bd012e52f4e533e798077e2bfd6d}{}\index{gc.\+h@{gc.\+h}!h\+\_\+alloc\+\_\+struct@{h\+\_\+alloc\+\_\+struct}}
+\index{h\+\_\+alloc\+\_\+struct@{h\+\_\+alloc\+\_\+struct}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+alloc\+\_\+struct}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ h\+\_\+alloc\+\_\+struct (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h, }
+\item[{char $\ast$}]{layout}
+\end{DoxyParamCaption}
+)}\label{gc_8h_afc09bd012e52f4e533e798077e2bfd6d}
+
+
+Allocate a new object on a heap with a given format string. 
+
+Valid characters in format strings are\+:
+\begin{DoxyItemize}
+\item \textquotesingle{}i\textquotesingle{} -- for sizeof(int) bytes \textquotesingle{}raw\textquotesingle{} data
+\item \textquotesingle{}l\textquotesingle{} -- for sizeof(long) bytes \textquotesingle{}raw\textquotesingle{} data
+\item \textquotesingle{}f\textquotesingle{} -- for sizeof(float) bytes \textquotesingle{}raw\textquotesingle{} data
+\item \textquotesingle{}c\textquotesingle{} -- for sizeof(char) bytes \textquotesingle{}raw\textquotesingle{} data
+\item \textquotesingle{}d\textquotesingle{} -- for sizeof(double) bytes \textquotesingle{}raw\textquotesingle{} data
+\item \textquotesingle{}$\ast$\textquotesingle{} -- for a sizeof(void $\ast$) bytes pointer value
+\item \textquotesingle{}\textbackslash{}0\textquotesingle{} -- null-\/character terminates the format string
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap \\
+\hline
+{\em layout} & the format string \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the newly allocated object
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+the heap does {\itshape not} retain an alias to layout. 
+\end{DoxyNote}
+\hypertarget{gc_8h_ae5a02e78fb87061975e8b509375d7eb8}{}\index{gc.\+h@{gc.\+h}!h\+\_\+avail@{h\+\_\+avail}}
+\index{h\+\_\+avail@{h\+\_\+avail}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+avail}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t h\+\_\+avail (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h}
+\end{DoxyParamCaption}
+)}\label{gc_8h_ae5a02e78fb87061975e8b509375d7eb8}
+
+
+Returns the available free memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the available free memory. 
+\end{DoxyReturn}
+\hypertarget{gc_8h_a2a33b69784524edff57993a64c1c6616}{}\index{gc.\+h@{gc.\+h}!h\+\_\+delete@{h\+\_\+delete}}
+\index{h\+\_\+delete@{h\+\_\+delete}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+delete}]{\setlength{\rightskip}{0pt plus 5cm}void h\+\_\+delete (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h}
+\end{DoxyParamCaption}
+)}\label{gc_8h_a2a33b69784524edff57993a64c1c6616}
+
+
+Delete a heap. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap \\
+\hline
+\end{DoxyParams}
+\hypertarget{gc_8h_aee911cf9474117bcbb06c53aed4f9288}{}\index{gc.\+h@{gc.\+h}!h\+\_\+delete\+\_\+dbg@{h\+\_\+delete\+\_\+dbg}}
+\index{h\+\_\+delete\+\_\+dbg@{h\+\_\+delete\+\_\+dbg}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+delete\+\_\+dbg}]{\setlength{\rightskip}{0pt plus 5cm}void h\+\_\+delete\+\_\+dbg (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h, }
+\item[{void $\ast$}]{dbg\+\_\+value}
+\end{DoxyParamCaption}
+)}\label{gc_8h_aee911cf9474117bcbb06c53aed4f9288}
+
+
+Delete a heap and trace, killing off stack pointers. 
+
+Only valid pointers will be replaced. A valid pointer is a pointer with the address of an allocated space in {\ttfamily h}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap \\
+\hline
+{\em dbg\+\_\+value} & a value to be written into every valid pointer into {\ttfamily h} on the stack \\
+\hline
+\end{DoxyParams}
+\hypertarget{gc_8h_ad7dc4368eb1d50f161d20c18d83d5610}{}\index{gc.\+h@{gc.\+h}!h\+\_\+gc@{h\+\_\+gc}}
+\index{h\+\_\+gc@{h\+\_\+gc}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+gc}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t h\+\_\+gc (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h}
+\end{DoxyParamCaption}
+)}\label{gc_8h_ad7dc4368eb1d50f161d20c18d83d5610}
+
+
+Manually trigger garbage collection. 
+
+Garbage collection is otherwise run when an allocation is impossible in the available consecutive free memory.
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the number of bytes collected 
+\end{DoxyReturn}
+\hypertarget{gc_8h_a348b1f7af1f7cbe8ba83820fe503a0b4}{}\index{gc.\+h@{gc.\+h}!h\+\_\+gc\+\_\+dbg@{h\+\_\+gc\+\_\+dbg}}
+\index{h\+\_\+gc\+\_\+dbg@{h\+\_\+gc\+\_\+dbg}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+gc\+\_\+dbg}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t h\+\_\+gc\+\_\+dbg (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h, }
+\item[{bool}]{unsafe\+\_\+stack}
+\end{DoxyParamCaption}
+)}\label{gc_8h_a348b1f7af1f7cbe8ba83820fe503a0b4}
+
+
+Manually trigger garbage collection with the ability to override the setting for how stack pointers are treated. 
+
+Garbage collection is otherwise run when an allocation is impossible in the available consecutive free memory.
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap \\
+\hline
+{\em unsafe\+\_\+stack} & true if pointers on the stack are to be considered unsafe pointers \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the number of bytes collected 
+\end{DoxyReturn}
+\hypertarget{gc_8h_ab63ddbc8bdc711c2879417b0faafe530}{}\index{gc.\+h@{gc.\+h}!h\+\_\+init@{h\+\_\+init}}
+\index{h\+\_\+init@{h\+\_\+init}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf heap\+\_\+t}$\ast$ h\+\_\+init (
+\begin{DoxyParamCaption}
+\item[{size\+\_\+t}]{bytes, }
+\item[{bool}]{unsafe\+\_\+stack, }
+\item[{float}]{gc\+\_\+threshold}
+\end{DoxyParamCaption}
+)}\label{gc_8h_ab63ddbc8bdc711c2879417b0faafe530}
+
+
+Create a new heap with {\ttfamily bytes} total size. 
+
+The size available for allocation will be strictly less than {\ttfamily bytes} because of metadata and other internal data.
+
+
+\begin{DoxyParams}{Parameters}
+{\em bytes} & the total size of the heap in bytes \\
+\hline
+{\em unsafe\+\_\+stack} & true if pointers on the stack are to be considered unsafe pointers \\
+\hline
+{\em gc\+\_\+threshold} & the memory pressure at which gc should be triggered (1.\+0 = full memory) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the new heap or N\+U\+L\+L if memory cannot be allocated 
+\end{DoxyReturn}
+\hypertarget{gc_8h_ab6dea3c2f2058c8dd2d172a109634fec}{}\index{gc.\+h@{gc.\+h}!h\+\_\+size@{h\+\_\+size}}
+\index{h\+\_\+size@{h\+\_\+size}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+size}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t h\+\_\+size (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h}
+\end{DoxyParamCaption}
+)}\label{gc_8h_ab6dea3c2f2058c8dd2d172a109634fec}
+
+
+Return the byte size of the heap. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the byte size of the heap. 
+\end{DoxyReturn}
+\hypertarget{gc_8h_abf464a743697b9f7c3e913be239e9f9d}{}\index{gc.\+h@{gc.\+h}!h\+\_\+strdup@{h\+\_\+strdup}}
+\index{h\+\_\+strdup@{h\+\_\+strdup}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+strdup}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ h\+\_\+strdup (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h, }
+\item[{char $\ast$}]{str}
+\end{DoxyParamCaption}
+)}\label{gc_8h_abf464a743697b9f7c3e913be239e9f9d}
+
+
+Return a copy of a pointer, that is alloced on our heap. $\ast$. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap \\
+\hline
+{\em str} & the pointer to the string \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The copied pointer 
+\end{DoxyReturn}
+\hypertarget{gc_8h_adf4518289fe36bdd40c5e80362063fd4}{}\index{gc.\+h@{gc.\+h}!h\+\_\+used@{h\+\_\+used}}
+\index{h\+\_\+used@{h\+\_\+used}!gc.\+h@{gc.\+h}}
+\subsubsection[{h\+\_\+used}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t h\+\_\+used (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h}
+\end{DoxyParamCaption}
+)}\label{gc_8h_adf4518289fe36bdd40c5e80362063fd4}
+
+
+Returns the bytes currently in use in a heap. 
+
+This includes any meta-\/data specific to user allocated structures and any internal padding.
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the bytes currently in use by user structures. 
+\end{DoxyReturn}

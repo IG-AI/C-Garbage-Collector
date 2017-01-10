@@ -1,0 +1,362 @@
+\hypertarget{header_8h}{}\section{header.\+h File Reference}
+\label{header_8h}\index{header.\+h@{header.\+h}}
+
+
+A module for creating headers (meta data) for data and structures.  
+
+
+{\ttfamily \#include $<$stdlib.\+h$>$}\\*
+{\ttfamily \#include $<$stdbool.\+h$>$}\\*
+{\ttfamily \#include \char`\"{}gc.\+h\char`\"{}}\\*
+Include dependency graph for header.\+h\+:
+% FIG 0
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{header_8h_ac6c34d4e6fbdfd05e85e560ba058f245}{}typedef enum \hyperlink{header_8h_ad7f9678fbffaef587ba680031317a4f9}{header\+\_\+type} {\bfseries header\+\_\+type}\label{header_8h_ac6c34d4e6fbdfd05e85e560ba058f245}
+
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{header_8h_ad7f9678fbffaef587ba680031317a4f9}{header\+\_\+type} \{ \hyperlink{header_8h_ad7f9678fbffaef587ba680031317a4f9aa95b1e6d1fcdbcc145322e678f06f8dd}{R\+A\+W\+\_\+\+D\+A\+T\+A}, 
+\hyperlink{header_8h_ad7f9678fbffaef587ba680031317a4f9a5f27f204111038192ec7c365d8a6a924}{S\+T\+R\+U\+C\+T\+\_\+\+R\+E\+P}, 
+\hyperlink{header_8h_ad7f9678fbffaef587ba680031317a4f9aa0a820259add1d97da94e447ccc2d254}{F\+O\+R\+W\+A\+R\+D\+I\+N\+G\+\_\+\+A\+D\+D\+R}, 
+\hyperlink{header_8h_ad7f9678fbffaef587ba680031317a4f9acfe24a7b308a82835c8a9a9a89bc4ca2}{N\+O\+T\+H\+I\+N\+G}
+ \}
+\begin{DoxyCompactList}\small\item\em The enumeration of different types a header can have. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void $\ast$ \hyperlink{header_8h_a0b69fe045395358205ac6540a0c7b287}{create\+\_\+struct\+\_\+header} (\hyperlink{gc_8h_ad3bb09826584eab4757c6cd2f988e7d6}{heap\+\_\+t} $\ast$h, char $\ast$format\+\_\+string, void $\ast$heap\+\_\+ptr)
+\begin{DoxyCompactList}\small\item\em Creates a header and saves it on the heap. \end{DoxyCompactList}\item 
+void $\ast$ \hyperlink{header_8h_a2f4d174441c9fb8f2b62fb935256d912}{create\+\_\+data\+\_\+header} (size\+\_\+t bytes, void $\ast$heap\+\_\+ptr)
+\begin{DoxyCompactList}\small\item\em Creates a header and saves it on the heap. \end{DoxyCompactList}\item 
+\hyperlink{header_8h_ad7f9678fbffaef587ba680031317a4f9}{header\+\_\+type} \hyperlink{header_8h_a97a169b95fba1489a4810f5c9780dd56}{get\+\_\+header\+\_\+type} (void $\ast$)
+\begin{DoxyCompactList}\small\item\em Gets the type of header belonging to the data. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{header_8h_af484c9f937b9f91148b44e4801263ef0}{get\+\_\+number\+\_\+of\+\_\+pointers\+\_\+in\+\_\+struct} (void $\ast$structure)
+\begin{DoxyCompactList}\small\item\em Get the number of pointers inside {\ttfamily structure}. \end{DoxyCompactList}\item 
+bool \hyperlink{header_8h_a57105fa91cf9ef5bb4e88784675ccd96}{get\+\_\+pointers\+\_\+in\+\_\+struct} (void $\ast$structure, void $\ast$$\ast$array\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Finds all pointers inside {\ttfamily structure} and places pointers to them in {\ttfamily array}. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{header_8h_ad1db70c039d8ccde85eb4c0ce43658b1}{get\+\_\+struct\+\_\+size} (char $\ast$format\+\_\+string)
+\begin{DoxyCompactList}\small\item\em Calculates the size needed to store the structure represented by {\ttfamily format\+\_\+string}, including a header. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{header_8h_a697872eb81c027c321904e10fabef050}{get\+\_\+data\+\_\+size} (size\+\_\+t bytes)
+\begin{DoxyCompactList}\small\item\em Calculates the size needed to store data of size {\ttfamily bytes} with a header. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{header_8h_a6951d82f26c04c88353d6368a14c20f8}{get\+\_\+existing\+\_\+size} (void $\ast$data)
+\begin{DoxyCompactList}\small\item\em Get the size of data having a header. \end{DoxyCompactList}\item 
+size\+\_\+t \hyperlink{header_8h_a27e0c278fd25a3520b2cc7755bdffaa4}{get\+\_\+existing\+\_\+data\+\_\+size} (void $\ast$data)
+\begin{DoxyCompactList}\small\item\em Get the size of data having a header. \end{DoxyCompactList}\item 
+void $\ast$ \hyperlink{header_8h_a9969f857712ff16735c160df84a711e0}{copy\+\_\+header} (void $\ast$data, void $\ast$heap\+\_\+ptr)
+\begin{DoxyCompactList}\small\item\em Creates a copy of a header and saves the copy on the heap. \end{DoxyCompactList}\item 
+bool \hyperlink{header_8h_af104ce328ab98be35be16611d39a0fe6}{forward\+\_\+header} (void $\ast$data, void $\ast$new\+\_\+data)
+\begin{DoxyCompactList}\small\item\em forwards a header \end{DoxyCompactList}\item 
+void $\ast$ \hyperlink{header_8h_a87def239dc6c8bda4dc44defc4d895de}{get\+\_\+forwarding\+\_\+address} (void $\ast$data)
+\begin{DoxyCompactList}\small\item\em Gets the address that data has been forwarded to. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A module for creating headers (meta data) for data and structures. 
+
+\begin{DoxyAuthor}{Author}
+Daniel Agstrand 
+
+Henrik Bergendal 
+
+Adam Inersjo 
+
+Maria Lindqvist 
+
+Simon Pellgard 
+
+Robert Rosborg 
+\end{DoxyAuthor}
+
+
+\subsection{Enumeration Type Documentation}
+\hypertarget{header_8h_ad7f9678fbffaef587ba680031317a4f9}{}\index{header.\+h@{header.\+h}!header\+\_\+type@{header\+\_\+type}}
+\index{header\+\_\+type@{header\+\_\+type}!header.\+h@{header.\+h}}
+\subsubsection[{header\+\_\+type}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf header\+\_\+type}}\label{header_8h_ad7f9678fbffaef587ba680031317a4f9}
+
+
+The enumeration of different types a header can have. 
+
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{R\+A\+W\+\_\+\+D\+A\+T\+A@{R\+A\+W\+\_\+\+D\+A\+T\+A}!header.\+h@{header.\+h}}\index{header.\+h@{header.\+h}!R\+A\+W\+\_\+\+D\+A\+T\+A@{R\+A\+W\+\_\+\+D\+A\+T\+A}}\item[{\em 
+\hypertarget{header_8h_ad7f9678fbffaef587ba680031317a4f9aa95b1e6d1fcdbcc145322e678f06f8dd}{}R\+A\+W\+\_\+\+D\+A\+T\+A\label{header_8h_ad7f9678fbffaef587ba680031317a4f9aa95b1e6d1fcdbcc145322e678f06f8dd}
+}]The header is followed by raw data \index{S\+T\+R\+U\+C\+T\+\_\+\+R\+E\+P@{S\+T\+R\+U\+C\+T\+\_\+\+R\+E\+P}!header.\+h@{header.\+h}}\index{header.\+h@{header.\+h}!S\+T\+R\+U\+C\+T\+\_\+\+R\+E\+P@{S\+T\+R\+U\+C\+T\+\_\+\+R\+E\+P}}\item[{\em 
+\hypertarget{header_8h_ad7f9678fbffaef587ba680031317a4f9a5f27f204111038192ec7c365d8a6a924}{}S\+T\+R\+U\+C\+T\+\_\+\+R\+E\+P\label{header_8h_ad7f9678fbffaef587ba680031317a4f9a5f27f204111038192ec7c365d8a6a924}
+}]The header is followed by data containing pointers \index{F\+O\+R\+W\+A\+R\+D\+I\+N\+G\+\_\+\+A\+D\+D\+R@{F\+O\+R\+W\+A\+R\+D\+I\+N\+G\+\_\+\+A\+D\+D\+R}!header.\+h@{header.\+h}}\index{header.\+h@{header.\+h}!F\+O\+R\+W\+A\+R\+D\+I\+N\+G\+\_\+\+A\+D\+D\+R@{F\+O\+R\+W\+A\+R\+D\+I\+N\+G\+\_\+\+A\+D\+D\+R}}\item[{\em 
+\hypertarget{header_8h_ad7f9678fbffaef587ba680031317a4f9aa0a820259add1d97da94e447ccc2d254}{}F\+O\+R\+W\+A\+R\+D\+I\+N\+G\+\_\+\+A\+D\+D\+R\label{header_8h_ad7f9678fbffaef587ba680031317a4f9aa0a820259add1d97da94e447ccc2d254}
+}]The header contains information about forwarded data \index{N\+O\+T\+H\+I\+N\+G@{N\+O\+T\+H\+I\+N\+G}!header.\+h@{header.\+h}}\index{header.\+h@{header.\+h}!N\+O\+T\+H\+I\+N\+G@{N\+O\+T\+H\+I\+N\+G}}\item[{\em 
+\hypertarget{header_8h_ad7f9678fbffaef587ba680031317a4f9acfe24a7b308a82835c8a9a9a89bc4ca2}{}N\+O\+T\+H\+I\+N\+G\label{header_8h_ad7f9678fbffaef587ba680031317a4f9acfe24a7b308a82835c8a9a9a89bc4ca2}
+}]There is no header \end{description}
+\end{Desc}
+
+
+\subsection{Function Documentation}
+\hypertarget{header_8h_a9969f857712ff16735c160df84a711e0}{}\index{header.\+h@{header.\+h}!copy\+\_\+header@{copy\+\_\+header}}
+\index{copy\+\_\+header@{copy\+\_\+header}!header.\+h@{header.\+h}}
+\subsubsection[{copy\+\_\+header}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ copy\+\_\+header (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{data, }
+\item[{void $\ast$}]{heap\+\_\+ptr}
+\end{DoxyParamCaption}
+)}\label{header_8h_a9969f857712ff16735c160df84a711e0}
+
+
+Creates a copy of a header and saves the copy on the heap. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & the data containing the header to be copied \\
+\hline
+{\em heap\+\_\+ptr} & the place on the heap where the header will be saved \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to where the data should be placed N\+U\+L\+L if {\ttfamily data} is N\+U\+L\+L or {\ttfamily heap\+\_\+ptr} is N\+U\+L\+L 
+\end{DoxyReturn}
+\hypertarget{header_8h_a2f4d174441c9fb8f2b62fb935256d912}{}\index{header.\+h@{header.\+h}!create\+\_\+data\+\_\+header@{create\+\_\+data\+\_\+header}}
+\index{create\+\_\+data\+\_\+header@{create\+\_\+data\+\_\+header}!header.\+h@{header.\+h}}
+\subsubsection[{create\+\_\+data\+\_\+header}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ create\+\_\+data\+\_\+header (
+\begin{DoxyParamCaption}
+\item[{size\+\_\+t}]{bytes, }
+\item[{void $\ast$}]{heap\+\_\+ptr}
+\end{DoxyParamCaption}
+)}\label{header_8h_a2f4d174441c9fb8f2b62fb935256d912}
+
+
+Creates a header and saves it on the heap. 
+
+This function is called when the header doesn\textquotesingle{}t have to contain information about pointers existing inside data. The header created will be of the type R\+A\+W\+\_\+\+D\+A\+T\+A
+
+
+\begin{DoxyParams}{Parameters}
+{\em bytes} & the size in bytes \\
+\hline
+{\em heap\+\_\+ptr} & the place on the heap where the header will be saved \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to where the data should be placed N\+U\+L\+L if {\ttfamily bytes} is zero or {\ttfamily heap\+\_\+ptr} is N\+U\+L\+L 
+\end{DoxyReturn}
+\hypertarget{header_8h_a0b69fe045395358205ac6540a0c7b287}{}\index{header.\+h@{header.\+h}!create\+\_\+struct\+\_\+header@{create\+\_\+struct\+\_\+header}}
+\index{create\+\_\+struct\+\_\+header@{create\+\_\+struct\+\_\+header}!header.\+h@{header.\+h}}
+\subsubsection[{create\+\_\+struct\+\_\+header}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ create\+\_\+struct\+\_\+header (
+\begin{DoxyParamCaption}
+\item[{{\bf heap\+\_\+t} $\ast$}]{h, }
+\item[{char $\ast$}]{format\+\_\+string, }
+\item[{void $\ast$}]{heap\+\_\+ptr}
+\end{DoxyParamCaption}
+)}\label{header_8h_a0b69fe045395358205ac6540a0c7b287}
+
+
+Creates a header and saves it on the heap. 
+
+This function is called when the header is to be created for data represented by a format string. If there are pointers in the format string the header created will be of the type S\+T\+R\+U\+C\+T\+\_\+\+R\+E\+P, else it will be converted into R\+A\+W\+\_\+\+D\+A\+T\+A.
+
+The {\ttfamily format\+\_\+string} will be copied and doesn\textquotesingle{}t need to be placed on the heap before hand.
+
+
+\begin{DoxyParams}{Parameters}
+{\em h} & the heap to allocate {\ttfamily format\+\_\+string} in if it is too big \\
+\hline
+{\em format\+\_\+string} & the string representation of the structure to create a header for \\
+\hline
+{\em heap\+\_\+ptr} & the place on the heap where the header will be saved \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to where the data should be placed 
+\end{DoxyReturn}
+\hypertarget{header_8h_af104ce328ab98be35be16611d39a0fe6}{}\index{header.\+h@{header.\+h}!forward\+\_\+header@{forward\+\_\+header}}
+\index{forward\+\_\+header@{forward\+\_\+header}!header.\+h@{header.\+h}}
+\subsubsection[{forward\+\_\+header}]{\setlength{\rightskip}{0pt plus 5cm}bool forward\+\_\+header (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{data, }
+\item[{void $\ast$}]{new\+\_\+data}
+\end{DoxyParamCaption}
+)}\label{header_8h_af104ce328ab98be35be16611d39a0fe6}
+
+
+forwards a header 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & the data containing the header to be forwarded \\
+\hline
+{\em new\+\_\+data} & the data the header will be forwarded to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the forwarding was successfull, false otherwise 
+\end{DoxyReturn}
+\hypertarget{header_8h_a697872eb81c027c321904e10fabef050}{}\index{header.\+h@{header.\+h}!get\+\_\+data\+\_\+size@{get\+\_\+data\+\_\+size}}
+\index{get\+\_\+data\+\_\+size@{get\+\_\+data\+\_\+size}!header.\+h@{header.\+h}}
+\subsubsection[{get\+\_\+data\+\_\+size}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t get\+\_\+data\+\_\+size (
+\begin{DoxyParamCaption}
+\item[{size\+\_\+t}]{bytes}
+\end{DoxyParamCaption}
+)}\label{header_8h_a697872eb81c027c321904e10fabef050}
+
+
+Calculates the size needed to store data of size {\ttfamily bytes} with a header. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em bytes} & the size of the data \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the size needed for storing the data with a header. If {\ttfamily bytes} combined with the size of the header extends maximum size for size\+\_\+t the function will return 0. Zero is also returned when {\ttfamily bytes} is 0. 
+\end{DoxyReturn}
+\hypertarget{header_8h_a27e0c278fd25a3520b2cc7755bdffaa4}{}\index{header.\+h@{header.\+h}!get\+\_\+existing\+\_\+data\+\_\+size@{get\+\_\+existing\+\_\+data\+\_\+size}}
+\index{get\+\_\+existing\+\_\+data\+\_\+size@{get\+\_\+existing\+\_\+data\+\_\+size}!header.\+h@{header.\+h}}
+\subsubsection[{get\+\_\+existing\+\_\+data\+\_\+size}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t get\+\_\+existing\+\_\+data\+\_\+size (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{data}
+\end{DoxyParamCaption}
+)}\label{header_8h_a27e0c278fd25a3520b2cc7755bdffaa4}
+
+
+Get the size of data having a header. 
+
+The size of the header itself is N\+O\+T included in the result
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & pointer to the data to get size of \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+size of data 
+\end{DoxyReturn}
+\hypertarget{header_8h_a6951d82f26c04c88353d6368a14c20f8}{}\index{header.\+h@{header.\+h}!get\+\_\+existing\+\_\+size@{get\+\_\+existing\+\_\+size}}
+\index{get\+\_\+existing\+\_\+size@{get\+\_\+existing\+\_\+size}!header.\+h@{header.\+h}}
+\subsubsection[{get\+\_\+existing\+\_\+size}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t get\+\_\+existing\+\_\+size (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{data}
+\end{DoxyParamCaption}
+)}\label{header_8h_a6951d82f26c04c88353d6368a14c20f8}
+
+
+Get the size of data having a header. 
+
+The size of the header itself is included in the result
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & pointer to the data to get size of \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+size of data combined with header 
+\end{DoxyReturn}
+\hypertarget{header_8h_a87def239dc6c8bda4dc44defc4d895de}{}\index{header.\+h@{header.\+h}!get\+\_\+forwarding\+\_\+address@{get\+\_\+forwarding\+\_\+address}}
+\index{get\+\_\+forwarding\+\_\+address@{get\+\_\+forwarding\+\_\+address}!header.\+h@{header.\+h}}
+\subsubsection[{get\+\_\+forwarding\+\_\+address}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ get\+\_\+forwarding\+\_\+address (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{data}
+\end{DoxyParamCaption}
+)}\label{header_8h_a87def239dc6c8bda4dc44defc4d895de}
+
+
+Gets the address that data has been forwarded to. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & the data containing the header to get forwarding address from \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the address where {\ttfamily data} has been forwarded to N\+U\+L\+L if {\ttfamily data} isn\textquotesingle{}t of type F\+O\+R\+W\+A\+R\+D\+I\+N\+G\+\_\+\+A\+D\+D\+R 
+\end{DoxyReturn}
+\hypertarget{header_8h_a97a169b95fba1489a4810f5c9780dd56}{}\index{header.\+h@{header.\+h}!get\+\_\+header\+\_\+type@{get\+\_\+header\+\_\+type}}
+\index{get\+\_\+header\+\_\+type@{get\+\_\+header\+\_\+type}!header.\+h@{header.\+h}}
+\subsubsection[{get\+\_\+header\+\_\+type}]{\setlength{\rightskip}{0pt plus 5cm}{\bf header\+\_\+type} get\+\_\+header\+\_\+type (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{}
+\end{DoxyParamCaption}
+)}\label{header_8h_a97a169b95fba1489a4810f5c9780dd56}
+
+
+Gets the type of header belonging to the data. 
+
+The available types are F\+O\+R\+W\+A\+R\+D\+I\+N\+G\+\_\+\+A\+D\+D\+R, S\+T\+R\+U\+C\+T\+\_\+\+R\+E\+P and R\+A\+W\+\_\+\+D\+A\+T\+A.
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & the data to analyze \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the type of header beloning to {\ttfamily data}, N\+O\+T\+H\+I\+N\+G if {\ttfamily data} is N\+U\+L\+L 
+\end{DoxyReturn}
+\hypertarget{header_8h_af484c9f937b9f91148b44e4801263ef0}{}\index{header.\+h@{header.\+h}!get\+\_\+number\+\_\+of\+\_\+pointers\+\_\+in\+\_\+struct@{get\+\_\+number\+\_\+of\+\_\+pointers\+\_\+in\+\_\+struct}}
+\index{get\+\_\+number\+\_\+of\+\_\+pointers\+\_\+in\+\_\+struct@{get\+\_\+number\+\_\+of\+\_\+pointers\+\_\+in\+\_\+struct}!header.\+h@{header.\+h}}
+\subsubsection[{get\+\_\+number\+\_\+of\+\_\+pointers\+\_\+in\+\_\+struct}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t get\+\_\+number\+\_\+of\+\_\+pointers\+\_\+in\+\_\+struct (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{structure}
+\end{DoxyParamCaption}
+)}\label{header_8h_af484c9f937b9f91148b44e4801263ef0}
+
+
+Get the number of pointers inside {\ttfamily structure}. 
+
+The function will only return valid information if a struct\+\_\+header has been created and placed just before the struct in the heap.
+
+
+\begin{DoxyParams}{Parameters}
+{\em structure} & the structure to look for pointers in \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+number of pointers found in {\ttfamily structure} if its header has the type S\+T\+R\+U\+C\+T\+\_\+\+R\+E\+P. Otherwise it will return 0 
+\end{DoxyReturn}
+\hypertarget{header_8h_a57105fa91cf9ef5bb4e88784675ccd96}{}\index{header.\+h@{header.\+h}!get\+\_\+pointers\+\_\+in\+\_\+struct@{get\+\_\+pointers\+\_\+in\+\_\+struct}}
+\index{get\+\_\+pointers\+\_\+in\+\_\+struct@{get\+\_\+pointers\+\_\+in\+\_\+struct}!header.\+h@{header.\+h}}
+\subsubsection[{get\+\_\+pointers\+\_\+in\+\_\+struct}]{\setlength{\rightskip}{0pt plus 5cm}bool get\+\_\+pointers\+\_\+in\+\_\+struct (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{structure, }
+\item[{void $\ast$$\ast$}]{array\mbox{[}$\,$\mbox{]}}
+\end{DoxyParamCaption}
+)}\label{header_8h_a57105fa91cf9ef5bb4e88784675ccd96}
+
+
+Finds all pointers inside {\ttfamily structure} and places pointers to them in {\ttfamily array}. 
+
+The function will only return valid information if a struct\+\_\+header has been created and placed just before the struct in the heap.
+
+{\ttfamily structure} has to have the header type Structure\+\_\+rep. {\ttfamily array} must be of size get\+\_\+numer\+\_\+of\+\_\+pointers\+\_\+in\+\_\+structure({\ttfamily structure}).
+
+
+\begin{DoxyParams}{Parameters}
+{\em structure} & the structure to look for pointers is \\
+\hline
+{\em array} & the array to place pointers to the pointers found in header of {\ttfamily structure} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if pointers were found and placed in {\ttfamily array}, false otherwise 
+\end{DoxyReturn}
+\hypertarget{header_8h_ad1db70c039d8ccde85eb4c0ce43658b1}{}\index{header.\+h@{header.\+h}!get\+\_\+struct\+\_\+size@{get\+\_\+struct\+\_\+size}}
+\index{get\+\_\+struct\+\_\+size@{get\+\_\+struct\+\_\+size}!header.\+h@{header.\+h}}
+\subsubsection[{get\+\_\+struct\+\_\+size}]{\setlength{\rightskip}{0pt plus 5cm}size\+\_\+t get\+\_\+struct\+\_\+size (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{format\+\_\+string}
+\end{DoxyParamCaption}
+)}\label{header_8h_ad1db70c039d8ccde85eb4c0ce43658b1}
+
+
+Calculates the size needed to store the structure represented by {\ttfamily format\+\_\+string}, including a header. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em format\+\_\+string} & the string representation of a structure \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the size needed for the structure 
+\end{DoxyReturn}
