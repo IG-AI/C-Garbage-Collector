@@ -1,0 +1,139 @@
+Function 'h_strdup'
+Lines executed:0.00% of 7
+
+Function 'h_size'
+Lines executed:100.00% of 3
+
+Function 'h_used'
+Lines executed:100.00% of 7
+
+Function 'h_avail'
+Lines executed:100.00% of 7
+
+Function 'h_gc_dbg'
+Lines executed:100.00% of 30
+
+Function 'set_unsafe_pages_to_active'
+Lines executed:100.00% of 5
+
+Function 'set_unsafe_pages'
+Lines executed:100.00% of 7
+
+Function 'h_gc'
+Lines executed:100.00% of 2
+
+Function 'forward_internal_array_ptrs_with_offset'
+Lines executed:100.00% of 8
+
+Function 'set_active_to_transition'
+Lines executed:100.00% of 5
+
+Function 'h_alloc_raw'
+Lines executed:100.00% of 25
+
+Function 'h_alloc_data'
+Lines executed:100.00% of 9
+
+Function 'h_alloc_struct'
+Lines executed:100.00% of 9
+
+Function 'h_alloc'
+Lines executed:96.15% of 26
+
+Function 'run_gc_if_above_threshold'
+Lines executed:75.00% of 8
+
+Function 'find_first_passive_page'
+Lines executed:80.00% of 5
+
+Function 'number_of_passive_pages'
+Lines executed:100.00% of 6
+
+Function 'find_next_active_page'
+Lines executed:100.00% of 5
+
+Function 'get_ptr_page'
+Lines executed:100.00% of 2
+
+Function 'get_ptrs_from_stack'
+Lines executed:100.00% of 13
+
+Function 'get_number_of_ptrs_in_stack'
+Lines executed:100.00% of 12
+
+Function 'get_active_ptrs'
+Lines executed:100.00% of 8
+
+Function 'get_active_heap_ptrs_rec'
+Lines executed:100.00% of 20
+
+Function 'get_number_of_active_ptrs'
+Lines executed:100.00% of 14
+
+Function 'get_number_of_active_heap_ptrs_rec'
+Lines executed:100.00% of 16
+
+Function 'reset_ptrs_to_not_found_array'
+Lines executed:100.00% of 6
+
+Function 'reset_ptrs_to_not_found'
+Lines executed:100.00% of 11
+
+Function 'reset_ptrs_to_not_found_heap_rec'
+Lines executed:100.00% of 13
+
+Function 'h_delete_dbg'
+Lines executed:100.00% of 11
+
+Function 'h_delete'
+Lines executed:100.00% of 3
+
+Function 'heap_get_number_of_pages'
+Lines executed:0.00% of 2
+
+Function 'heap_get_size'
+Lines executed:0.00% of 2
+
+Function 'get_memory'
+Lines executed:0.00% of 2
+
+Function 'h_init'
+Lines executed:100.00% of 25
+
+Function 'page_set_type'
+Lines executed:100.00% of 3
+
+Function 'page_get_type'
+Lines executed:100.00% of 2
+
+Function 'page_get_used'
+Lines executed:100.00% of 2
+
+Function 'page_get_avail'
+Lines executed:100.00% of 2
+
+Function 'page_get_size'
+Lines executed:0.00% of 2
+
+Function 'page_reset'
+Lines executed:100.00% of 3
+
+Function 'page_move_bump'
+Lines executed:100.00% of 3
+
+Function 'page_get_bump'
+Lines executed:100.00% of 2
+
+Function 'page_get_end'
+Lines executed:0.00% of 2
+
+Function 'page_get_start'
+Lines executed:0.00% of 2
+
+Function 'create_pages'
+Lines executed:100.00% of 7
+
+File 'gc.c'
+Lines executed:93.68% of 364
+Creating 'gc.c.gcov'
+
