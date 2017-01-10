@@ -19,7 +19,8 @@ endif
 
 
 
-all: gc
+all: gc.o header.o stack_search.o alloc_map.o
+	ld -r gc.o header.o stack_search.o alloc_map.o -o garbage_collector.o
 
 gc: gc.o stack_search.o header.o alloc_map.o
 	@$(CC) $(LINKFLAGS) $@ $^
@@ -58,13 +59,13 @@ test: gc_test header_test stack_search_test alloc_map_test
 
 	@echo "Completed"
 
-coverage: header_coverage stack_search_coverage alloc_map_coverage #gc_coverage
-#	@./gc_coverage
-#	@echo ""
-#	@echo "GC coverage:"
-#	gcov gc.c
-#	@echo ""
-#	@echo "*************************************************************"
+coverage: clean alloc_map_coverage stack_search_coverage header_coverage gc_coverage 
+	@./gc_coverage
+	@echo ""
+	@echo "GC coverage:"
+	gcov gc.c
+	@echo ""
+	@echo "*************************************************************"
 
 	@./header_coverage
 	@echo ""
@@ -97,8 +98,8 @@ test_gc: gc_test
 gc_test: gc_test.c gc.c header.o stack_search.o alloc_map.o
 	@$(CC)  $^ -o $@ $(TESTFLAGS)
 
-gc_coverage: gc.c gc_test.c header.c stack_search.c alloc_map.c
-	@$(CC)  $^ -o $@ $(COVERAGEFLAGS) -lgcov
+gc_coverage: gc.c gc_test.c header.o stack_search.o alloc_map.o
+	$(CC)  $^ -o $@ $(COVERAGEFLAGS)
 
 memtest_gc: gc_test
 	valgrind --leak-check=full --log-file=memtest.txt  ./gc_test  #-v 
