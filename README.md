@@ -9,6 +9,7 @@
 * Simon Pellgård
 
 ###Dokumentation
+- [Användning av skräpsamlaren](Dokumentation/Användning.md)
 - [Avvikelser från specifikationen](Dokumentation/Avsteg från specifikationen.md)
 - [Dokumentationsstandard](Dokumentation/Dokumentationsstandard.md) (Y65)
 - [Testning](Dokumentation/Enhetstestning.md) (Y69)
