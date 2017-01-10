@@ -23,3 +23,5 @@
 - [Header](Dokumentation/Design/Header.md)
 - [Heap](Dokumentation/Design/Heap.md)
 - [Stack search](Dokumentation/Design/Stack_search.md)
+
+Final commit 2017-01-10 11e901f3fc3e56619e3df01fe3b8d5c8d0cab586 
