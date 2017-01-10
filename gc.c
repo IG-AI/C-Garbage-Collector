@@ -220,6 +220,82 @@ h_delete_dbg(heap_t *h, void *dbg_value)
 }
 
 /**
+ *  @brief Recursively sets the status  of all active pointers in the heap
+ *         to not found
+ *
+ *  @param  h a pointer to the heap
+ *  @param  ptr a pointer to be searched recursively from
+ */
+void
+reset_ptrs_to_not_found_heap_rec(heap_t *h, void *ptr)
+{
+  if(get_header_type(ptr) != STRUCT_REP)
+    {
+      return;
+    }
+  else 
+    {
+      size_t num_ptrs = get_number_of_pointers_in_struct(ptr);
+      void **array[num_ptrs];
+      bool success = get_pointers_in_struct(ptr, array);
+      if(!success) return;
+      header_set_ptr_to_not_found(ptr);
+      
+      for(size_t i = 0; i < num_ptrs; ++i)
+        {
+          if(alloc_map_ptr_used(h->alloc_map, *array[i])
+             && header_ptr_already_found(*array[i]))
+            {
+              reset_ptrs_to_not_found_heap_rec(h, *array[i]);
+            }
+        }
+    }
+}
+
+/**
+ *  @brief Sets all data on the heap to not found
+ *
+ *  @param h the heap to set all active data to not found
+ *  @param original_top the top of the stack
+ */
+void
+reset_ptrs_to_not_found(heap_t *h, void *original_top)
+{
+  void *stack_top = original_top;
+  void *stack_bottom = (void *)*environ;
+  void *heap_start = h->memory;
+  void *heap_end = (h->memory + h->size);
+  void **pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
+
+  while (pointer != NULL)
+    {
+      if(alloc_map_ptr_used(h->alloc_map, *pointer))
+        {
+          reset_ptrs_to_not_found_heap_rec(h, *pointer);
+        }
+      pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
+    }
+}
+/**
+ *  @brief Sets all data on the heap to not found from an array
+ *
+ *  @param array the array to go through to get to the data
+ *  @param size the size of @p array
+ */
+void
+reset_ptrs_to_not_found_array(void **array[], size_t size)
+{
+  for(size_t i = 0; i < size; ++i)
+    {
+      void **current_ptr = array[i];
+      if(current_ptr != NULL && get_header_type(*current_ptr) == STRUCT_REP)
+        {
+          header_set_ptr_to_not_found(*current_ptr);
+        }
+    }
+}
+
+/**
  *  @brief Recursively gets the number of all active pointers in the heap 
  *
  *  @param  h a pointer to the heap
@@ -240,6 +316,7 @@ get_number_of_active_heap_ptrs_rec(heap_t *h, void *ptr)
       size_t result = 0;
       void **array[num_ptrs];
       bool success = get_pointers_in_struct(ptr, array);
+      header_set_ptr_to_found(ptr);
       if(!success) return 0;
       
       for(size_t i = 0; i < num_ptrs; ++i)
@@ -247,7 +324,10 @@ get_number_of_active_heap_ptrs_rec(heap_t *h, void *ptr)
           if(alloc_map_ptr_used(h->alloc_map, *array[i]))
             {
               ++result;
-              result += get_number_of_active_heap_ptrs_rec(h, *array[i]);
+              if(!header_ptr_already_found(*array[i]))
+                {
+                  result += get_number_of_active_heap_ptrs_rec(h, *array[i]);
+                }
             }
         }
       return result;
@@ -281,6 +361,7 @@ get_number_of_active_ptrs(heap_t *h, void *original_top)
         }
       pointer = stack_find_next_ptr(&stack_bottom, stack_top, heap_start, heap_end);
     }
+  reset_ptrs_to_not_found(h, original_top);
   return i;
 }
 
@@ -307,6 +388,7 @@ get_active_heap_ptrs_rec(heap_t *h, void *ptr, void **array[], size_t *index)
       void **temp_array[num_ptrs];
       bool success = get_pointers_in_struct(ptr, temp_array);
       if(!success) return;
+      header_set_ptr_to_found(ptr);
       size_t num_valid_ptrs = 0;
       void ***sub_array =  &(array[*index]);
       for(size_t i = 0; i < num_ptrs; ++i)
@@ -321,7 +403,10 @@ get_active_heap_ptrs_rec(heap_t *h, void *ptr, void **array[], size_t *index)
       
       for(size_t i = 0; i < num_valid_ptrs; ++i)
         {
-          get_active_heap_ptrs_rec(h, *sub_array[i], array, index);
+          if(!header_ptr_already_found(*sub_array[i]))
+            {
+              get_active_heap_ptrs_rec(h, *sub_array[i], array, index);
+            }
         }
     }
 }
@@ -347,6 +432,7 @@ get_active_ptrs(heap_t *h, void *original_top, void **array[], size_t array_size
     {
       get_active_heap_ptrs_rec(h, *array[i], array, &index);
     }
+  reset_ptrs_to_not_found_array(array, array_size);
   return num_stack_ptrs;
 }
 
