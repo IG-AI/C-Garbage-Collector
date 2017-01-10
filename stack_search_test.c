@@ -42,7 +42,6 @@ void test_stack_find_ptr()
   void *heap_end = target + 40;
   void *heap_start = target - 40;
 
-  printf("target    %p\n", &target);
   bool finished = false;
   bool found_addr = false;
 
