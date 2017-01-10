@@ -1,5 +1,6 @@
-\hypertarget{stack__search_8h}{}\section{stack\+\_\+search.\+h File Reference}
-\label{stack__search_8h}\index{stack\+\_\+search.\+h@{stack\+\_\+search.\+h}}
+\hypertarget{stack__search_8h}{\section{stack\-\_\-search.\-h File Reference}
+\label{stack__search_8h}\index{stack\-\_\-search.\-h@{stack\-\_\-search.\-h}}
+}
 
 
 A module for searching through the stack.  
@@ -8,14 +9,12 @@ A module for searching through the stack.
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-void $\ast$$\ast$ \hyperlink{stack__search_8h_a602e1757a197da5dbd6402a7ce335fad}{stack\+\_\+find\+\_\+next\+\_\+ptr} (void $\ast$$\ast$stack\+\_\+bottom, void $\ast$stack\+\_\+top, void $\ast$heap\+\_\+start, void $\ast$heap\+\_\+end)
+void $\ast$$\ast$ \hyperlink{stack__search_8h_a602e1757a197da5dbd6402a7ce335fad}{stack\-\_\-find\-\_\-next\-\_\-ptr} (void $\ast$$\ast$stack\-\_\-bottom, void $\ast$stack\-\_\-top, void $\ast$heap\-\_\-start, void $\ast$heap\-\_\-end)
 \begin{DoxyCompactList}\small\item\em Finds a possible pointer on the stack. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
-A module for searching through the stack. 
-
-\begin{DoxyAuthor}{Author}
+A module for searching through the stack. \begin{DoxyAuthor}{Author}
 Daniel Agstrand 
 
 Henrik Bergendal 
@@ -31,36 +30,36 @@ Robert Rosborg
 
 
 \subsection{Function Documentation}
-\hypertarget{stack__search_8h_a602e1757a197da5dbd6402a7ce335fad}{}\index{stack\+\_\+search.\+h@{stack\+\_\+search.\+h}!stack\+\_\+find\+\_\+next\+\_\+ptr@{stack\+\_\+find\+\_\+next\+\_\+ptr}}
-\index{stack\+\_\+find\+\_\+next\+\_\+ptr@{stack\+\_\+find\+\_\+next\+\_\+ptr}!stack\+\_\+search.\+h@{stack\+\_\+search.\+h}}
-\subsubsection[{stack\+\_\+find\+\_\+next\+\_\+ptr}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$$\ast$ stack\+\_\+find\+\_\+next\+\_\+ptr (
+\hypertarget{stack__search_8h_a602e1757a197da5dbd6402a7ce335fad}{\index{stack\-\_\-search.\-h@{stack\-\_\-search.\-h}!stack\-\_\-find\-\_\-next\-\_\-ptr@{stack\-\_\-find\-\_\-next\-\_\-ptr}}
+\index{stack\-\_\-find\-\_\-next\-\_\-ptr@{stack\-\_\-find\-\_\-next\-\_\-ptr}!stack_search.h@{stack\-\_\-search.\-h}}
+\subsubsection[{stack\-\_\-find\-\_\-next\-\_\-ptr}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$$\ast$ stack\-\_\-find\-\_\-next\-\_\-ptr (
 \begin{DoxyParamCaption}
-\item[{void $\ast$$\ast$}]{stack\+\_\+bottom, }
-\item[{void $\ast$}]{stack\+\_\+top, }
-\item[{void $\ast$}]{heap\+\_\+start, }
-\item[{void $\ast$}]{heap\+\_\+end}
+\item[{void $\ast$$\ast$}]{stack\-\_\-bottom, }
+\item[{void $\ast$}]{stack\-\_\-top, }
+\item[{void $\ast$}]{heap\-\_\-start, }
+\item[{void $\ast$}]{heap\-\_\-end}
 \end{DoxyParamCaption}
-)}\label{stack__search_8h_a602e1757a197da5dbd6402a7ce335fad}
+)}}\label{stack__search_8h_a602e1757a197da5dbd6402a7ce335fad}
 
 
 Finds a possible pointer on the stack. 
 
 
 \begin{DoxyParams}{Parameters}
-{\em stack\+\_\+bottom} & the bottom of the stack to seach \\
+{\em stack\-\_\-bottom} & the bottom of the stack to seach \\
 \hline
-{\em stack\+\_\+top} & the top of the stack to seach \\
+{\em stack\-\_\-top} & the top of the stack to seach \\
 \hline
-{\em heap\+\_\+start} & the start of the heap \\
+{\em heap\-\_\-start} & the start of the heap \\
 \hline
-{\em heap\+\_\+end} & the last position in the heap to which a pointer is allowed to refer \\
+{\em heap\-\_\-end} & the last position in the heap to which a pointer is allowed to refer \\
 \hline
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
-a pointer to a location in the stack between {\ttfamily stack\+\_\+bottom} and {\ttfamily stack\+\_\+top} that contains a possible address into the heap between {\ttfamily heap\+\_\+start} and {\ttfamily heap\+\_\+end}, or N\+U\+L\+L if search is finished
+a pointer to a location in the stack between {\ttfamily stack\-\_\-bottom} and {\ttfamily stack\-\_\-top} that contains a possible address into the heap between {\ttfamily heap\-\_\-start} and {\ttfamily heap\-\_\-end}, or N\-U\-L\-L if search is finished
 \end{DoxyReturn}
-Before calling stack search registers need to be dumped to the stack. This can be achieved by\+: \#include $<$setjmp.\+h$>$ \#define Dump\+\_\+registers() \textbackslash{} jmp\+\_\+buf env; \textbackslash{} if (setjmp(env)) abort(); \textbackslash{}
+Before calling stack search registers need to be dumped to the stack. This can be achieved by\-: \#include $<$setjmp.\-h$>$ \#define Dump\-\_\-registers() \textbackslash{} jmp\-\_\-buf env; \textbackslash{} if (setjmp(env)) abort(); \textbackslash{}
 
-When calling the function use; \+\_\+\+\_\+builtin\+\_\+frame\+\_\+address(n); To get a pointer to the start of a scopes memory on stack. $<$n$>$ specifies what scope. 0 is the current, 1 the one above. On S\+P\+A\+R\+C with Sun C Compiler this doesn\textquotesingle{}t work so another method is needed.
+When calling the function use; \-\_\-\-\_\-builtin\-\_\-frame\-\_\-address(n); To get a pointer to the start of a scopes memory on stack. $<$n$>$ specifies what scope. 0 is the current, 1 the one above. On S\-P\-A\-R\-C with Sun C Compiler this doesn't work so another method is needed.
 
-extern char $\ast$$\ast$environ; To get the bottom of the programs\textquotesingle{} stack. When refering to it use something similar to\+: void $\ast$stack\+\_\+bottom = (void $\ast$)$\ast$environ; void $\ast$pointer = stack\+\_\+find\+\_\+next\+\_\+ptr(\&stack\+\_\+bottom, stack\+\_\+top, heap\+\_\+start, heap\+\_\+end); 
+extern char $\ast$$\ast$environ; To get the bottom of the programs' stack. When refering to it use something similar to\-: void $\ast$stack\-\_\-bottom = (void $\ast$)$\ast$environ; void $\ast$pointer = stack\-\_\-find\-\_\-next\-\_\-ptr(\&stack\-\_\-bottom, stack\-\_\-top, heap\-\_\-start, heap\-\_\-end); 

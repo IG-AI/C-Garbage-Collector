@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['write_5fpointer_5fto_5fheap',['write_pointer_to_heap',['../gc_8h.html#a66dbe11bece904b937cc41974d9feb6d',1,'gc.c']]]
+  ['test_5flink',['test_link',['../structtest__link.html',1,'']]],
+  ['test_5fstruct',['test_struct',['../structtest__struct.html',1,'']]]
 ];
