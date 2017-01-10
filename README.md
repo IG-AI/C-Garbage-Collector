@@ -12,8 +12,8 @@
 - [Avsteg från specifikationen](Dokumentation/Avsteg från specifikationen.md)
 - [Dokumentationsstandard](Dokumentation/Dokumentationsstandard.md)
 - [Testning](Dokumentation/Enhetstestning.md)
-- [Individuella reflektioner](Dokumentation/Sjalvreflektioner.pdf)
-- [Gemensam reflektion](Dokumentation/Gemensam-reflektion.pdf)
+- [Individuella reflektioner](Dokumentation/Sjalvreflektioner.pdf) 
+- [Gemensam reflektion](Dokumentation/Gemensam-reflektion.pdf) (Y64-Y67, Y69)
 - [Profileringsdata utan skräpsamling](Dokumentation/prof_test_malloc.txt)
 - [Profileringsdata med skräpsamling](Dokumentation/prof_test_gc.txt)
 
