@@ -88,4 +88,7 @@ alloc_map_ptr_used(alloc_map_t *alloc_map, void *ptr);
 bool 
 alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state);
 
+void
+alloc_map_print_in_use(alloc_map_t *alloc_map);
+
 #endif

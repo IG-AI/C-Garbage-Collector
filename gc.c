@@ -826,7 +826,9 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
 {
   assert(h != NULL);
   if(h == NULL) return 0;
-  //Dump_registers();
+  printf("\n*****************************Garbage Collection******************************\n");
+  alloc_map_print_in_use(h->alloc_map);
+ //Dump_registers();
 
   size_t used_before_gc = h_used(h);
   set_active_to_transition(h);

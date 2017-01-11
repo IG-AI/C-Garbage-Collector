@@ -89,8 +89,8 @@ alloc_map_set(alloc_map_t *alloc_map, void *ptr, bool state)
   return true;
 }
 
-/*
-static void
+
+void
 alloc_map_print_in_use(alloc_map_t *alloc_map)
 {
   printf("\nStart addr: %p\n", alloc_map->start_addr);
@@ -108,4 +108,3 @@ alloc_map_print_in_use(alloc_map_t *alloc_map)
     }
   printf("\n");
 }
-*/
