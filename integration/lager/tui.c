@@ -429,7 +429,7 @@ void event_loop(db* db)
 int main(int argc, char *argv[])
 {
 #ifdef GC
-  heap = h_init(102400, false, 0.5);
+  heap = h_init(10240000, false, 0.5);
 #endif
 
   db *db = db_new();

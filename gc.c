@@ -205,9 +205,12 @@ h_delete_dbg(heap_t *h, void *dbg_value)
 {
   assert(h != NULL);
   if(h==NULL) return;
+  #ifdef SPARC
   int dummy = 0;
   void *stack_top = &dummy;
-  //  Get_stack_top(stack_top);
+  #else
+  void *stack_top = __builtin_frame_address(0);
+  #endif
   size_t number_of_ptrs = get_number_of_ptrs_in_stack(h, stack_top);
   void **array[number_of_ptrs];
   size_t actual_nr_of_ptrs = 0;
@@ -824,13 +827,17 @@ h_gc_dbg(heap_t *h, bool unsafe_stack)
   assert(h != NULL);
   if(h == NULL) return 0;
   //Dump_registers();
+  printf("GARBAGE COLLECTION");
 
   size_t used_before_gc = h_used(h);
   set_active_to_transition(h);
 
+  #ifdef SPARC
   int dummy = 0;
   void *stack_top = &dummy;
-  //Get_stack_top(stack_top);
+  #else
+  void *stack_top = __builtin_frame_address(0);
+  #endif
   size_t num_active_ptrs = get_number_of_active_ptrs(h, stack_top);
   void **array_of_found_ptrs[num_active_ptrs];
   size_t num_stack_ptrs = get_active_ptrs(h, stack_top,  array_of_found_ptrs, num_active_ptrs);

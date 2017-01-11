@@ -106,7 +106,7 @@ void teardown(list_t lists[], int no_lists)
   GC_gcollect(); /// Requires building and linking against BDW GC
 #endif
 #ifdef IOOPM_GC
-  h_gc(h); /// Requires building and linking against IOOPM GC
+  h_delete(h); /// Requires building and linking against IOOPM GC
 #endif
 }
 
@@ -140,10 +140,10 @@ int main(int argc, char *argv[])
 {
   int no_lists = 4;
   int elements = 1024 * 128;
-  int max = no_lists * elements * 2;
+  int max = no_lists * elements;
 
 #ifdef IOOPM_GC
-  size_t size = max * sizeof(struct link) * 2.4;
+  size_t size = max * sizeof(struct link) * 1.2;
   h = h_init(size + 2048 - size % 2048, true, 0.5);
 #endif
   
@@ -167,6 +167,10 @@ int main(int argc, char *argv[])
   /// Create some extra memory pressure
   create_lists(lists, no_lists, elements, max);
 
+  printf("Inbetween\n");
+#ifdef IOOPM_GC
+  printf("Used: %lu\nAvail: %lu\nSize: %lu\n", h_used(h), h_avail(h), h_size(h));
+#endif
   /// Delete the roots to the lists
   for (int i = 0; i < no_lists; ++i) lists[i] = new_list();
   /// Re-create the lists again

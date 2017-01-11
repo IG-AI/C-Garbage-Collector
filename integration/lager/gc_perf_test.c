@@ -93,11 +93,10 @@ int main(int argc, char *argv[])
   int_cell **cursor = ids;
   for (int i = 0; i < M; ++i)
     {
-      printf("M = %i\n", i);
       *cursor++ = populate_lists(lists, Lists, M * Lists);
     }
 
-#ifdef GC
+#ifdef GC_RUN
   size_t cleaned = h_gc(heap);
   printf("\nCleaned: %lu\n", cleaned);
 #endif
@@ -108,16 +107,19 @@ int main(int argc, char *argv[])
   uint hits = 0;
   for (int j = 0; j < N; ++j)
     {
-      printf("N = %i\n", j);
       if (do_search(lists[rand() % Lists], M * Lists))
         {
           ++hits;
         }
     }
-  printf("Number of elements found: %d\n", hits);
   
 #ifdef GC
   h_delete(heap);
+#else
+  for(int i = 0; i < Lists; ++i)
+    {
+      list_delete(lists[i]);
+    }
 #endif
 
   return 0;

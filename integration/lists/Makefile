@@ -15,5 +15,5 @@ clean:
 
 bench: nogc ioopm #bdw
 	$(TIME) --verbose -o ioopm.txt ./ioopm
-	#$(TIME) --verbose -o bdw.txt ./bdw
+#	$(TIME) --verbose -o bdw.txt ./bdw
 	$(TIME) --verbose -o nogc.txt ./nogc

@@ -3,10 +3,10 @@ PLATFORM ?=x86
 ifeq ($(PLATFORM), sparc)
   CC =cc
   STD =-std=c11
-  LINKFLAGS =$(STD) -g -xmemalign=1i -o
-  COMPFLAGS =$(STD) -g -c -m64 -xmemalign=1i
-  TESTFLAGS =$(STD) -g -m64 -lcunit -xmemalign=1i -DNDEBUG
-  COVERAGEFLAGS =$(STD) -Wall -g -m64 -lcunit -xmemalign=1i -DNDEBUG -fprofile-arcs -ftest-coverage -coverage
+  LINKFLAGS =$(STD) -g -DSPARC -xmemalign=1i -o
+  COMPFLAGS =$(STD) -g -c -m64 -DSPARC -xmemalign=1i
+  TESTFLAGS =$(STD) -g -m64 -lcunit -DSPARC -xmemalign=1i -DNDEBUG
+  COVERAGEFLAGS =$(STD) -Wall -g -m64 -lcunit -DSPARC -xmemalign=1i -DNDEBUG -fprofile-arcs -ftest-coverage -coverage
 else
   CC =gcc
   STD =-std=c11
