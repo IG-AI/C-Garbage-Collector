@@ -16,6 +16,7 @@
 - [Individuella reflektioner](Dokumentation/Sjalvreflektioner.pdf) (Y67)
 - [Gemensam reflektion](Dokumentation/Gemensam-reflektion.pdf) (Y64-Y67, Y69)
 - [Performance jämförelser](Dokumentation/perf_tests.md)
+- [Presentation](Dokumentation/ioopm%20redovisning.pdf)
 
 ###Design
 - [Övergripande design](Dokumentation/Design/Övergripande%20design%20och%20uppdelning.md)
