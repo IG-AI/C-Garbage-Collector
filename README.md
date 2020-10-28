@@ -1,6 +1,6 @@
-#Humrarnas projektarbete - Garbage Collector
+# Garbage Collector
 
-###Medlemmar: 
+### Authors: 
 * Adam Inersjö - Teamansvarig
 * Daniel Ågstrand
 * Robert Rosborg
@@ -8,7 +8,7 @@
 * Henrik Bergendal
 * Simon Pellgård
 
-###Dokumentation
+### Documentation
 - [Användning av skräpsamlaren](Dokumentation/Användning.md)
 - [Avvikelser från specifikationen](Dokumentation/Avsteg från specifikationen.md)
 - [Dokumentationsstandard](Dokumentation/Dokumentationsstandard.md) (Y65)
@@ -18,7 +18,7 @@
 - [Performance jämförelser](Dokumentation/perf_tests.md)
 - [Presentation](Dokumentation/ioopm%20redovisning.pdf)
 
-###Design
+### Design
 - [Övergripande design](Dokumentation/Design/Övergripande%20design%20och%20uppdelning.md)
 - [Alloc map](Dokumentation/Design/Alloc_map.md)
 - [Header](Dokumentation/Design/Header.md)
